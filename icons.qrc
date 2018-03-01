@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="play">open-iconic/svg/media-play.svg</file>
+        <file alias="pause">open-iconic/svg/media-pause.svg</file>
+        <file alias="stop">open-iconic/svg/media-stop.svg</file>
+        <file alias="folder">open-iconic/svg/folder.svg</file>
+        <file alias="note">open-iconic/svg/musical-note.svg</file>
+        <file alias="waveform">open-iconic/svg/pulse.svg</file>
+    </qresource>
+</RCC>
