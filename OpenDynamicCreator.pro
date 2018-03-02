@@ -24,11 +24,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp \
 	src/OpenDynamicCreator.cpp \
-    src/qt/MusicTreeView.cpp
+    src/qt/MusicTreeView.cpp \
+    src/commands/OdcUndoCommands.cpp \
+    src/qt/StatesTreeView.cpp
 
 HEADERS  += version.h \
 	src/OpenDynamicCreator.h \
-    src/qt/MusicTreeView.h
+    src/qt/MusicTreeView.h \
+    src/commands/OdcUndoCommands.h \
+    src/qt/StatesTreeView.h
 
 FORMS    += \
     ui/OpenDynamicCreator.ui

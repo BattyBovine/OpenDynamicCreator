@@ -1,6 +1,6 @@
-#include "src/qt/MusicTreeView.h"
+#include "src/qt/StatesTreeView.h"
 
-void MusicTreeView::keyPressEvent(QKeyEvent *e)
+void StatesTreeView::keyPressEvent(QKeyEvent *e)
 {
 	switch(e->key()) {
 	case Qt::Key_Delete:
@@ -9,7 +9,7 @@ void MusicTreeView::keyPressEvent(QKeyEvent *e)
 	}
 }
 
-void MusicTreeView::deleteSelectedItems()
+void StatesTreeView::deleteSelectedItems()
 {
 	QModelIndexList selectedindices = this->selectedIndexes();
 	if(selectedindices.size()>0) {
@@ -19,7 +19,7 @@ void MusicTreeView::deleteSelectedItems()
 			if(selection) {
 				switch(QMessageBox::warning(this,"","Are you sure you want to delete this?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No)) {
 				case QMessageBox::Yes:
-					if(selection->type()==MusicItemType::MIT_MUSIC)
+					if(selection->type()==StateItemType::SIT_STATESWITCH)
 						model->removeRow(selectedindices[0].row());
 					else
 						selection->parent()->removeRow(selectedindices[0].row());
@@ -32,7 +32,7 @@ void MusicTreeView::deleteSelectedItems()
 
 
 
-QMimeData *MusicTreeViewModel::mimeData(const QModelIndexList &indices) const
+QMimeData *StatesTreeViewModel::mimeData(const QModelIndexList &indices) const
 {
 	QMimeData *mime = QStandardItemModel::mimeData(indices);
 	QByteArray mimebytes;
@@ -44,15 +44,15 @@ QMimeData *MusicTreeViewModel::mimeData(const QModelIndexList &indices) const
 			ds.writeRawData((const char*)&itemptr, sizeof(QStandardItem*));
 		}
 	}
-	mime->setData("Qt/MusicItemType", mimebytes);
+	mime->setData("Qt/StateItemType", mimebytes);
 	return mime;
 }
 
-bool MusicTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, int row, int, const QModelIndex &parent)
+bool StatesTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, int row, int, const QModelIndex &parent)
 {
 	QStandardItem *parentitem = this->itemFromIndex(parent);
-	if(parentitem && data->hasFormat("Qt/MusicItemType")) {
-		QDataStream ds(&data->data("Qt/MusicItemType"), QIODevice::ReadOnly);
+	if(parentitem && data->hasFormat("Qt/StateItemType")) {
+		QDataStream ds(&data->data("Qt/StateItemType"), QIODevice::ReadOnly);
 		quint32 itemcount;
 		ds >> itemcount;
 		int bytelength = itemcount*sizeof(QStandardItem*);
@@ -61,7 +61,7 @@ bool MusicTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, int
 		for(quint32 i=0; i<itemcount; i++) {
 			QStandardItem *item = items[i];
 			switch(item->type()) {
-			case MusicItemType::MIT_MUSIC:
+			case StateItemType::SIT_STATESWITCH:
 				if(parentitem==this->invisibleRootItem()) {
 					if(row>=0)
 						parentitem->insertRow(row, item->clone());
@@ -69,16 +69,13 @@ bool MusicTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, int
 						parentitem->appendRow(item->clone());
 				}
 				break;
-			case MusicItemType::MIT_CLIP:
-				if(parentitem->type()==MusicItemType::MIT_CLIP)
+			case StateItemType::SIT_STATE:
+				if(parentitem->type()!=StateItemType::SIT_STATESWITCH)
 					return false;
-			case MusicItemType::MIT_CLIPGROUP:
-				if(parentitem->type()==MusicItemType::MIT_CLIPGROUP || parentitem->type()==MusicItemType::MIT_MUSIC) {
-					if(row>=0)
-						parentitem->insertRow(row, item->clone());
-					else
-						parentitem->appendRow(item->clone());
-				}
+				if(row>=0)
+					parentitem->insertRow(row, item->clone());
+				else
+					parentitem->appendRow(item->clone());
 				break;
 			}
 
