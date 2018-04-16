@@ -6,18 +6,18 @@
 #include "src/qt/MusicTreeView.h"
 #include "src/qt/StatesTreeView.h"
 
-class OdcAddTrackCommand : public QUndoCommand
+class OdcAddItemCommand : public QUndoCommand
 {
 public:
-	OdcAddTrackCommand(MusicItem*, QTreeView*, QStandardItemModel*, QItemSelectionModel*, QUndoCommand *parent=Q_NULLPTR);
-	void undo();
-	void redo();
+    OdcAddItemCommand(QStandardItem*, QStandardItem*, QTreeView*, QStandardItemModel*, QItemSelectionModel*, QUndoCommand *parent=Q_NULLPTR);
+    void undo();
+    void redo();
 private:
-	QStandardItem *track;
-	QTreeView *view;
-	QStandardItemModel *model;
-	QItemSelectionModel *selmodel;
-	int row;
+    QStandardItem *item, *parent;
+    QTreeView *view;
+    QStandardItemModel *model;
+    QItemSelectionModel *selmodel;
+    int row;
 };
 
 

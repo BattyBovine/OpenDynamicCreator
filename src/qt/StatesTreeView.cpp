@@ -17,13 +17,11 @@ void StatesTreeView::deleteSelectedItems()
 		if(model) {
 			QStandardItem *selection = model->itemFromIndex(selectedindices[0]);
 			if(selection) {
-				switch(QMessageBox::warning(this,"","Are you sure you want to delete this?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No)) {
-				case QMessageBox::Yes:
-					if(selection->type()==StateItemType::SIT_STATESWITCH)
-						model->removeRow(selectedindices[0].row());
-					else
-						selection->parent()->removeRow(selectedindices[0].row());
-					break;
+                if(QMessageBox::warning(this,"","Are you sure you want to delete this?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+                    if(selection->type()==StateItemType::SIT_STATESWITCH)
+                        model->removeRow(selectedindices[0].row());
+                    else
+                        selection->parent()->removeRow(selectedindices[0].row());
 				}
 			}
 		}
@@ -52,7 +50,8 @@ bool StatesTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, in
 {
 	QStandardItem *parentitem = this->itemFromIndex(parent);
 	if(parentitem && data->hasFormat("Qt/StateItemType")) {
-		QDataStream ds(&data->data("Qt/StateItemType"), QIODevice::ReadOnly);
+        QByteArray datamime = data->data("Qt/StateItemType");
+        QDataStream ds(&datamime, QIODevice::ReadOnly);
 		quint32 itemcount;
 		ds >> itemcount;
 		int bytelength = itemcount*sizeof(QStandardItem*);

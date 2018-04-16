@@ -16,14 +16,19 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 	ui->treeStates->setModel(this->modelStates);
 	this->selStates = ui->treeStates->selectionModel();
 
-	// Menu for right-clicking an empty area of the music tree
-	this->menuTrackContext = new QMenu(ui->treeMusic);
-	this->menuTrackContext->addAction(ui->actionAddTrack);
-	this->menuTrackContext->addAction(ui->actionDeleteMusicItem);
+	// Menu for right-clicking an empty area of the music tree or a music item
+	this->menuMusicBlankContext = new QMenu(ui->treeMusic);
+	this->menuMusicBlankContext->addAction(ui->actionAddTrack);
+	this->menuMusicBlankContext->addAction(ui->actionDeleteMusicItem);
 
-	// Menu for right-clicking an item on the music tree
+	// Menu for right-clicking a song or mixer item
+	this->menuSongAndMixerContext = new QMenu(ui->treeMusic);
+	this->menuSongAndMixerContext->addAction(ui->actionAddGroup);
+	this->menuSongAndMixerContext->addAction(ui->actionAddClip);
+	this->menuSongAndMixerContext->addAction(ui->actionDeleteMusicItem);
+
+	// Menu for right-clicking a clip
 	this->menuClipContext = new QMenu(ui->treeMusic);
-	this->menuClipContext->addAction(ui->actionAddGroup);
 	this->menuClipContext->addAction(ui->actionAddClip);
 	this->menuClipContext->addAction(ui->actionDeleteMusicItem);
 
@@ -45,14 +50,17 @@ OpenDynamicCreator::~OpenDynamicCreator()
 
 void OpenDynamicCreator::addTrack()
 {
-	this->odcUndo->push(new OdcAddTrackCommand(new MusicItem(QString("Track %1").arg(this->modelMusic->rowCount()+1)), ui->treeMusic, this->modelMusic, this->selMusic));
+	TrackItem *ti = new TrackItem(QString("%1 %2").arg(ODC_MUSIC_LABEL).arg(this->modelMusic->rowCount()+1));
+	this->modelMusic->invisibleRootItem()->appendRow(ti);
+	this->selMusic->select(this->modelMusic->indexFromItem(ti), QItemSelectionModel::ClearAndSelect);
+	ui->treeMusic->setExpanded(this->modelMusic->indexFromItem(ti), true);
 }
 
 void OpenDynamicCreator::addClipGroup()
 {
 	QStandardItem *selection = this->checkSelectedMusicTreeItem();
 	if(!selection)	return;
-	if(selection->type()!=MusicItemType::MIT_MUSIC && selection->type()!=MusicItemType::MIT_CLIPGROUP)
+	if(selection->type()!=MusicItemType::MIT_TRACK)
 		Q_ASSERT(selection=selection->parent());
 	int groupcount=1, rowcount = selection->rowCount();
 	for(uint16_t i=0; i<rowcount; i++) {
@@ -60,14 +68,16 @@ void OpenDynamicCreator::addClipGroup()
 		if(item->type()==MusicItemType::MIT_CLIPGROUP)
 			groupcount++;
 	}
-	selection->appendRow(new ClipGroupItem(QString("Group %1").arg(groupcount)));
+	ClipGroupItem *cgi = new ClipGroupItem(QString("%1 %2").arg(ODC_CLIP_GROUP_LABEL).arg(groupcount));
+	selection->appendRow(cgi);
+	ui->treeMusic->setExpanded(this->modelMusic->indexFromItem(cgi), true);
 }
 
 void OpenDynamicCreator::addClip()
 {
 	QStandardItem *selection = this->checkSelectedMusicTreeItem();
 	if(!selection)	return;
-	if(selection->type()!=MusicItemType::MIT_MUSIC && selection->type()!=MusicItemType::MIT_CLIPGROUP)
+    if(selection->type()!=MusicItemType::MIT_TRACK && selection->type()!=MusicItemType::MIT_CLIPGROUP)
 		Q_ASSERT(selection=selection->parent());
 	int clipcount=1, rowcount = selection->rowCount();
 	for(uint16_t i=0; i<rowcount; i++) {
@@ -75,7 +85,7 @@ void OpenDynamicCreator::addClip()
 		if(item->type()==MusicItemType::MIT_CLIP)
 			clipcount++;
 	}
-	selection->appendRow(new ClipItem(QString("Clip %1").arg(clipcount)));
+	selection->appendRow(new ClipItem(QString("%1 %2").arg(ODC_CLIP_LABEL).arg(clipcount)));
 }
 
 void OpenDynamicCreator::deleteMusicItem()
@@ -88,16 +98,16 @@ void OpenDynamicCreator::deleteMusicItem()
 QStandardItem *OpenDynamicCreator::checkSelectedMusicTreeItem()
 {
 	if(this->modelMusic->rowCount()==0) {
-		QMessageBox::warning(this, OAML_TITLE_ADD_CLIP_NO_MUSIC, OAML_TEXT_ADD_CLIP_NO_MUSIC);
+		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_NO_MUSIC, ODC_TEXT_ADD_CLIP_NO_MUSIC);
 		return NULL;
 	}
 	if(!this->selMusic->hasSelection()) {
-		QMessageBox::warning(this, OAML_TITLE_ADD_CLIP_NO_SELECTION, OAML_TEXT_ADD_CLIP_NO_SELECTION);
+		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_NO_SELECTION, ODC_TEXT_ADD_CLIP_NO_SELECTION);
 		return NULL;
 	}
 	QStandardItem *selection = this->modelMusic->itemFromIndex(this->selMusic->selectedRows()[0]);
 	if(selection==NULL) {
-		QMessageBox::warning(this, OAML_TITLE_ADD_CLIP_INVALID_SELECTION, OAML_TEXT_ADD_CLIP_INVALID_SELECTION);
+		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_INVALID_SELECTION, ODC_TEXT_ADD_CLIP_INVALID_SELECTION);
 		return NULL;
 	}
 	return selection;
@@ -107,7 +117,10 @@ QStandardItem *OpenDynamicCreator::checkSelectedMusicTreeItem()
 
 void OpenDynamicCreator::addStateSwitch()
 {
-	this->odcUndo->push(new OdcAddStateSwitchCommand(new StateSwitchItem(QString("Switch %1").arg(this->modelStates->rowCount()+1)), ui->treeStates, this->modelStates, this->selStates));
+	StateSwitchItem *ss = new StateSwitchItem(QString("%1 %2").arg(ODC_STATE_SWITCH_LABEL).arg(this->modelStates->rowCount()+1));
+	this->modelStates->invisibleRootItem()->appendRow(ss);
+	this->selStates->select(this->modelStates->indexFromItem(ss), QItemSelectionModel::ClearAndSelect);
+	ui->treeStates->setExpanded(this->modelStates->indexFromItem(ss), true);
 }
 
 void OpenDynamicCreator::addState()
@@ -122,7 +135,7 @@ void OpenDynamicCreator::addState()
 		if(item->type()==StateItemType::SIT_STATE)
 			statecount++;
 	}
-	selection->appendRow(new StateItem(QString("State %1").arg(statecount)));
+	selection->appendRow(new StateItem(QString("%1 %2").arg(ODC_STATE_LABEL).arg(statecount)));
 }
 
 void OpenDynamicCreator::deleteStateItem()
@@ -135,16 +148,16 @@ void OpenDynamicCreator::deleteStateItem()
 QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 {
 	if(this->modelStates->rowCount()==0) {
-		QMessageBox::warning(this, OAML_TITLE_ADD_STATE_NO_SWITCH, OAML_TEXT_ADD_STATE_NO_SWITCH);
+		QMessageBox::warning(this, ODC_TITLE_ADD_STATE_NO_SWITCH, ODC_TEXT_ADD_STATE_NO_SWITCH);
 		return NULL;
 	}
 	if(!this->selStates->hasSelection()) {
-		QMessageBox::warning(this, OAML_TITLE_ADD_STATE_NO_SELECTION, OAML_TEXT_ADD_STATE_NO_SELECTION);
+		QMessageBox::warning(this, ODC_TITLE_ADD_STATE_NO_SELECTION, ODC_TEXT_ADD_STATE_NO_SELECTION);
 		return NULL;
 	}
 	QStandardItem *selection = this->modelStates->itemFromIndex(this->selStates->selectedRows()[0]);
 	if(selection==NULL) {
-		QMessageBox::warning(this, OAML_TITLE_ADD_STATE_INVALID_SELECTION, OAML_TEXT_ADD_STATE_INVALID_SELECTION);
+		QMessageBox::warning(this, ODC_TITLE_ADD_STATE_INVALID_SELECTION, ODC_TEXT_ADD_STATE_INVALID_SELECTION);
 		return NULL;
 	}
 	return selection;
@@ -156,9 +169,19 @@ void OpenDynamicCreator::customContextMenuMusic(QPoint point)
 {
 	QModelIndex index = ui->treeMusic->indexAt(point);
 	if(index.isValid()) {
-		this->menuClipContext->exec(ui->treeMusic->mapToGlobal(point));
+		switch(this->modelMusic->itemFromIndex(index)->type()) {
+		case MusicItemType::MIT_TRACK:
+		case MusicItemType::MIT_CLIPGROUP:
+			this->menuSongAndMixerContext->exec(ui->treeMusic->mapToGlobal(point));
+			break;
+		case MusicItemType::MIT_CLIP:
+			this->menuClipContext->exec(ui->treeMusic->mapToGlobal(point));
+			break;
+		default:
+			this->menuMusicBlankContext->exec(ui->treeMusic->mapToGlobal(point));
+		}
 	} else {
-		this->menuTrackContext->exec(ui->treeMusic->mapToGlobal(point));
+		this->menuMusicBlankContext->exec(ui->treeMusic->mapToGlobal(point));
 	}
 }
 

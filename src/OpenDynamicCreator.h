@@ -10,19 +10,26 @@
 #include "src/qt/StatesTreeView.h"
 #include "src/commands/OdcUndoCommands.h"
 
-#define OAML_TITLE_ADD_CLIP_NO_MUSIC			tr("No tracks")
-#define OAML_TEXT_ADD_CLIP_NO_MUSIC				tr("Please create a music track first.")
-#define OAML_TITLE_ADD_CLIP_NO_SELECTION		tr("Nothing selected")
-#define OAML_TEXT_ADD_CLIP_NO_SELECTION			tr("Please select a music track or clip group first.")
-#define OAML_TITLE_ADD_CLIP_INVALID_SELECTION	tr("Invalid selection")
-#define OAML_TEXT_ADD_CLIP_INVALID_SELECTION	tr("You have somehow selected something that has no valid data.")
+#define ODC_MUSIC_LABEL			tr("Song")
+#define ODC_CLIP_GROUP_LABEL	tr("Mixer")
+#define ODC_CLIP_LABEL			tr("Clip")
 
-#define OAML_TITLE_ADD_STATE_NO_SWITCH			tr("No switches")
-#define OAML_TEXT_ADD_STATE_NO_SWITCH			tr("Please create a state switch first.")
-#define OAML_TITLE_ADD_STATE_NO_SELECTION		tr("Nothing selected")
-#define OAML_TEXT_ADD_STATE_NO_SELECTION		tr("Please select a switch first.")
-#define OAML_TITLE_ADD_STATE_INVALID_SELECTION	tr("Invalid selection")
-#define OAML_TEXT_ADD_STATE_INVALID_SELECTION	tr("You have somehow selected something that has no valid data.")
+#define ODC_STATE_SWITCH_LABEL	tr("Switch")
+#define ODC_STATE_LABEL			tr("State")
+
+#define ODC_TITLE_ADD_CLIP_NO_MUSIC				tr("No tracks")
+#define ODC_TEXT_ADD_CLIP_NO_MUSIC				tr("Please create a music track first.")
+#define ODC_TITLE_ADD_CLIP_NO_SELECTION			tr("Nothing selected")
+#define ODC_TEXT_ADD_CLIP_NO_SELECTION			tr("Please select a music track or clip group first.")
+#define ODC_TITLE_ADD_CLIP_INVALID_SELECTION	tr("Invalid selection")
+#define ODC_TEXT_ADD_CLIP_INVALID_SELECTION		tr("You have somehow selected something that has no valid data.")
+
+#define ODC_TITLE_ADD_STATE_NO_SWITCH			tr("No switches")
+#define ODC_TEXT_ADD_STATE_NO_SWITCH			tr("Please create a state switch first.")
+#define ODC_TITLE_ADD_STATE_NO_SELECTION		tr("Nothing selected")
+#define ODC_TEXT_ADD_STATE_NO_SELECTION			tr("Please select a switch first.")
+#define ODC_TITLE_ADD_STATE_INVALID_SELECTION	tr("Invalid selection")
+#define ODC_TEXT_ADD_STATE_INVALID_SELECTION	tr("You have somehow selected something that has no valid data.")
 
 namespace Ui {
 class OpenDynamicCreator;
@@ -58,7 +65,8 @@ private:
 	QItemSelectionModel *selMusic;
 	QStandardItemModel *modelStates;
 	QItemSelectionModel *selStates;
-	QMenu *menuTrackContext;
+	QMenu *menuMusicBlankContext;
+	QMenu *menuSongAndMixerContext;
 	QMenu *menuClipContext;
 	QUndoStack *odcUndo;
 };
