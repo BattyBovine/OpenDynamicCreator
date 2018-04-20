@@ -1,4 +1,4 @@
-#include "src/OpenDynamicCreator.h"
+#include "OpenDynamicCreator.h"
 #include "ui_OpenDynamicCreator.h"
 
 OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
@@ -32,11 +32,12 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 	this->menuClipContext->addAction(ui->actionAddClip);
 	this->menuClipContext->addAction(ui->actionDeleteMusicItem);
 
-	this->setupPlaybackToolbar();
-
 	this->odcUndo = new QUndoStack(this);
 	connect(ui->actionUndo, SIGNAL(triggered()), this->odcUndo, SLOT(undo()));
 	connect(ui->actionRedo, SIGNAL(triggered()), this->odcUndo, SLOT(redo()));
+
+	connect(this->modelMusic, SIGNAL(audioClipsDropped(QModelIndex,QStringList)), this, SLOT(addClipList(QModelIndex,QStringList)));
+	connect(this->selMusic, SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(swapEditorWidget(QModelIndex)));
 
 	ui->statusMain->showMessage(tr("Ready"));
 }
@@ -73,10 +74,15 @@ void OpenDynamicCreator::addClipGroup()
 	ui->treeMusic->setExpanded(this->modelMusic->indexFromItem(cgi), true);
 }
 
-void OpenDynamicCreator::addClip()
+void OpenDynamicCreator::addClip(QModelIndex parent, QString file, QString label)
 {
-	QStandardItem *selection = this->checkSelectedMusicTreeItem();
-	if(!selection)	return;
+	QStandardItem *selection = NULL;
+	if(!parent.isValid())
+		selection = this->checkSelectedMusicTreeItem();
+	else
+		selection = this->modelMusic->itemFromIndex(parent);
+	if(!selection)
+		return;
     if(selection->type()!=MusicItemType::MIT_TRACK && selection->type()!=MusicItemType::MIT_CLIPGROUP)
 		Q_ASSERT(selection=selection->parent());
 	int clipcount=1, rowcount = selection->rowCount();
@@ -85,7 +91,15 @@ void OpenDynamicCreator::addClip()
 		if(item->type()==MusicItemType::MIT_CLIP)
 			clipcount++;
 	}
-	selection->appendRow(new ClipItem(QString("%1 %2").arg(ODC_CLIP_LABEL).arg(clipcount)));
+	selection->appendRow(new ClipItem(file, label.isEmpty() ? QString("%1 %2").arg(ODC_CLIP_LABEL).arg(clipcount) : label));
+}
+
+void OpenDynamicCreator::addClipList(QModelIndex parent, QStringList files)
+{
+	foreach(QString file, files) {
+		QFileInfo info(file);
+		this->addClip(parent, file, info.baseName());
+	}
 }
 
 void OpenDynamicCreator::deleteMusicItem()
@@ -165,6 +179,29 @@ QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 
 
 
+void OpenDynamicCreator::swapEditorWidget(QModelIndex i)
+{
+	ui->wMainWindow->deleteLater();
+	ui->wMainWindow = new QWidget();
+	ui->saMainWindow->setWidget(ui->wMainWindow);
+	QStandardItem *item = this->modelMusic->itemFromIndex(i);
+	if(!item) {
+		this->setCentralWidget(new QScrollArea(this));
+		return;
+	}
+	switch(item->type()) {
+	case MusicItemType::MIT_TRACK:
+		this->loadTrackEditorWidget(i);
+		break;
+	case MusicItemType::MIT_CLIPGROUP:
+		this->loadClipGroupEditorWidget(i);
+		break;
+	case MusicItemType::MIT_CLIP:
+		this->loadClipEditorWidget(i);
+		break;
+	}
+}
+
 void OpenDynamicCreator::customContextMenuMusic(QPoint point)
 {
 	QModelIndex index = ui->treeMusic->indexAt(point);
@@ -185,17 +222,6 @@ void OpenDynamicCreator::customContextMenuMusic(QPoint point)
 	}
 }
 
-void OpenDynamicCreator::setupPlaybackToolbar()
-{
-	QComboBox *combo = new QComboBox();
-	combo->addItem(tr("No IDs"));
-	ui->toolbarPlayback->addWidget(combo);
-
-	combo = new QComboBox();
-	combo->addItem(tr("No values"));
-	ui->toolbarPlayback->addWidget(combo);
-}
-
 void OpenDynamicCreator::showAboutDialogue()
 {
 	QString abouttext = QString("%1 v%2\n\n%3")
@@ -205,4 +231,35 @@ void OpenDynamicCreator::showAboutDialogue()
 	QMessageBox::question(this, qApp->applicationName(),
 						  abouttext,
 						  QMessageBox::Ok);
+}
+
+
+
+void OpenDynamicCreator::loadTrackEditorWidget(QModelIndex)
+{
+	ui->wMainWindow->setLayout(new QVBoxLayout());
+}
+
+void OpenDynamicCreator::loadClipGroupEditorWidget(QModelIndex i)
+{
+	QVBoxLayout *vboxClipEditor = new QVBoxLayout();
+	QGridLayout *gridClipEditor = new QGridLayout();
+	int clipcount = this->modelMusic->itemFromIndex(i)->rowCount();
+	for(int clip=0; clip<clipcount; clip++)
+		this->addClipGroupEditor(gridClipEditor, clip);
+	vboxClipEditor->addLayout(gridClipEditor);
+	vboxClipEditor->addItem(new QSpacerItem(0,20,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding));
+	ui->wMainWindow->setLayout(vboxClipEditor);
+}
+void OpenDynamicCreator::addClipGroupEditor(QGridLayout *gl, int row)
+{
+	ClipMixerWidget *cmw = new ClipMixerWidget();
+	cmw->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
+	gl->addWidget(cmw, row, 0);
+	gl->addWidget(new QWidget(), row, 1);
+}
+
+void OpenDynamicCreator::loadClipEditorWidget(QModelIndex)
+{
+	ui->wMainWindow->setLayout(new QVBoxLayout());
 }

@@ -1,4 +1,4 @@
-#include "src/OpenDynamicCreator.h"
+#include "OpenDynamicCreator.h"
 #include <QApplication>
 
 #include "version.h"

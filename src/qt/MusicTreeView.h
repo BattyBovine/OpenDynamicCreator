@@ -1,14 +1,18 @@
 #ifndef MUSICTREEVIEW_H
 #define MUSICTREEVIEW_H
 
+#include <QDebug>
 #include <QTreeView>
 #include <QStandardItemModel>
 #include <QItemSelection>
 
 #include <QMimeData>
 #include <QKeyEvent>
+#include <QMediaPlayer>
 #include <QMessageBox>
 #include <QUuid>
+
+#define MIT_MIME "Qt/MusicItemType"
 
 enum MusicItemType
 {
@@ -97,8 +101,15 @@ class MusicTreeViewModel : public QStandardItemModel
 {
 	Q_OBJECT
 public:
+	QStringList mimeTypes() const;
 	QMimeData *mimeData(const QModelIndexList&) const;
 	bool dropMimeData (const QMimeData*, Qt::DropAction, int, int, const QModelIndex&);
+
+signals:
+	void audioClipsDropped(QModelIndex,QStringList);
+
+private:
+	QStandardItem *parseMusicItemMimeData(QStandardItem*);
 };
 
 

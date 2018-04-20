@@ -30,6 +30,14 @@ void MusicTreeView::deleteSelectedItems()
 
 
 
+QStringList MusicTreeViewModel::mimeTypes() const
+{
+	QStringList types;
+	types << MIT_MIME;
+	types << "text/uri-list";
+	return types;
+}
+
 QMimeData *MusicTreeViewModel::mimeData(const QModelIndexList &indices) const
 {
 	QMimeData *mime = QStandardItemModel::mimeData(indices);
@@ -42,15 +50,15 @@ QMimeData *MusicTreeViewModel::mimeData(const QModelIndexList &indices) const
             ds.writeRawData((const char*)&itemptr, sizeof(QStandardItem*));
 		}
 	}
-	mime->setData("Qt/MusicItemType", mimebytes);
+	mime->setData(MIT_MIME, mimebytes);
 	return mime;
 }
 
 bool MusicTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, int row, int, const QModelIndex &parent)
 {
 	QStandardItem *parentitem = this->itemFromIndex(parent);
-    if(data->hasFormat("Qt/MusicItemType")) {
-        QByteArray datamime = data->data("Qt/MusicItemType");
+	if(data->hasFormat(MIT_MIME)) {
+		QByteArray datamime = data->data(MIT_MIME);
         QDataStream ds(&datamime, QIODevice::ReadOnly);
 		quint32 itemcount;
 		ds >> itemcount;
@@ -93,5 +101,51 @@ bool MusicTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, int
 		free(items);
         return true;
 	}
+	if(data->hasFormat("text/uri-list")) {
+		// First, make sure the files were dropped into a valid container for clips
+		QStandardItem *parentitem = NULL;
+		if(parent.isValid())
+			parentitem = this->parseMusicItemMimeData(this->itemFromIndex(parent));
+		else
+			qDebug() << QString("Can't drop onto root item; ignoring drop.");
+		if(parentitem==NULL)
+			return false;
+
+		// Next, make sure the dropped files are valid audio data, and ignore any that aren't
+		QStringList filepaths = QString(data->data("text/uri-list")).split(QRegExp("(\\r\\n?|\\n)+"));
+		QStringList validaudiofiles;
+		QMediaPlayer *mediatest = new QMediaPlayer();
+		foreach(QString fileurl, filepaths) {
+			if(fileurl.isEmpty())
+				continue;
+			mediatest->setMedia(QUrl(fileurl));
+			if(mediatest->error()!=QMediaPlayer::NoError) {
+				qDebug() << QString("Error loading media file '%1': %2").arg(fileurl).arg(mediatest->errorString());
+				continue;
+			}
+			validaudiofiles << fileurl;
+		}
+		mediatest->deleteLater();
+		emit(audioClipsDropped(this->indexFromItem(parentitem), validaudiofiles));
+	}
 	return false;
+}
+QStandardItem *MusicTreeViewModel::parseMusicItemMimeData(QStandardItem *item)
+{
+	if(!item) {
+		qDebug() << QString("Can't drop onto root item; ignoring drop.");
+		return NULL;
+	}
+	switch(item->type()) {
+	case MIT_TRACK:
+	case MIT_CLIPGROUP:
+		return item;
+	case MIT_CLIP:
+		if(item->parent())
+			return this->parseMusicItemMimeData(item->parent());
+		else
+			qDebug() << QString("Could not find valid parent; ignoring drop.");
+		break;
+	}
+	return NULL;
 }

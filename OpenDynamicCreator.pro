@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui multimedia multimediawidgets
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = OpenDynamicCreator
@@ -23,19 +23,32 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp \
-	src/OpenDynamicCreator.cpp \
-    src/qt/MusicTreeView.cpp \
-    src/commands/OdcUndoCommands.cpp \
-    src/qt/StatesTreeView.cpp
+	OpenDynamicCreator.cpp \
+	ui/MusicPropertiesEditor.cpp \
+	ui/StatePropertiesEditor.cpp \
+	src/qt/MusicTreeView.cpp \
+	src/qt/StatesTreeView.cpp \
+	src/commands/OdcUndoCommands.cpp \
+    ui/Timeline/TimelineWidget.cpp \
+	ui/Timeline/ClipMixerWidget.cpp \
+    ui/Widgets/ClipMixerSlider.cpp
 
 HEADERS  += version.h \
-	src/OpenDynamicCreator.h \
-    src/qt/MusicTreeView.h \
-    src/commands/OdcUndoCommands.h \
-    src/qt/StatesTreeView.h
+	OpenDynamicCreator.h \
+	ui/MusicPropertiesEditor.h \
+	ui/StatePropertiesEditor.h \
+	src/qt/MusicTreeView.h \
+	src/qt/StatesTreeView.h \
+	src/commands/OdcUndoCommands.h \
+    ui/Timeline/TimelineWidget.h \
+	ui/Timeline/ClipMixerWidget.h \
+    ui/Widgets/ClipMixerSlider.h
 
 FORMS    += \
-    ui/OpenDynamicCreator.ui
+	OpenDynamicCreator.ui \
+    ui/MusicPropertiesEditor.ui \
+    ui/StatePropertiesEditor.ui \
+    ui/Timeline/ClipMixerWidget.ui
 
 DISTFILES +=
 

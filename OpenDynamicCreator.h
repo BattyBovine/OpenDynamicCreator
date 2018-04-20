@@ -2,9 +2,15 @@
 #define OPENADAPTIVE_H
 
 #include <QMainWindow>
-#include <QComboBox>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QLayout>
+#include <QSpacerItem>
 #include <QUndoStack>
 #include <QMessageBox>
+#include <QFileInfo>
+
+#include "ui/Timeline/ClipMixerWidget.h"
 
 #include "src/qt/MusicTreeView.h"
 #include "src/qt/StatesTreeView.h"
@@ -46,7 +52,8 @@ public:
 public slots:
 	void addTrack();
 	void addClipGroup();
-	void addClip();
+	void addClip(QModelIndex parent=QModelIndex(), QString file="", QString label="");
+	void addClipList(QModelIndex,QStringList);
 	void deleteMusicItem();
 	QStandardItem *checkSelectedMusicTreeItem();
 
@@ -55,19 +62,26 @@ public slots:
 	void deleteStateItem();
 	QStandardItem *checkSelectedStateTreeItem();
 
+	void swapEditorWidget(QModelIndex);
 	void customContextMenuMusic(QPoint);
-	void setupPlaybackToolbar();
 	void showAboutDialogue();
 
 private:
+	void loadTrackEditorWidget(QModelIndex);
+	void loadClipGroupEditorWidget(QModelIndex);
+	void loadClipEditorWidget(QModelIndex);
+	void addClipGroupEditor(QGridLayout*, int row=-1);
+
 	Ui::OpenDynamicCreator *ui;
-	QStandardItemModel *modelMusic;
+	MusicTreeViewModel *modelMusic;
 	QItemSelectionModel *selMusic;
 	QStandardItemModel *modelStates;
 	QItemSelectionModel *selStates;
+
 	QMenu *menuMusicBlankContext;
 	QMenu *menuSongAndMixerContext;
 	QMenu *menuClipContext;
+
 	QUndoStack *odcUndo;
 };
 
