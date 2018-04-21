@@ -31,7 +31,8 @@ SOURCES += main.cpp \
 	src/commands/OdcUndoCommands.cpp \
     ui/Timeline/TimelineWidget.cpp \
 	ui/Timeline/ClipMixerWidget.cpp \
-    ui/Widgets/ClipMixerSlider.cpp
+	ui/Widgets/ClipMixerVolumeSlider.cpp \
+	ui/Widgets/ClipMixerPanSlider.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -42,7 +43,8 @@ HEADERS  += version.h \
 	src/commands/OdcUndoCommands.h \
     ui/Timeline/TimelineWidget.h \
 	ui/Timeline/ClipMixerWidget.h \
-    ui/Widgets/ClipMixerSlider.h
+	ui/Widgets/ClipMixerVolumeSlider.h \
+	ui/Widgets/ClipMixerPanSlider.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \

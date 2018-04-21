@@ -70,7 +70,7 @@ private:
 	void loadTrackEditorWidget(QModelIndex);
 	void loadClipGroupEditorWidget(QModelIndex);
 	void loadClipEditorWidget(QModelIndex);
-	void addClipGroupEditor(QGridLayout*, int row=-1);
+	void addClipGroupEditor(QGridLayout*, ClipItem*, int row=-1);
 
 	Ui::OpenDynamicCreator *ui;
 	MusicTreeViewModel *modelMusic;

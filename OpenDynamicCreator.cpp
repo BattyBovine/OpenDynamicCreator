@@ -244,17 +244,21 @@ void OpenDynamicCreator::loadClipGroupEditorWidget(QModelIndex i)
 {
 	QVBoxLayout *vboxClipEditor = new QVBoxLayout();
 	QGridLayout *gridClipEditor = new QGridLayout();
-	int clipcount = this->modelMusic->itemFromIndex(i)->rowCount();
-	for(int clip=0; clip<clipcount; clip++)
-		this->addClipGroupEditor(gridClipEditor, clip);
+	QStandardItem *item = this->modelMusic->itemFromIndex(i);
+	if(!item)
+		return;
+	int rowcount = item->rowCount();
+	for(int row=0; row<rowcount; row++)
+		this->addClipGroupEditor(gridClipEditor, (ClipItem*)item->child(row), row);
 	vboxClipEditor->addLayout(gridClipEditor);
 	vboxClipEditor->addItem(new QSpacerItem(0,20,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding));
 	ui->wMainWindow->setLayout(vboxClipEditor);
 }
-void OpenDynamicCreator::addClipGroupEditor(QGridLayout *gl, int row)
+void OpenDynamicCreator::addClipGroupEditor(QGridLayout *gl, ClipItem *clip, int row)
 {
 	ClipMixerWidget *cmw = new ClipMixerWidget();
 	cmw->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
+	cmw->attachClip(clip);
 	gl->addWidget(cmw, row, 0);
 	gl->addWidget(new QWidget(), row, 1);
 }

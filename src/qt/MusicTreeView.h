@@ -77,9 +77,7 @@ class ClipItem : public BaseMusicItem
 {
 public:
     ClipItem(QString t) : BaseMusicItem(t) { this->setText(t); this->setIcon(QIcon(":/icons/waveform")); }
-    ClipItem(QString f, QString t) : BaseMusicItem(t) { this->setClip(f); this->setText(t); this->setIcon(QIcon(":/icons/waveform")); }
-
-	QString clip() { return this->sClipFile; }
+	ClipItem(QString f, QString t) : BaseMusicItem(t) { this->setClip(f); this->setText(t); this->setIcon(QIcon(":/icons/waveform")); }
 
 	virtual int type() const { return MusicItemType::MIT_CLIP; }
 	virtual QStandardItem *clone() const
@@ -89,10 +87,14 @@ public:
 		return ci;
 	}
 
-    void setClip(QString s) { this->sClipFile=s; }
+	void setClip(QString s) { this->sClipFile=s; }
+	QString clip() { return this->sClipFile; }
+	void setClipVolume(int v) { this->iVolume=v; }
+	int clipVolume() { return this->iVolume; }
 
 private:
 	QString sClipFile;
+	int iVolume;
 };
 
 
