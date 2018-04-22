@@ -5,6 +5,7 @@
 #include <QLayout>
 #include <QToolTip>
 #include <QStyle>
+#include <QMouseEvent>
 
 class ClipMixerPanSlider : public QSlider
 {
@@ -12,8 +13,14 @@ class ClipMixerPanSlider : public QSlider
 public:
 	explicit ClipMixerPanSlider(QWidget *parent = 0);
 
+	virtual void mousePressEvent(QMouseEvent*);
+	virtual void mouseReleaseEvent(QMouseEvent*);
+
 private slots:
-	void showTip(int);
+	void sliderConvenience(int);
+
+private:
+	bool bSnapToCentre = false;
 };
 
 #endif // CLIPMIXERPANSLIDER_H

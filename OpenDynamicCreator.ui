@@ -16,32 +16,8 @@
   <property name="locale">
    <locale language="English" country="UnitedKingdom"/>
   </property>
-  <property name="dockOptions">
-   <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::VerticalTabs</set>
-  </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QScrollArea" name="saMainWindow">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="wMainWindow">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>483</width>
-         <height>502</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
-    </item>
-   </layout>
+   <layout class="QVBoxLayout" name="verticalLayout"/>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -224,6 +200,9 @@
    </property>
    <property name="toolTip">
     <string>Pause the currently playing song.</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
   <action name="actionNew">

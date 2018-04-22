@@ -38,10 +38,7 @@ private:
 class TrackItem : public BaseMusicItem
 {
 public:
-    TrackItem(QString t) : BaseMusicItem(t)
-    {
-        this->setIcon(QIcon(":/icons/note"));
-    }
+	TrackItem(QString);
 
     virtual int type() const { return MusicItemType::MIT_TRACK; }
     virtual QStandardItem *clone() const
@@ -52,6 +49,21 @@ public:
 		mi->setUuid(this->getUuid());
         return mi;
     }
+
+	void setTempo(int t) { this->iTempo = t; }
+	int tempo() { return this->iTempo; }
+	void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure = b; }
+	int beatsPerMeasure() { return this->iBeatsPerMeasure; }
+	void setBeatUnit(int b) { this->iBeatUnit = b; }
+	int beatUnit() { return this->iBeatUnit; }
+	void setPlaybackSpeed(float s) { this->fPlaybackSpeed = s; }
+	float playbackSpeed() { return this->fPlaybackSpeed; }
+
+private:
+	int iTempo = 120;
+	int iBeatsPerMeasure = 4;
+	int iBeatUnit = 4;
+	float fPlaybackSpeed = 1.0f;
 };
 
 class ClipGroupItem : public BaseMusicItem
@@ -76,25 +88,24 @@ public:
 class ClipItem : public BaseMusicItem
 {
 public:
-    ClipItem(QString t) : BaseMusicItem(t) { this->setText(t); this->setIcon(QIcon(":/icons/waveform")); }
-	ClipItem(QString f, QString t) : BaseMusicItem(t) { this->setClip(f); this->setText(t); this->setIcon(QIcon(":/icons/waveform")); }
+	ClipItem(QString, QString f="", float v=100.0f);
 
 	virtual int type() const { return MusicItemType::MIT_CLIP; }
 	virtual QStandardItem *clone() const
 	{
-		ClipItem *ci = new ClipItem(this->sClipFile, this->text());
+		ClipItem *ci = new ClipItem(this->text(), this->sClipFile);
 		ci->setUuid(this->getUuid());
 		return ci;
 	}
 
 	void setClip(QString s) { this->sClipFile=s; }
 	QString clip() { return this->sClipFile; }
-	void setClipVolume(int v) { this->iVolume=v; }
-	int clipVolume() { return this->iVolume; }
+	void setClipVolume(float v) { this->iVolume=v; }
+	float clipVolume() { return this->iVolume; }
 
 private:
 	QString sClipFile;
-	int iVolume;
+	float iVolume;
 };
 
 

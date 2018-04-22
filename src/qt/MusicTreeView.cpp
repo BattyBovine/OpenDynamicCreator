@@ -149,3 +149,18 @@ QStandardItem *MusicTreeViewModel::parseMusicItemMimeData(QStandardItem *item)
 	}
 	return NULL;
 }
+
+
+
+TrackItem::TrackItem(QString t) : BaseMusicItem(t)
+{
+	this->setIcon(QIcon(":/icons/note"));
+}
+
+ClipItem::ClipItem(QString t, QString f, float v) : BaseMusicItem(t)
+{
+	this->setText(t);
+	this->setClip(f);
+	this->setClipVolume(v);
+	this->setIcon(QIcon(":/icons/waveform"));
+}

@@ -24,33 +24,39 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp \
 	OpenDynamicCreator.cpp \
-	ui/MusicPropertiesEditor.cpp \
 	ui/StatePropertiesEditor.cpp \
 	src/qt/MusicTreeView.cpp \
 	src/qt/StatesTreeView.cpp \
 	src/commands/OdcUndoCommands.cpp \
-    ui/Timeline/TimelineWidget.cpp \
+	ui/ClipGroupEditorWidget.cpp \
+	ui/MusicPropertiesWidget.cpp \
+	ui/Timeline/TimelineWidget.cpp \
 	ui/Timeline/ClipMixerWidget.cpp \
 	ui/Widgets/ClipMixerVolumeSlider.cpp \
-	ui/Widgets/ClipMixerPanSlider.cpp
+	ui/Widgets/ClipMixerPanSlider.cpp \
+    ui/ClipEditorWidget.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
-	ui/MusicPropertiesEditor.h \
 	ui/StatePropertiesEditor.h \
 	src/qt/MusicTreeView.h \
 	src/qt/StatesTreeView.h \
 	src/commands/OdcUndoCommands.h \
-    ui/Timeline/TimelineWidget.h \
+	ui/ClipGroupEditorWidget.h \
+	ui/MusicPropertiesWidget.h \
+	ui/Timeline/TimelineWidget.h \
 	ui/Timeline/ClipMixerWidget.h \
 	ui/Widgets/ClipMixerVolumeSlider.h \
-	ui/Widgets/ClipMixerPanSlider.h
+	ui/Widgets/ClipMixerPanSlider.h \
+    ui/ClipEditorWidget.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \
-    ui/MusicPropertiesEditor.ui \
+	ui/ClipGroupEditorWidget.ui \
+	ui/MusicPropertiesWidget.ui \
     ui/StatePropertiesEditor.ui \
-    ui/Timeline/ClipMixerWidget.ui
+	ui/Timeline/ClipMixerWidget.ui \
+    ui/ClipEditorWidget.ui
 
 DISTFILES +=
 

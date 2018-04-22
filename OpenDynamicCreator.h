@@ -10,6 +10,9 @@
 #include <QMessageBox>
 #include <QFileInfo>
 
+#include "ui/MusicPropertiesWidget.h"
+#include "ui/ClipGroupEditorWidget.h"
+#include "ui/ClipEditorWidget.h"
 #include "ui/Timeline/ClipMixerWidget.h"
 
 #include "src/qt/MusicTreeView.h"
@@ -70,7 +73,6 @@ private:
 	void loadTrackEditorWidget(QModelIndex);
 	void loadClipGroupEditorWidget(QModelIndex);
 	void loadClipEditorWidget(QModelIndex);
-	void addClipGroupEditor(QGridLayout*, ClipItem*, int row=-1);
 
 	Ui::OpenDynamicCreator *ui;
 	MusicTreeViewModel *modelMusic;

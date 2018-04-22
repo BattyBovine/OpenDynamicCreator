@@ -2,15 +2,32 @@
 
 ClipMixerPanSlider::ClipMixerPanSlider(QWidget *parent) : QSlider(parent)
 {
-	connect(this, SIGNAL(valueChanged(int)), this, SLOT(showTip(int)));
+	connect(this, SIGNAL(valueChanged(int)), this, SLOT(sliderConvenience(int)));
+}
+
+void ClipMixerPanSlider::mousePressEvent(QMouseEvent *e)
+{
+	QSlider::mousePressEvent(e);
+	if(e->button()==Qt::LeftButton)
+		this->bSnapToCentre = true;
+}
+void ClipMixerPanSlider::mouseReleaseEvent(QMouseEvent *e)
+{
+	QSlider::mouseReleaseEvent(e);
+	if(e->button()==Qt::LeftButton)
+		this->bSnapToCentre = false;
 }
 
 
 
-void ClipMixerPanSlider::showTip(int value)
+void ClipMixerPanSlider::sliderConvenience(int value)
 {
+	if(this->bSnapToCentre && (value!=0 && abs(value)<2)) {
+		this->setValue(0);
+		return;
+	}
 	QMargins margins = this->parentWidget()->layout()->contentsMargins();
-	QRect geometry = this->geometry();
+	QRect geometry = this->rect();
 	int w = geometry.width()-margins.left()-margins.right();
 	int h = geometry.height()-margins.top()-margins.bottom();
 	QPoint tooltippos(QStyle::sliderPositionFromValue(this->minimum(), this->maximum(), value, w), roundf(h/2.0f));

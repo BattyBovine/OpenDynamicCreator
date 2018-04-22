@@ -91,7 +91,7 @@ void OpenDynamicCreator::addClip(QModelIndex parent, QString file, QString label
 		if(item->type()==MusicItemType::MIT_CLIP)
 			clipcount++;
 	}
-	selection->appendRow(new ClipItem(file, label.isEmpty() ? QString("%1 %2").arg(ODC_CLIP_LABEL).arg(clipcount) : label));
+	selection->appendRow(new ClipItem((label.isEmpty() ? QString("%1 %2").arg(ODC_CLIP_LABEL).arg(clipcount) : label), file));
 }
 
 void OpenDynamicCreator::addClipList(QModelIndex parent, QStringList files)
@@ -181,12 +181,9 @@ QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 
 void OpenDynamicCreator::swapEditorWidget(QModelIndex i)
 {
-	ui->wMainWindow->deleteLater();
-	ui->wMainWindow = new QWidget();
-	ui->saMainWindow->setWidget(ui->wMainWindow);
 	QStandardItem *item = this->modelMusic->itemFromIndex(i);
 	if(!item) {
-		this->setCentralWidget(new QScrollArea(this));
+		this->setCentralWidget(new QWidget());
 		return;
 	}
 	switch(item->type()) {
@@ -235,35 +232,30 @@ void OpenDynamicCreator::showAboutDialogue()
 
 
 
-void OpenDynamicCreator::loadTrackEditorWidget(QModelIndex)
+void OpenDynamicCreator::loadTrackEditorWidget(QModelIndex i)
 {
-	ui->wMainWindow->setLayout(new QVBoxLayout());
+	TrackItem *item = static_cast<TrackItem*>(this->modelMusic->itemFromIndex(i));
+	if(!item)	return;
+	MusicPropertiesWidget *mpw = new MusicPropertiesWidget(item);
+	this->setCentralWidget(mpw);
 }
 
 void OpenDynamicCreator::loadClipGroupEditorWidget(QModelIndex i)
 {
-	QVBoxLayout *vboxClipEditor = new QVBoxLayout();
-	QGridLayout *gridClipEditor = new QGridLayout();
 	QStandardItem *item = this->modelMusic->itemFromIndex(i);
-	if(!item)
-		return;
+	if(!item)	return;
+	ClipGroupEditorWidget *cgew = new ClipGroupEditorWidget();
 	int rowcount = item->rowCount();
 	for(int row=0; row<rowcount; row++)
-		this->addClipGroupEditor(gridClipEditor, (ClipItem*)item->child(row), row);
-	vboxClipEditor->addLayout(gridClipEditor);
-	vboxClipEditor->addItem(new QSpacerItem(0,20,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding));
-	ui->wMainWindow->setLayout(vboxClipEditor);
-}
-void OpenDynamicCreator::addClipGroupEditor(QGridLayout *gl, ClipItem *clip, int row)
-{
-	ClipMixerWidget *cmw = new ClipMixerWidget();
-	cmw->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Maximum);
-	cmw->attachClip(clip);
-	gl->addWidget(cmw, row, 0);
-	gl->addWidget(new QWidget(), row, 1);
+		cgew->addClipGroupEditor(static_cast<ClipItem*>(item->child(row)));
+	this->setCentralWidget(cgew);
 }
 
-void OpenDynamicCreator::loadClipEditorWidget(QModelIndex)
+void OpenDynamicCreator::loadClipEditorWidget(QModelIndex i)
 {
-	ui->wMainWindow->setLayout(new QVBoxLayout());
+	ClipItem *item = static_cast<ClipItem*>(this->modelMusic->itemFromIndex(i));
+	if(!item)	return;
+	ClipEditorWidget *cew = new ClipEditorWidget();
+	cew->setClipEditor(item);
+	this->setCentralWidget(cew);
 }

@@ -14,21 +14,22 @@ class ClipMixerWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit ClipMixerWidget(QWidget *parent = 0);
+	explicit ClipMixerWidget(ClipItem *ci=NULL, bool groupmode=false, QWidget *parent = 0);
 	~ClipMixerWidget();
 
 	int volumedB();
-	int volumePercent();
+	float volumePercent();
 
 public slots:
-	void attachClip(ClipItem *i) { this->ciClip = i; this->setVolumePercent(i->clipVolume()); }
+	void attachClip(ClipItem*);
 	void volumedBChanged(int);
 	void setVolumedB(int);
-	void setVolumePercent(int);
+	void setVolumePercent(float);
 
 private:
-	inline int dBToVolume(int d) { return roundf(powf(10.0f, 0.05f * d) * 100); }
-	inline int volumeTodB(int v) { return roundf(20.0f * log10f(v/100.0f)); }
+
+	inline float dBToVolume(int d) { return powf(10.0f, 0.05f * d) * 100; }
+	inline int volumeTodB(float v) { return roundf(20.0f * log10f(v/100.0f)); }
 
 	Ui::ClipMixerWidget *ui;
 	ClipItem *ciClip = NULL;
