@@ -29,12 +29,12 @@ protected:
 	void paintEvent(QPaintEvent*);
 
 private:
-	void drawMeasures(QPainter&, int, float);
+	void drawMeasureMarkers(QPainter&, int, float);
 
 	TrackItem *tiTrack = NULL;
 	ClipItem *ciClip = NULL;
 
-	float fBeatSpacing = 20.0f;
+	float fBeatSpacing = 10.0f;
 };
 
 #endif // TIMELINEWIDGET_H
