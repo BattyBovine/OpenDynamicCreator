@@ -81,10 +81,10 @@ void OpenDynamicCreator::addClip(QModelIndex parent, QString file, QString label
 		selection = this->checkSelectedMusicTreeItem();
 	else
 		selection = this->modelMusic->itemFromIndex(parent);
-	if(!selection)
-		return;
+	if(!selection) return;
     if(selection->type()!=MusicItemType::MIT_TRACK && selection->type()!=MusicItemType::MIT_CLIPGROUP)
-		Q_ASSERT(selection=selection->parent());
+		selection = selection->parent();
+	if(!selection) return;
 	int clipcount=1, rowcount = selection->rowCount();
 	for(uint16_t i=0; i<rowcount; i++) {
 		QStandardItem *item = selection->child(i);
