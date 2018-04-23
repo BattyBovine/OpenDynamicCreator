@@ -14,18 +14,6 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="frameShape">
@@ -42,8 +30,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>450</width>
-        <height>245</height>
+        <width>432</width>
+        <height>227</height>
        </rect>
       </property>
      </widget>

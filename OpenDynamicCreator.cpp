@@ -242,20 +242,31 @@ void OpenDynamicCreator::loadTrackEditorWidget(QModelIndex i)
 
 void OpenDynamicCreator::loadClipGroupEditorWidget(QModelIndex i)
 {
-	QStandardItem *item = this->modelMusic->itemFromIndex(i);
-	if(!item)	return;
+	TrackItem *track = static_cast<TrackItem*>(this->modelMusic->itemFromIndex(this->findTrack(i)));
+	if(!track)	return;
+	QStandardItem *clip = this->modelMusic->itemFromIndex(i);
+	if(!clip)	return;
 	ClipGroupEditorWidget *cgew = new ClipGroupEditorWidget();
-	int rowcount = item->rowCount();
+	int rowcount = clip->rowCount();
 	for(int row=0; row<rowcount; row++)
-		cgew->addClipGroupEditor(static_cast<ClipItem*>(item->child(row)));
+		cgew->addClipGroupEditor(track, static_cast<ClipItem*>(clip->child(row)));
 	this->setCentralWidget(cgew);
 }
 
 void OpenDynamicCreator::loadClipEditorWidget(QModelIndex i)
 {
-	ClipItem *item = static_cast<ClipItem*>(this->modelMusic->itemFromIndex(i));
-	if(!item)	return;
+	TrackItem *track = static_cast<TrackItem*>(this->modelMusic->itemFromIndex(this->findTrack(i)));
+	if(!track)	return;
+	ClipItem *clip = static_cast<ClipItem*>(this->modelMusic->itemFromIndex(i));
+	if(!clip)	return;
 	ClipEditorWidget *cew = new ClipEditorWidget();
-	cew->setClipEditor(item);
+	cew->setClipEditor(track, clip);
 	this->setCentralWidget(cew);
+}
+
+QModelIndex OpenDynamicCreator::findTrack(QModelIndex index)
+{
+	while(index.parent().isValid())
+		index = index.parent();
+	return index;
 }

@@ -19,7 +19,7 @@ public:
 	explicit ClipEditorWidget(QWidget *parent = 0);
 	~ClipEditorWidget();
 
-	void setClipEditor(ClipItem *clip);
+	void setClipEditor(TrackItem*, ClipItem*);
 
 private:
 	Ui::ClipEditorWidget *ui;

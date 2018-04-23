@@ -15,10 +15,10 @@ ClipEditorWidget::~ClipEditorWidget()
 
 
 
-void ClipEditorWidget::setClipEditor(ClipItem *clip)
+void ClipEditorWidget::setClipEditor(TrackItem *track, ClipItem *clip)
 {
 	if(clip) {
-		ui->layoutClipEditor->addWidget(new ClipMixerWidget(clip, true), 0, 0);
-		ui->layoutClipEditor->addWidget(new TimelineWidget(), 0, 1);
+		ui->layoutClipEditor->addWidget(new ClipMixerWidget(clip), 0, 0);
+		ui->layoutClipEditor->addWidget(new TimelineWidget(track, clip), 0, 1);
 	}
 }

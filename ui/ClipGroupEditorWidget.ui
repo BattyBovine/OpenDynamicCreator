@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>312</height>
+    <width>431</width>
+    <height>283</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,23 +27,11 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>463</width>
-     <height>312</height>
+     <width>431</width>
+     <height>283</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="layoutClipGroupEditor">
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
     <item>
      <layout class="QGridLayout" name="layoutClips"/>
     </item>

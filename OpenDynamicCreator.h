@@ -69,11 +69,13 @@ public slots:
 	void showAboutDialogue();
 
 private:
+	Ui::OpenDynamicCreator *ui;
+
 	void loadTrackEditorWidget(QModelIndex);
 	void loadClipGroupEditorWidget(QModelIndex);
 	void loadClipEditorWidget(QModelIndex);
+	QModelIndex findTrack(QModelIndex);
 
-	Ui::OpenDynamicCreator *ui;
 	MusicTreeViewModel *modelMusic;
 	QItemSelectionModel *selMusic;
 	QStandardItemModel *modelStates;
