@@ -4,7 +4,7 @@ namespace Version
 {
     static const int MAJOR = 0;
     static const int MINOR = 1;
-    static const int REVISION = 6;
-    static const int BUILD = 585;
+    static const int REVISION = 8;
+    static const int BUILD = 586;
 }
 #endif // VERSION_H
