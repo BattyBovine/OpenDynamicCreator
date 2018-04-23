@@ -3,8 +3,8 @@
 
 #include <QUndoCommand>
 
-#include "src/qt/MusicTreeView.h"
-#include "src/qt/StatesTreeView.h"
+#include "Widgets/MusicTreeView.h"
+#include "Widgets/StatesTreeView.h"
 
 class OdcAddItemCommand : public QUndoCommand
 {

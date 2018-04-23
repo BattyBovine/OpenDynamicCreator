@@ -1,4 +1,4 @@
-#include "src/qt/MusicTreeView.h"
+#include "Widgets/MusicTreeView.h"
 
 void MusicTreeView::keyPressEvent(QKeyEvent *e)
 {
@@ -157,10 +157,11 @@ TrackItem::TrackItem(QString t) : BaseMusicItem(t)
 	this->setIcon(QIcon(":/icons/note"));
 }
 
-ClipItem::ClipItem(QString t, QString f, float v) : BaseMusicItem(t)
+ClipItem::ClipItem(QString t, QString f, float v, int p) : BaseMusicItem(t)
 {
 	this->setText(t);
 	this->setClip(f);
 	this->setClipVolume(v);
+	this->setClipPan(p);
 	this->setIcon(QIcon(":/icons/waveform"));
 }

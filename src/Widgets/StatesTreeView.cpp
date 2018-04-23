@@ -1,4 +1,4 @@
-#include "src/qt/StatesTreeView.h"
+#include "Widgets/StatesTreeView.h"
 
 void StatesTreeView::keyPressEvent(QKeyEvent *e)
 {

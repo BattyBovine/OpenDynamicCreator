@@ -1,4 +1,4 @@
-#include "ClipMixerWidget.h"
+#include "Widgets/ClipMixerWidget.h"
 #include "ui_ClipMixerWidget.h"
 
 ClipMixerWidget::ClipMixerWidget(ClipItem *ci, bool groupmode, QWidget *parent) :
@@ -11,6 +11,7 @@ ClipMixerWidget::ClipMixerWidget(ClipItem *ci, bool groupmode, QWidget *parent) 
 	ui->labelClipName->setVisible(groupmode);
 
 	connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(volumedBChanged(int)));
+	connect(ui->sliderPan, SIGNAL(valueChanged(int)), this, SLOT(panChanged(int)));
 }
 
 ClipMixerWidget::~ClipMixerWidget()
@@ -24,7 +25,9 @@ void ClipMixerWidget::attachClip(ClipItem *i)
 {
 	this->ciClip = i;
 	this->setVolumePercent(i->clipVolume());
+	this->setPan(i->clipPan());
 	ui->labelClipName->setText(this->ciClip->text());
+	ui->labelClipName->setToolTip(this->ciClip->text());
 }
 
 void ClipMixerWidget::volumedBChanged(int d)
@@ -48,4 +51,18 @@ void ClipMixerWidget::setVolumePercent(float v)
 float ClipMixerWidget::volumePercent()
 {
 	return this->dBToVolume(ui->sliderVolume->value());
+}
+
+void ClipMixerWidget::panChanged(int p)
+{
+	if(this->ciClip)
+		this->ciClip->setClipPan(p);
+}
+void ClipMixerWidget::setPan(int p)
+{
+	ui->sliderPan->setValue(p);
+}
+int ClipMixerWidget::pan()
+{
+	return ui->sliderPan->value();
 }

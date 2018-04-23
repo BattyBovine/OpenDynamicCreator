@@ -10,14 +10,13 @@
 #include <QMessageBox>
 #include <QFileInfo>
 
-#include "ui/MusicPropertiesWidget.h"
-#include "ui/ClipGroupEditorWidget.h"
-#include "ui/ClipEditorWidget.h"
-#include "ui/Timeline/ClipMixerWidget.h"
+#include "MusicPropertiesWidget.h"
+#include "ClipGroupEditorWidget.h"
+#include "ClipEditorWidget.h"
+#include "Widgets/ClipMixerWidget.h"
 
-#include "src/qt/MusicTreeView.h"
-#include "src/qt/StatesTreeView.h"
-#include "src/commands/OdcUndoCommands.h"
+#include "Widgets/MusicTreeView.h"
+#include "Widgets/StatesTreeView.h"
 
 #define ODC_MUSIC_LABEL			tr("Song")
 #define ODC_CLIP_GROUP_LABEL	tr("Mixer")

@@ -88,7 +88,7 @@ public:
 class ClipItem : public BaseMusicItem
 {
 public:
-	ClipItem(QString, QString f="", float v=100.0f);
+	ClipItem(QString, QString f="", float v=100.0f, int p=0);
 
 	virtual int type() const { return MusicItemType::MIT_CLIP; }
 	virtual QStandardItem *clone() const
@@ -100,12 +100,15 @@ public:
 
 	void setClip(QString s) { this->sClipFile=s; }
 	QString clip() { return this->sClipFile; }
-	void setClipVolume(float v) { this->iVolume=v; }
-	float clipVolume() { return this->iVolume; }
+	void setClipVolume(float v) { this->fVolume=v; }
+	float clipVolume() { return this->fVolume; }
+	void setClipPan(int v) { this->iPan=v; }
+	int clipPan() { return this->iPan; }
 
 private:
 	QString sClipFile;
-	float iVolume;
+	float fVolume;
+	int iPan;
 };
 
 

@@ -1,4 +1,4 @@
-#include "OdcUndoCommands.h"
+#include "Commands/OdcUndoCommands.h"
 
 OdcAddItemCommand::OdcAddItemCommand(QStandardItem *i, QStandardItem *p, QTreeView *v, QStandardItemModel *m, QItemSelectionModel *s, QUndoCommand *parent) : QUndoCommand(parent)
 {

@@ -21,41 +21,43 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += include
+
 
 SOURCES += main.cpp \
 	OpenDynamicCreator.cpp \
-	ui/StatePropertiesEditor.cpp \
-	src/qt/MusicTreeView.cpp \
-	src/qt/StatesTreeView.cpp \
-	src/commands/OdcUndoCommands.cpp \
-	ui/ClipGroupEditorWidget.cpp \
-	ui/MusicPropertiesWidget.cpp \
-	ui/Timeline/TimelineWidget.cpp \
-	ui/Timeline/ClipMixerWidget.cpp \
-	ui/Widgets/ClipMixerVolumeSlider.cpp \
-	ui/Widgets/ClipMixerPanSlider.cpp \
-    ui/ClipEditorWidget.cpp
+	src/StatePropertiesEditor.cpp \
+	src/Widgets/MusicTreeView.cpp \
+	src/Widgets/StatesTreeView.cpp \
+	src/Commands/OdcUndoCommands.cpp \
+	src/ClipGroupEditorWidget.cpp \
+	src/MusicPropertiesWidget.cpp \
+	src/Widgets/TimelineWidget.cpp \
+	src/Widgets/ClipMixerWidget.cpp \
+	src/Widgets/ClipMixerVolumeSlider.cpp \
+	src/Widgets/ClipMixerPanSlider.cpp \
+	src/ClipEditorWidget.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
-	ui/StatePropertiesEditor.h \
-	src/qt/MusicTreeView.h \
-	src/qt/StatesTreeView.h \
-	src/commands/OdcUndoCommands.h \
-	ui/ClipGroupEditorWidget.h \
-	ui/MusicPropertiesWidget.h \
-	ui/Timeline/TimelineWidget.h \
-	ui/Timeline/ClipMixerWidget.h \
-	ui/Widgets/ClipMixerVolumeSlider.h \
-	ui/Widgets/ClipMixerPanSlider.h \
-    ui/ClipEditorWidget.h
+	include/StatePropertiesEditor.h \
+	include/Widgets/MusicTreeView.h \
+	include/Widgets/StatesTreeView.h \
+	include/Commands/OdcUndoCommands.h \
+	include/ClipGroupEditorWidget.h \
+	include/MusicPropertiesWidget.h \
+	include/Widgets/TimelineWidget.h \
+	include/Widgets/ClipMixerWidget.h \
+	include/Widgets/ClipMixerVolumeSlider.h \
+	include/Widgets/ClipMixerPanSlider.h \
+	include/ClipEditorWidget.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \
 	ui/ClipGroupEditorWidget.ui \
 	ui/MusicPropertiesWidget.ui \
     ui/StatePropertiesEditor.ui \
-	ui/Timeline/ClipMixerWidget.ui \
+	ui/Widgets/ClipMixerWidget.ui \
     ui/ClipEditorWidget.ui
 
 DISTFILES +=

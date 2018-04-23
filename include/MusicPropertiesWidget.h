@@ -3,7 +3,7 @@
 
 #include <QScrollArea>
 
-#include "src/qt/MusicTreeView.h"
+#include "Widgets/MusicTreeView.h"
 
 namespace Ui {
 class MusicPropertiesWidget;

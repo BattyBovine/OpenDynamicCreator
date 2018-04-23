@@ -351,12 +351,12 @@
   <customwidget>
    <class>MusicTreeView</class>
    <extends>QTreeView</extends>
-   <header>src/qt/MusicTreeView.h</header>
+   <header>Widgets/MusicTreeView.h</header>
   </customwidget>
   <customwidget>
    <class>StatesTreeView</class>
    <extends>QTreeView</extends>
-   <header>src/qt/StatesTreeView.h</header>
+   <header>Widgets/StatesTreeView.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -3,8 +3,8 @@
 
 #include <QScrollArea>
 
-#include "src/qt/MusicTreeView.h"
-#include "ui/Timeline/ClipMixerWidget.h"
+#include "Widgets/MusicTreeView.h"
+#include "Widgets/ClipMixerWidget.h"
 
 namespace Ui {
 class ClipGroupEditorWidget;

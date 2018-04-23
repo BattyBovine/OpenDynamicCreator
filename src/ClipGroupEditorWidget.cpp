@@ -17,5 +17,9 @@ ClipGroupEditorWidget::~ClipGroupEditorWidget()
 
 void ClipGroupEditorWidget::addClipGroupEditor(ClipItem *clip)
 {
-	if(clip) ui->layoutClipGroupEditor->insertWidget(ui->layoutClipGroupEditor->count()-1, new ClipMixerWidget(clip, true));
+	if(clip) {
+		int row = ui->layoutClips->rowCount();
+		ui->layoutClips->addWidget(new ClipMixerWidget(clip, true), row, 0);
+		ui->layoutClips->addWidget(new QWidget(), row, 1);
+	}
 }

@@ -1,4 +1,4 @@
-#include "TimelineWidget.h"
+#include "Widgets/TimelineWidget.h"
 
 TimelineWidget::TimelineWidget(QWidget *parent) : QWidget(parent)
 {
