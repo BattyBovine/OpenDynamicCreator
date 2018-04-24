@@ -13,7 +13,7 @@
 #include "MusicPropertiesWidget.h"
 #include "ClipGroupEditorWidget.h"
 #include "ClipEditorWidget.h"
-#include "Widgets/ClipMixerWidget.h"
+#include "Widgets/MixerWidget.h"
 
 #include "Widgets/MusicTreeView.h"
 #include "Widgets/StatesTreeView.h"

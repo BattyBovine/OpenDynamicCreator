@@ -1,5 +1,5 @@
-#ifndef CLIPMIXERPANSLIDER_H
-#define CLIPMIXERPANSLIDER_H
+#ifndef MIXERPANSLIDER_H
+#define MIXERPANSLIDER_H
 
 #include <QSlider>
 #include <QLayout>
@@ -7,13 +7,13 @@
 #include <QStyle>
 #include <QMouseEvent>
 
-class ClipMixerPanSlider : public QSlider
+class MixerPanSlider : public QSlider
 {
 	Q_OBJECT
 	Q_PROPERTY(int centerSnapRange READ centerSnapRange WRITE setCenterSnapRange)
 
 public:
-	explicit ClipMixerPanSlider(QWidget *parent = 0);
+	explicit MixerPanSlider(QWidget *parent = 0);
 
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);
@@ -30,4 +30,4 @@ private:
 	bool bSnapToCentre = false;
 };
 
-#endif // CLIPMIXERPANSLIDER_H
+#endif // MIXERPANSLIDER_H

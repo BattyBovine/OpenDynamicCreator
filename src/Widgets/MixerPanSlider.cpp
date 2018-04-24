@@ -1,23 +1,23 @@
-#include "Widgets/ClipMixerPanSlider.h"
+#include "Widgets/MixerPanSlider.h"
 
-ClipMixerPanSlider::ClipMixerPanSlider(QWidget *parent) : QSlider(parent)
+MixerPanSlider::MixerPanSlider(QWidget *parent) : QSlider(parent)
 {
 	connect(this, SIGNAL(valueChanged(int)), this, SLOT(sliderConvenience(int)));
 }
 
-void ClipMixerPanSlider::mousePressEvent(QMouseEvent *e)
+void MixerPanSlider::mousePressEvent(QMouseEvent *e)
 {
 	QSlider::mousePressEvent(e);
 	if(e->button()==Qt::LeftButton)
 		this->bSnapToCentre = true;
 }
-void ClipMixerPanSlider::mouseReleaseEvent(QMouseEvent *e)
+void MixerPanSlider::mouseReleaseEvent(QMouseEvent *e)
 {
 	QSlider::mouseReleaseEvent(e);
 	if(e->button()==Qt::LeftButton)
 		this->bSnapToCentre = false;
 }
-void ClipMixerPanSlider::mouseDoubleClickEvent(QMouseEvent *e)
+void MixerPanSlider::mouseDoubleClickEvent(QMouseEvent *e)
 {
 	QSlider::mouseDoubleClickEvent(e);
 	if(e->button()==Qt::LeftButton)
@@ -26,7 +26,7 @@ void ClipMixerPanSlider::mouseDoubleClickEvent(QMouseEvent *e)
 
 
 
-void ClipMixerPanSlider::sliderConvenience(int value)
+void MixerPanSlider::sliderConvenience(int value)
 {
 	if(this->bSnapToCentre && (value!=0 && abs(value)<=this->iCentreSnapRange)) {
 		this->setValue(0);

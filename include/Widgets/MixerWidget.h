@@ -1,28 +1,28 @@
-#ifndef CLIPMIXERWIDGET_H
-#define CLIPMIXERWIDGET_H
+#ifndef MIXERWIDGET_H
+#define MIXERWIDGET_H
 
 #include <QWidget>
 
 #include <Widgets/MusicTreeView.h>
 
 namespace Ui {
-class ClipMixerWidget;
+class MixerWidget;
 }
 
-class ClipMixerWidget : public QWidget
+class MixerWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit ClipMixerWidget(QWidget *parent = 0, ClipItem *ci=NULL, bool groupmode=false);
-	~ClipMixerWidget();
+	explicit MixerWidget(QWidget *parent = 0, BaseMusicItem *musicitem=NULL, bool groupmode=false);
+	~MixerWidget();
 
 	int volumedB();
 	float volumePercent();
 	int pan();
 
 public slots:
-	void attachClip(ClipItem*);
+	void attachMusicItem(BaseMusicItem*);
 	void setVolumedB(int);
 	void setVolumePercent(float);
 	void setPan(int);
@@ -35,8 +35,8 @@ private:
 	inline float dBToVolume(int d) { return powf(10.0f, 0.05f * d) * 100; }
 	inline int volumeTodB(float v) { return roundf(20.0f * log10f(v/100.0f)); }
 
-	Ui::ClipMixerWidget *ui;
-	ClipItem *ciClip = NULL;
+	Ui::MixerWidget *ui;
+	BaseMusicItem *bmiMusicItem = NULL;
 };
 
-#endif // CLIPMIXERWIDGET_H
+#endif // MIXERWIDGET_H

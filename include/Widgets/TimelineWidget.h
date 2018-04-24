@@ -15,9 +15,9 @@ class TimelineWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TimelineWidget(QWidget *parent=0, ClipItem *clip=NULL, int beatsPerMeasure=4);
+	explicit TimelineWidget(QWidget *parent=0, BaseMusicItem *musicitem=NULL, int beatsPerMeasure=4);
 
-	ClipItem *clip() { return this->ciClip; }
+	BaseMusicItem *musicItem() { return this->bmiMusicItem; }
 	int beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	float measureSpacing() { return this->fMeasureSpacing; }
 	float beatSpacing() { return this->fBeatSpacing; }
@@ -27,7 +27,7 @@ public:
 	virtual void mouseReleaseEvent(QMouseEvent*);
 
 public slots:
-	void setClip(ClipItem *i) { this->ciClip=i; }
+	void setMusicItem(BaseMusicItem *i) { this->bmiMusicItem=i; }
 	void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure=b; }
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; this->fBeatSpacing=(m/this->iBeatsPerMeasure); }
 	void setBeatSpacing(float b) { this->fBeatSpacing=b; this->fMeasureSpacing=(b*this->iBeatsPerMeasure); }
@@ -41,7 +41,7 @@ private:
 
 	inline int getNearestBeat(float);
 
-	ClipItem *ciClip = NULL;
+	BaseMusicItem *bmiMusicItem = NULL;
 
 	int iBeatsPerMeasure = 4;
 	float fTopSpacing = 5.0f;

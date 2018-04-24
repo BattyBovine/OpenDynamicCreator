@@ -18,7 +18,7 @@ ClipEditorWidget::~ClipEditorWidget()
 void ClipEditorWidget::setClipEditor(ClipItem *clip, int beatspermeasure)
 {
 	if(clip) {
-		ui->layoutClipEditor->addWidget(new ClipMixerWidget(this, clip), 0, 0);
+		ui->layoutClipEditor->addWidget(new MixerWidget(this, clip), 0, 0);
 		ui->layoutClipEditor->addWidget(new TimelineWidget(this, clip, beatspermeasure), 0, 1);
 	}
 }

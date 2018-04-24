@@ -4,7 +4,7 @@
 #include <QScrollArea>
 
 #include "Widgets/MusicTreeView.h"
-#include "Widgets/ClipMixerWidget.h"
+#include "Widgets/MixerWidget.h"
 #include "Widgets/TimelineWidget.h"
 
 namespace Ui {
@@ -19,7 +19,7 @@ public:
 	explicit ClipGroupEditorWidget(QWidget *parent = 0);
 	~ClipGroupEditorWidget();
 
-	void addClipGroupEditor(ClipItem*, int);
+	void addClipGroupEditor(BaseMusicItem*, int);
 
 private:
 	Ui::ClipGroupEditorWidget *ui;

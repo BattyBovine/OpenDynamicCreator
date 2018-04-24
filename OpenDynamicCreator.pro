@@ -33,10 +33,10 @@ SOURCES += main.cpp \
 	src/ClipGroupEditorWidget.cpp \
 	src/MusicPropertiesWidget.cpp \
 	src/Widgets/TimelineWidget.cpp \
-	src/Widgets/ClipMixerWidget.cpp \
-	src/Widgets/ClipMixerVolumeSlider.cpp \
-	src/Widgets/ClipMixerPanSlider.cpp \
-	src/ClipEditorWidget.cpp
+	src/ClipEditorWidget.cpp \
+    src/Widgets/MixerWidget.cpp \
+    src/Widgets/MixerVolumeSlider.cpp \
+    src/Widgets/MixerPanSlider.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -47,18 +47,18 @@ HEADERS  += version.h \
 	include/ClipGroupEditorWidget.h \
 	include/MusicPropertiesWidget.h \
 	include/Widgets/TimelineWidget.h \
-	include/Widgets/ClipMixerWidget.h \
-	include/Widgets/ClipMixerVolumeSlider.h \
-	include/Widgets/ClipMixerPanSlider.h \
-	include/ClipEditorWidget.h
+	include/ClipEditorWidget.h \
+    include/Widgets/MixerWidget.h \
+    include/Widgets/MixerVolumeSlider.h \
+    include/Widgets/MixerPanSlider.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \
 	ui/ClipGroupEditorWidget.ui \
 	ui/MusicPropertiesWidget.ui \
     ui/StatePropertiesEditor.ui \
-	ui/Widgets/ClipMixerWidget.ui \
-    ui/ClipEditorWidget.ui
+    ui/ClipEditorWidget.ui \
+    ui/Widgets/MixerWidget.ui
 
 DISTFILES +=
 

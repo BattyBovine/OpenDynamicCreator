@@ -1,8 +1,8 @@
 #include "Widgets/TimelineWidget.h"
 
-TimelineWidget::TimelineWidget(QWidget *parent, ClipItem *clip, int beatspermeasure) : QWidget(parent)
+TimelineWidget::TimelineWidget(QWidget *parent, BaseMusicItem *musicitem, int beatspermeasure) : QWidget(parent)
 {
-	this->setClip(clip);
+	this->setMusicItem(musicitem);
 	this->setMeasureSpacing(40.0f);
 	this->setBeatsPerMeasure(beatspermeasure);
 }

@@ -161,7 +161,7 @@ ClipItem::ClipItem(QString t, QString f, float v, int p) : BaseMusicItem(t)
 {
 	this->setText(t);
 	this->setClip(f);
-	this->setClipVolume(v);
-	this->setClipPan(p);
+	this->setVolume(v);
+	this->setPan(p);
 	this->setIcon(QIcon(":/icons/waveform"));
 }

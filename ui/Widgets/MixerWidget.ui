@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ClipMixerWidget</class>
- <widget class="QWidget" name="ClipMixerWidget">
+ <class>MixerWidget</class>
+ <widget class="QWidget" name="MixerWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="ClipMixerVolumeSlider" name="sliderVolume">
+    <widget class="MixerVolumeSlider" name="sliderVolume">
      <property name="toolTip">
       <string>Volume</string>
      </property>
@@ -200,7 +200,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="ClipMixerPanSlider" name="sliderPan">
+      <widget class="MixerPanSlider" name="sliderPan">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -242,14 +242,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ClipMixerVolumeSlider</class>
+   <class>MixerVolumeSlider</class>
    <extends>QSlider</extends>
-   <header>Widgets/ClipMixerVolumeSlider.h</header>
+   <header>Widgets/MixerVolumeSlider.h</header>
   </customwidget>
   <customwidget>
-   <class>ClipMixerPanSlider</class>
+   <class>MixerPanSlider</class>
    <extends>QSlider</extends>
-   <header>Widgets/ClipMixerPanSlider.h</header>
+   <header>Widgets/MixerPanSlider.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

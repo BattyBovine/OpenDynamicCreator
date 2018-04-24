@@ -28,6 +28,12 @@ public:
         this->setText(t);
 		this->uuid = QUuid::createUuid();
     }
+
+	virtual void setVolume(float v) = 0;
+	virtual float volume() = 0;
+	virtual void setPan(int v) = 0;
+	virtual int pan() = 0;
+
 	void setUuid(QUuid u) { this->uuid=u; }
 	QUuid getUuid() const { return this->uuid; }
 
@@ -59,11 +65,19 @@ public:
 	void setPlaybackSpeed(float s) { this->fPlaybackSpeed = s; }
 	float playbackSpeed() { return this->fPlaybackSpeed; }
 
+	virtual void setVolume(float v) { this->fVolume=v; }
+	virtual float volume() { return this->fVolume; }
+	virtual void setPan(int v) { this->iPan=v; }
+	virtual int pan() { return this->iPan; }
+
 private:
 	int iTempo = 120;
 	int iBeatsPerMeasure = 4;
 	int iBeatUnit = 4;
 	float fPlaybackSpeed = 1.0f;
+
+	float fVolume;
+	int iPan;
 };
 
 class ClipGroupItem : public BaseMusicItem
@@ -83,6 +97,15 @@ public:
 		cgi->setUuid(this->getUuid());
 		return cgi;
     }
+
+	virtual void setVolume(float v) { this->fVolume=v; }
+	virtual float volume() { return this->fVolume; }
+	virtual void setPan(int v) { this->iPan=v; }
+	virtual int pan() { return this->iPan; }
+
+private:
+	float fVolume;
+	int iPan;
 };
 
 class ClipItem : public BaseMusicItem
@@ -100,10 +123,11 @@ public:
 
 	void setClip(QString s) { this->sClipFile=s; }
 	QString clip() { return this->sClipFile; }
-	void setClipVolume(float v) { this->fVolume=v; }
-	float clipVolume() { return this->fVolume; }
-	void setClipPan(int v) { this->iPan=v; }
-	int clipPan() { return this->iPan; }
+
+	virtual void setVolume(float v) { this->fVolume=v; }
+	virtual float volume() { return this->fVolume; }
+	virtual void setPan(int v) { this->iPan=v; }
+	virtual int pan() { return this->iPan; }
 
 private:
 	QString sClipFile;

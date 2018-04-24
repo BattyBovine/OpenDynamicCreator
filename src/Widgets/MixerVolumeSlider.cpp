@@ -1,13 +1,13 @@
-#include "Widgets/ClipMixerVolumeSlider.h"
+#include "Widgets/MixerVolumeSlider.h"
 
-ClipMixerVolumeSlider::ClipMixerVolumeSlider(QWidget *parent) : QSlider(parent)
+MixerVolumeSlider::MixerVolumeSlider(QWidget *parent) : QSlider(parent)
 {
 	connect(this, SIGNAL(valueChanged(int)), this, SLOT(showTip(int)));
 }
 
 
 
-void ClipMixerVolumeSlider::showTip(int value)
+void MixerVolumeSlider::showTip(int value)
 {
 	QMargins margins = this->parentWidget()->layout()->contentsMargins();
 	QRect geometry = this->geometry();
