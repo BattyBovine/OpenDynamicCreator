@@ -1,7 +1,7 @@
 #include "Widgets/ClipMixerWidget.h"
 #include "ui_ClipMixerWidget.h"
 
-ClipMixerWidget::ClipMixerWidget(ClipItem *ci, bool groupmode, QWidget *parent) :
+ClipMixerWidget::ClipMixerWidget(QWidget *parent, ClipItem *ci, bool groupmode) :
 	QWidget(parent),
 	ui(new Ui::ClipMixerWidget)
 {

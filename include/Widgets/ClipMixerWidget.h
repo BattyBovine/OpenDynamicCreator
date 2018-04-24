@@ -14,7 +14,7 @@ class ClipMixerWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit ClipMixerWidget(ClipItem *ci=NULL, bool groupmode=false, QWidget *parent = 0);
+	explicit ClipMixerWidget(QWidget *parent = 0, ClipItem *ci=NULL, bool groupmode=false);
 	~ClipMixerWidget();
 
 	int volumedB();

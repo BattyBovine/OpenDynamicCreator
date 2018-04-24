@@ -15,11 +15,11 @@ ClipGroupEditorWidget::~ClipGroupEditorWidget()
 
 
 
-void ClipGroupEditorWidget::addClipGroupEditor(TrackItem *track, ClipItem *clip)
+void ClipGroupEditorWidget::addClipGroupEditor(ClipItem *clip, int beatspermeasure)
 {
 	if(clip) {
 		int row = ui->layoutClips->rowCount();
-		ui->layoutClips->addWidget(new ClipMixerWidget(clip, true), row, 0);
-		ui->layoutClips->addWidget(new TimelineWidget(track, clip), row, 1);
+		ui->layoutClips->addWidget(new ClipMixerWidget(this, clip, true), row, 0);
+		ui->layoutClips->addWidget(new TimelineWidget(this, clip, beatspermeasure), row, 1);
 	}
 }
