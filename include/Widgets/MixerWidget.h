@@ -32,8 +32,8 @@ private slots:
 	void panChanged(int);
 
 private:
-	inline float dBToVolume(int d) { return powf(10.0f, 0.05f * d) * 100; }
-	inline int volumeTodB(float v) { return roundf(20.0f * log10f(v/100.0f)); }
+	inline float dBToVolume(int d) { return powf(10.0f, 0.05f * d); }
+	inline int volumeTodB(float v) { return roundf(20.0f * log10f(v)); }
 
 	Ui::MixerWidget *ui;
 	BaseMusicItem *bmiMusicItem = NULL;

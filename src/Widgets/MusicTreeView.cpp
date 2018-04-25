@@ -157,11 +157,13 @@ TrackItem::TrackItem(QString t) : BaseMusicItem(t)
 	this->setIcon(QIcon(":/icons/note"));
 }
 
-ClipItem::ClipItem(QString t, QString f, float v, int p) : BaseMusicItem(t)
+ClipGroupItem::ClipGroupItem(QString t) : BaseMusicItem(t)
 {
-	this->setText(t);
-	this->setClip(f);
-	this->setVolume(v);
-	this->setPan(p);
+	this->setIcon(QIcon(":/icons/mixer"));
+}
+
+ClipItem::ClipItem(QString t, QString f) : BaseMusicItem(t)
+{
 	this->setIcon(QIcon(":/icons/waveform"));
+	this->setClip(f);
 }

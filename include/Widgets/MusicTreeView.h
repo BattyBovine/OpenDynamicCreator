@@ -14,6 +14,23 @@
 
 #define MIT_MIME "Qt/MusicItemType"
 
+
+class MusicEvent
+{
+public:
+	MusicEvent(float t=0.0f) { this->setTime(t); }
+
+	void setTime(float t) { this->fTime=t; }
+
+	float time() const { return this->fTime; }
+
+	void operator=(float t) { this->setTime(t); }
+
+private:
+	float fTime;
+};
+
+
 enum MusicItemType
 {
     MIT_TRACK = Qt::UserRole+1000,
@@ -21,40 +38,60 @@ enum MusicItemType
 	MIT_CLIPGROUP
 };
 
+typedef QVector<MusicEvent> MusicEventList;
+
 class BaseMusicItem : public QStandardItem
 {
 public:
 	BaseMusicItem(QString t) {
-        this->setText(t);
 		this->uuid = QUuid::createUuid();
-    }
+		this->setText(t);
+		this->setVolume(1.0f);
+		this->setPan(0);
+	}
 
-	virtual void setVolume(float v) = 0;
-	virtual float volume() = 0;
-	virtual void setPan(int v) = 0;
-	virtual int pan() = 0;
+	void cloneBase(BaseMusicItem *bmi) const {
+		for(int i=0; i<this->rowCount(); i++)
+			bmi->appendRow(this->child(i)->clone());
+		bmi->uuid = this->uuid;
+		bmi->setEvents(this->events());
+		bmi->setVolume(this->volume());
+		bmi->setPan(this->pan());
+	}
 
-	void setUuid(QUuid u) { this->uuid=u; }
-	QUuid getUuid() const { return this->uuid; }
+	virtual void setVolume(float v) { this->fVolume=v; }
+	virtual void setPan(int p) { this->iPan=p; }
+	virtual void addEvent(MusicEvent e) { this->vEvents << e; }
+	virtual void insertEvent(int i, MusicEvent e) { this->vEvents.insert(i,e); }
+	virtual void setEvents(MusicEventList el) { this->vEvents = el; }
+
+	virtual float volume() const { return this->fVolume; }
+	virtual int pan() const { return this->iPan; }
+	virtual MusicEvent event(int i) const { return this->vEvents[i]; }
+	virtual MusicEventList events() const { return this->vEvents; }
+
+	virtual int measureLength() = NULL;
 
 private:
-    QUuid uuid;
+	QUuid uuid;
+
+protected:
+	float fVolume;
+	int iPan;
+	MusicEventList vEvents;
 };
 
 class TrackItem : public BaseMusicItem
 {
 public:
 	TrackItem(QString);
-
-    virtual int type() const { return MusicItemType::MIT_TRACK; }
-    virtual QStandardItem *clone() const
-    {
-		TrackItem *mi = new TrackItem(this->text());
-        for(int i=0; i<this->rowCount(); i++)
-            mi->appendRow(this->child(i)->clone());
-		mi->setUuid(this->getUuid());
-        return mi;
-    }
+	virtual int type() const { return MusicItemType::MIT_TRACK; }
+	virtual QStandardItem *clone() const
+	{
+		TrackItem *ti = new TrackItem(this->text());
+		this->cloneBase(ti);
+		return ti;
+	}
 
 	void setTempo(int t) { this->iTempo = t; }
 	int tempo() { return this->iTempo; }
@@ -65,74 +102,49 @@ public:
 	void setPlaybackSpeed(float s) { this->fPlaybackSpeed = s; }
 	float playbackSpeed() { return this->fPlaybackSpeed; }
 
-	virtual void setVolume(float v) { this->fVolume=v; }
-	virtual float volume() { return this->fVolume; }
-	virtual void setPan(int v) { this->iPan=v; }
-	virtual int pan() { return this->iPan; }
+	virtual int measureLength() { return 0; }
 
 private:
 	int iTempo = 120;
 	int iBeatsPerMeasure = 4;
 	int iBeatUnit = 4;
 	float fPlaybackSpeed = 1.0f;
-
-	float fVolume;
-	int iPan;
 };
 
 class ClipGroupItem : public BaseMusicItem
 {
 public:
-    ClipGroupItem(QString t) : BaseMusicItem(t)
-    {
-		this->setIcon(QIcon(":/icons/mixer"));
-    }
-
+	ClipGroupItem(QString t);
 	virtual int type() const { return MusicItemType::MIT_CLIPGROUP; }
-    virtual QStandardItem *clone() const
-    {
+	virtual QStandardItem *clone() const
+	{
 		ClipGroupItem *cgi = new ClipGroupItem(this->text());
-        for(int i=0; i<this->rowCount(); i++)
-			cgi->appendRow(this->child(i)->clone());
-		cgi->setUuid(this->getUuid());
+		this->cloneBase(cgi);
 		return cgi;
-    }
+	}
 
-	virtual void setVolume(float v) { this->fVolume=v; }
-	virtual float volume() { return this->fVolume; }
-	virtual void setPan(int v) { this->iPan=v; }
-	virtual int pan() { return this->iPan; }
-
-private:
-	float fVolume;
-	int iPan;
+	virtual int measureLength() { return 0; }
 };
 
 class ClipItem : public BaseMusicItem
 {
 public:
-	ClipItem(QString, QString f="", float v=100.0f, int p=0);
-
+	ClipItem(QString, QString f="");
 	virtual int type() const { return MusicItemType::MIT_CLIP; }
 	virtual QStandardItem *clone() const
 	{
 		ClipItem *ci = new ClipItem(this->text(), this->sClipFile);
-		ci->setUuid(this->getUuid());
+		this->cloneBase(ci);
 		return ci;
 	}
 
 	void setClip(QString s) { this->sClipFile=s; }
 	QString clip() { return this->sClipFile; }
 
-	virtual void setVolume(float v) { this->fVolume=v; }
-	virtual float volume() { return this->fVolume; }
-	virtual void setPan(int v) { this->iPan=v; }
-	virtual int pan() { return this->iPan; }
+	virtual int measureLength() { return 0; }
 
 private:
 	QString sClipFile;
-	float fVolume;
-	int iPan;
 };
 
 
