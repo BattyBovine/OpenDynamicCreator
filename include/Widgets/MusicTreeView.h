@@ -44,7 +44,7 @@ class BaseMusicItem : public QStandardItem
 {
 public:
 	BaseMusicItem(QString t) {
-		this->uuid = QUuid::createUuid();
+		this->setUuid(QUuid::createUuid());
 		this->setText(t);
 		this->setVolume(1.0f);
 		this->setPan(0);
@@ -53,7 +53,7 @@ public:
 	void cloneBase(BaseMusicItem *bmi) const {
 		for(int i=0; i<this->rowCount(); i++)
 			bmi->appendRow(this->child(i)->clone());
-		bmi->uuid = this->uuid;
+		bmi->setUuid(this->uuid());
 		bmi->setEvents(this->events());
 		bmi->setVolume(this->volume());
 		bmi->setPan(this->pan());
@@ -65,6 +65,8 @@ public:
 	virtual void insertEvent(int i, MusicEvent e) { this->vEvents.insert(i,e); }
 	virtual void setEvents(MusicEventList el) { this->vEvents = el; }
 
+	virtual QUuid uuid() const { return this->qUuid; }
+	virtual QString uuidString() const { return this->qUuid.toString(); }
 	virtual float volume() const { return this->fVolume; }
 	virtual int pan() const { return this->iPan; }
 	virtual MusicEvent event(int i) const { return this->vEvents[i]; }
@@ -72,13 +74,14 @@ public:
 
 	virtual int measureLength() = NULL;
 
-private:
-	QUuid uuid;
-
 protected:
 	float fVolume;
 	int iPan;
 	MusicEventList vEvents;
+
+private:
+	void setUuid(QUuid u) { this->qUuid=u; }
+	QUuid qUuid;
 };
 
 class TrackItem : public BaseMusicItem
