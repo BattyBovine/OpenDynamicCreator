@@ -15,19 +15,49 @@
 #define MIT_MIME "Qt/MusicItemType"
 
 
+class Beat
+{
+public:
+	Beat(int beat=0, float tempo=120.0f, quint8 beatunit=4)
+	{
+		this->iBeat=beat;
+		this->fTempo=tempo;
+		this->iBeatUnit=beatunit;
+	}
+
+	void setBeat(int b) { this->iBeat=b; }
+	void setTempo(float t) { this->fTempo=t; }
+	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
+
+	int beat() { return this->iBeat; }
+	float tempo() { return this->fTempo; }
+	quint8 beatUnit() { return this->iBeatUnit; }
+	static Beat fromSeconds(float secs, float tempo, quint8 beatunit) { return Beat(roundf((secs*(60.0f*beatunit))/tempo), tempo, beatunit); }
+	float toSeconds() const { return (this->fTempo/60.0f) * (this->iBeat/float(this->iBeatUnit)); }
+
+	bool operator==(Beat &b) { return (this->beat()==b.beat() && this->unitMatch(b)); }
+	Beat operator+(Beat &b)  { if(!this->unitMatch(b)) return Beat(); return Beat(this->beat()+b.beat(), this->tempo(), this->beatUnit()); }
+	void operator+=(Beat &b) { if(this->unitMatch(b)) this->setBeat(this->beat()+b.beat()); }
+	Beat operator-(Beat &b)  { if(!this->unitMatch(b)) return Beat(); return Beat(this->beat()-b.beat(), this->tempo(), this->beatUnit()); }
+	void operator-=(Beat &b) { if(this->unitMatch(b)) this->setBeat(this->beat()+b.beat()); }
+
+private:
+	bool unitMatch(Beat &b) { return (this->tempo()==b.tempo() && this->beatUnit()==b.beatUnit()); }
+	float fTempo;
+	int iBeat;
+	quint8 iBeatUnit;
+};
+
 class MusicEvent
 {
 public:
-	MusicEvent(float t=0.0f) { this->setTime(t); }
+	MusicEvent(Beat b=Beat()) { this->setBeat(b); }
 
-	void setTime(float t) { this->fTime=t; }
-
-	float time() const { return this->fTime; }
-
-	void operator=(float t) { this->setTime(t); }
+	void setBeat(Beat b) { this->oBeat=b; }
+	Beat beat() const { return this->oBeat; }
 
 private:
-	float fTime;
+	Beat oBeat;
 };
 
 
@@ -43,27 +73,28 @@ typedef QVector<MusicEvent> MusicEventList;
 class BaseMusicItem : public QStandardItem
 {
 public:
-	BaseMusicItem(QString t) {
+	BaseMusicItem(QString t, float volume=1.0f, int pan=0)
+	{
 		this->setUuid(QUuid::createUuid());
 		this->setText(t);
-		this->setVolume(1.0f);
-		this->setPan(0);
+		this->setVolume(volume);
+		this->setPan(pan);
 	}
 
-	void cloneBase(BaseMusicItem *bmi) const {
+	void cloneBase(BaseMusicItem *bmi) const
+	{
 		for(int i=0; i<this->rowCount(); i++)
 			bmi->appendRow(this->child(i)->clone());
 		bmi->setUuid(this->uuid());
-		bmi->setEvents(this->events());
 		bmi->setVolume(this->volume());
 		bmi->setPan(this->pan());
+		bmi->setEvents(this->events());
 	}
 
 	virtual void setVolume(float v) { this->fVolume=v; }
 	virtual void setPan(int p) { this->iPan=p; }
 	virtual void addEvent(MusicEvent e) { this->vEvents << e; }
 	virtual void insertEvent(int i, MusicEvent e) { this->vEvents.insert(i,e); }
-	virtual void setEvents(MusicEventList el) { this->vEvents = el; }
 
 	virtual QUuid uuid() const { return this->qUuid; }
 	virtual QString uuidString() const { return this->qUuid.toString(); }
@@ -80,7 +111,8 @@ protected:
 	MusicEventList vEvents;
 
 private:
-	void setUuid(QUuid u) { this->qUuid=u; }
+	virtual void setUuid(QUuid u) { this->qUuid=u; }
+	virtual void setEvents(MusicEventList el) { this->vEvents = el; }
 	QUuid qUuid;
 };
 
@@ -93,25 +125,30 @@ public:
 	{
 		TrackItem *ti = new TrackItem(this->text());
 		this->cloneBase(ti);
+		ti->setTempo(this->tempo());
+		ti->setBeatsPerMeasure(this->beatsPerMeasure());
+		ti->setBeatUnit(this->beatUnit());
+		ti->setPlaybackSpeed(this->playbackSpeed());
 		return ti;
 	}
 
-	void setTempo(int t) { this->iTempo = t; }
-	int tempo() { return this->iTempo; }
-	void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure = b; }
-	int beatsPerMeasure() { return this->iBeatsPerMeasure; }
-	void setBeatUnit(int b) { this->iBeatUnit = b; }
-	int beatUnit() { return this->iBeatUnit; }
-	void setPlaybackSpeed(float s) { this->fPlaybackSpeed = s; }
-	float playbackSpeed() { return this->fPlaybackSpeed; }
+	virtual void setTempo(float t) { this->fTempo=t; }
+	virtual void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure = b; }
+	virtual void setBeatUnit(int b) { this->iBeatUnit = b; }
+	virtual void setPlaybackSpeed(float s) { this->fPlaybackSpeed = s; }
+
+	virtual float tempo() const { return this->fTempo; }
+	virtual int beatsPerMeasure() const { return this->iBeatsPerMeasure; }
+	virtual int beatUnit() const { return this->iBeatUnit; }
+	virtual float playbackSpeed() const { return this->fPlaybackSpeed; }
 
 	virtual int measureLength() { return 0; }
 
 private:
-	int iTempo = 120;
-	int iBeatsPerMeasure = 4;
-	int iBeatUnit = 4;
-	float fPlaybackSpeed = 1.0f;
+	float fTempo;
+	int iBeatsPerMeasure;
+	int iBeatUnit;
+	float fPlaybackSpeed;
 };
 
 class ClipGroupItem : public BaseMusicItem

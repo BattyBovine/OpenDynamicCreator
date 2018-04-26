@@ -69,55 +69,13 @@
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
    </widget>
-   <widget class="QMenu" name="menuStates">
-    <property name="title">
-     <string>States</string>
-    </property>
-    <addaction name="actionAddState"/>
-    <addaction name="actionAddStateSwitch"/>
-   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTracks"/>
-   <addaction name="menuStates"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusMain"/>
-  <widget class="QDockWidget" name="dockStates">
-   <property name="allowedAreas">
-    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
-   </property>
-   <property name="windowTitle">
-    <string>States</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>2</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <widget class="StatesTreeView" name="treeStates">
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="acceptDrops">
-        <bool>true</bool>
-       </property>
-       <property name="dragEnabled">
-        <bool>true</bool>
-       </property>
-       <property name="dragDropMode">
-        <enum>QAbstractItemView::InternalMove</enum>
-       </property>
-       <property name="headerHidden">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
   <widget class="QDockWidget" name="dockMusic">
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
@@ -353,11 +311,6 @@
    <extends>QTreeView</extends>
    <header>Widgets/MusicTreeView.h</header>
   </customwidget>
-  <customwidget>
-   <class>StatesTreeView</class>
-   <extends>QTreeView</extends>
-   <header>Widgets/StatesTreeView.h</header>
-  </customwidget>
  </customwidgets>
  <resources>
   <include location="icons.qrc"/>
@@ -439,22 +392,6 @@
     </hint>
     <hint type="destinationlabel">
      <x>136</x>
-     <y>268</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionStatesWindow</sender>
-   <signal>triggered()</signal>
-   <receiver>dockStates</receiver>
-   <slot>showNormal()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1054</x>
      <y>268</y>
     </hint>
    </hints>

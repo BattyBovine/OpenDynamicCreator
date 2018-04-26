@@ -9,7 +9,7 @@ MusicPropertiesWidget::MusicPropertiesWidget(TrackItem *track, QWidget *parent) 
 
 	this->attachTrackItem(track);
 
-	connect(ui->spinTempo, SIGNAL(valueChanged(int)), this, SLOT(tempoChanged(int)));
+	connect(ui->dspinTempo, SIGNAL(valueChanged(double)), this, SLOT(tempoChanged(double)));
 	connect(ui->spinBeatsPerMeasure, SIGNAL(valueChanged(int)), this, SLOT(beatsPerMeasureChanged(int)));
 	connect(ui->spinBeatUnit, SIGNAL(valueChanged(int)), this, SLOT(beatUnitChanged(int)));
 	connect(ui->dspinPlaybackSpeed, SIGNAL(valueChanged(double)), this, SLOT(playbackSpeedChanged(double)));
@@ -33,18 +33,18 @@ void MusicPropertiesWidget::attachTrackItem(TrackItem *t)
 
 
 
-void MusicPropertiesWidget::tempoChanged(int t)
+void MusicPropertiesWidget::tempoChanged(double t)
 {
 	if(this->tiTrack)
 		this->tiTrack->setTempo(t);
 }
 void MusicPropertiesWidget::setTempo(int t)
 {
-	ui->spinTempo->setValue(t);
+	ui->dspinTempo->setValue(t);
 }
 int MusicPropertiesWidget::tempo()
 {
-	return ui->spinTempo->value();
+	return ui->dspinTempo->value();
 }
 
 void MusicPropertiesWidget::beatsPerMeasureChanged(int b)

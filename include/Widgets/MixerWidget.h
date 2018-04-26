@@ -14,7 +14,7 @@ class MixerWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit MixerWidget(QWidget *parent = 0, BaseMusicItem *musicitem=NULL, bool groupmode=false);
+	explicit MixerWidget(BaseMusicItem *musicitem, bool groupmode=false, QWidget *parent=0);
 	~MixerWidget();
 
 	int volumedB();
@@ -23,13 +23,18 @@ public:
 
 public slots:
 	void attachMusicItem(BaseMusicItem*);
+	void setGroupMode(bool);
 	void setVolumedB(int);
 	void setVolumePercent(float);
 	void setPan(int);
 
 private slots:
+	void snapComboChanged(int i) { emit(snapChanged(i)); }
 	void volumedBChanged(int);
 	void panChanged(int);
+
+signals:
+	void snapChanged(int);
 
 private:
 	inline float dBToVolume(int d) { return powf(10.0f, 0.05f * d); }

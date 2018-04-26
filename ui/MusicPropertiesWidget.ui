@@ -129,18 +129,18 @@
        </widget>
       </item>
       <item row="0" column="1" colspan="3">
-       <widget class="QSpinBox" name="spinTempo">
+       <widget class="QDoubleSpinBox" name="dspinTempo">
         <property name="suffix">
          <string> bpm</string>
         </property>
         <property name="minimum">
-         <number>1</number>
+         <double>1.000000000000000</double>
         </property>
         <property name="maximum">
-         <number>300</number>
+         <double>300.000000000000000</double>
         </property>
         <property name="value">
-         <number>120</number>
+         <double>120.000000000000000</double>
         </property>
        </widget>
       </item>

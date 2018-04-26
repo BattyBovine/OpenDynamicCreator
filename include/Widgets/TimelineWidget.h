@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 #include <QMouseEvent>
+#include <QWheelEvent>
 
 #include "Widgets/MusicTreeView.h"
 
@@ -15,41 +16,59 @@ class TimelineWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TimelineWidget(QWidget *parent=0, BaseMusicItem *musicitem=NULL, int beatsPerMeasure=4);
+	explicit TimelineWidget(BaseMusicItem*, float, int, int, bool, QWidget *parent=0);
 
 	BaseMusicItem *musicItem() { return this->bmiMusicItem; }
+	float tempo() { return this->fTempo; }
 	int beatsPerMeasure() { return this->iBeatsPerMeasure; }
+	int beatUnit() { return this->iBeatUnit; }
 	float measureSpacing() { return this->fMeasureSpacing; }
 	float beatSpacing() { return this->fBeatSpacing; }
 
-	virtual void mousePressEvent(QMouseEvent*);
-	virtual void mouseMoveEvent(QMouseEvent*);
-	virtual void mouseReleaseEvent(QMouseEvent*);
-
 public slots:
 	void setMusicItem(BaseMusicItem *i) { this->bmiMusicItem=i; }
+	void setTempo(float t) { this->fTempo=t; }
 	void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure=b; }
+	void setBeatUnit(int b) { this->iBeatUnit=b; }
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; this->fBeatSpacing=(m/this->iBeatsPerMeasure); }
 	void setBeatSpacing(float b) { this->fBeatSpacing=b; this->fMeasureSpacing=(b*this->iBeatsPerMeasure); }
 
+	void setReadOnly(bool r) { this->bReadOnly=r; }
+	void setBeatUnitSnap(int s) { this->iBeatUnitSnap=s; }
+	void setBeatUnitSnapFromCombo(int s) { this->iBeatUnitSnap=powf(2,s); }
+
 protected:
-	void paintEvent(QPaintEvent*);
+	virtual void mousePressEvent(QMouseEvent*);
+	virtual void mouseMoveEvent(QMouseEvent*);
+	virtual void mouseReleaseEvent(QMouseEvent*);
+	virtual void wheelEvent(QWheelEvent*);
+	virtual void paintEvent(QPaintEvent*);
 
 private:
-	void drawPlayMarker(QPainter&, float);
+	void setTopSpacing(float t) { this->fTopSpacing=t; }
+
+	void drawPlayMarker(QPainter&);
+	void drawEventMarkers(QPainter&);
 	void drawMeasureMarkers(QPainter&, int);
 
-	inline int getNearestBeat(float);
+	float posToSeconds(int pos) { return ((pos/this->fMeasureSpacing)*this->iBeatUnit) / (this->fTempo/60.0f); }
+	Beat posToBeat(int pos) { return Beat::fromSeconds(this->posToSeconds(pos), this->fTempo, this->iBeatUnitSnap); }
+	int secondsToPos(float secs) { return roundf(this->fMeasureSpacing*((secs*(this->fTempo/60.0))/this->iBeatUnit)); }
 
 	BaseMusicItem *bmiMusicItem = NULL;
 
-	int iBeatsPerMeasure = 4;
-	float fTopSpacing = 5.0f;
-	float fMeasureSpacing = 40.0f;
-	float fBeatSpacing = 10.0f;
+	float fTempo;
+	int iBeatsPerMeasure;
+	int iBeatUnit;
+	float fTopSpacing = 0.0f;
+	float fMeasureSpacing = 0.0f;
+	float fBeatSpacing = 0.0f;
 
-	int iCursorPosition = 0;
-	bool bSnapToNote = true;
+	Beat oPlayMarker;
+	Beat oMouseClickPos, oMouseMovePos;
+	quint8 iBeatUnitSnap = 4;
+	bool bReadOnly = false;
+	bool bMoveMode = false;
 };
 
 #endif // TIMELINEWIDGET_H

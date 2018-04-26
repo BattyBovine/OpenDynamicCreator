@@ -1,15 +1,16 @@
 #include "Widgets/MixerWidget.h"
 #include "ui_MixerWidget.h"
 
-MixerWidget::MixerWidget(QWidget *parent, BaseMusicItem *musicitem, bool groupmode) :
+MixerWidget::MixerWidget(BaseMusicItem *musicitem, bool groupmode, QWidget *parent) :
 	QWidget(parent),
 	ui(new Ui::MixerWidget)
 {
 	ui->setupUi(this);
 
 	this->attachMusicItem(musicitem);
-	ui->labelClipName->setVisible(groupmode);
+	this->setGroupMode(groupmode);
 
+	connect(ui->comboNoteSnap, SIGNAL(currentIndexChanged(int)), this, SLOT(snapComboChanged(int)));
 	connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(volumedBChanged(int)));
 	connect(ui->sliderPan, SIGNAL(valueChanged(int)), this, SLOT(panChanged(int)));
 }
@@ -28,6 +29,13 @@ void MixerWidget::attachMusicItem(BaseMusicItem *i)
 	this->setPan(i->pan());
 	ui->labelClipName->setText(this->bmiMusicItem->text());
 	ui->labelClipName->setToolTip(this->bmiMusicItem->text());
+}
+
+void MixerWidget::setGroupMode(bool g)
+{
+	ui->labelClipName->setVisible(g);
+	ui->btnMute->setVisible(g);
+	ui->btnSolo->setVisible(g);
 }
 
 void MixerWidget::volumedBChanged(int d)

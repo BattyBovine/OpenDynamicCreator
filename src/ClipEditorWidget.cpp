@@ -15,10 +15,13 @@ ClipEditorWidget::~ClipEditorWidget()
 
 
 
-void ClipEditorWidget::setClipEditor(ClipItem *clip, int beatspermeasure)
+void ClipEditorWidget::setClipEditor(BaseMusicItem *musicitem, float tempo, int beatspermeasure, int beatunit)
 {
-	if(clip) {
-		ui->layoutClipEditor->addWidget(new MixerWidget(this, clip), 0, 0);
-		ui->layoutClipEditor->addWidget(new TimelineWidget(this, clip, beatspermeasure), 0, 1);
+	if(musicitem) {
+		MixerWidget *mw = new MixerWidget(musicitem, false, this);
+		TimelineWidget *tw = new TimelineWidget(musicitem, tempo, beatspermeasure, beatunit, this);
+		connect(mw, SIGNAL(snapChanged(int)), tw, SLOT(setBeatUnitSnapFromCombo(int)));
+		ui->layoutClipEditor->addWidget(mw, 0, 0);
+		ui->layoutClipEditor->addWidget(tw, 0, 1);
 	}
 }

@@ -155,6 +155,10 @@ QStandardItem *MusicTreeViewModel::parseMusicItemMimeData(QStandardItem *item)
 TrackItem::TrackItem(QString t) : BaseMusicItem(t)
 {
 	this->setIcon(QIcon(":/icons/note"));
+	this->setTempo(120.0f);
+	this->setBeatsPerMeasure(4);
+	this->setBeatUnit(4);
+	this->setPlaybackSpeed(1.0f);
 }
 
 ClipGroupItem::ClipGroupItem(QString t) : BaseMusicItem(t)

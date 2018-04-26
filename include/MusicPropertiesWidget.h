@@ -25,7 +25,7 @@ public:
 	double playbackSpeed();
 
 public slots:
-	void tempoChanged(int t);
+	void tempoChanged(double t);
 	void setTempo(int t);
 	void beatsPerMeasureChanged(int b);
 	void setBeatsPerMeasure(int b);

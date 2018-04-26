@@ -12,9 +12,9 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 	ui->treeMusic->setModel(this->modelMusic);
 	this->selMusic = ui->treeMusic->selectionModel();
 	// Set up state tree
-	this->modelStates = new StatesTreeViewModel();
-	ui->treeStates->setModel(this->modelStates);
-	this->selStates = ui->treeStates->selectionModel();
+//	this->modelStates = new StatesTreeViewModel();
+//	ui->treeStates->setModel(this->modelStates);
+//	this->selStates = ui->treeStates->selectionModel();
 
 	// Menu for right-clicking an empty area of the music tree or a music item
 	this->menuMusicBlankContext = new QMenu(ui->treeMusic);
@@ -131,10 +131,10 @@ QStandardItem *OpenDynamicCreator::checkSelectedMusicTreeItem()
 
 void OpenDynamicCreator::addStateSwitch()
 {
-	StateSwitchItem *ss = new StateSwitchItem(QString("%1 %2").arg(ODC_STATE_SWITCH_LABEL).arg(this->modelStates->rowCount()+1));
-	this->modelStates->invisibleRootItem()->appendRow(ss);
-	this->selStates->select(this->modelStates->indexFromItem(ss), QItemSelectionModel::ClearAndSelect);
-	ui->treeStates->setExpanded(this->modelStates->indexFromItem(ss), true);
+//	StateSwitchItem *ss = new StateSwitchItem(QString("%1 %2").arg(ODC_STATE_SWITCH_LABEL).arg(this->modelStates->rowCount()+1));
+//	this->modelStates->invisibleRootItem()->appendRow(ss);
+//	this->selStates->select(this->modelStates->indexFromItem(ss), QItemSelectionModel::ClearAndSelect);
+//	ui->treeStates->setExpanded(this->modelStates->indexFromItem(ss), true);
 }
 
 void OpenDynamicCreator::addState()
@@ -154,9 +154,9 @@ void OpenDynamicCreator::addState()
 
 void OpenDynamicCreator::deleteStateItem()
 {
-	QStandardItem *selection = this->checkSelectedStateTreeItem();
-	if(!selection)	return;
-	ui->treeStates->deleteSelectedItems();
+//	QStandardItem *selection = this->checkSelectedStateTreeItem();
+//	if(!selection)	return;
+//	ui->treeStates->deleteSelectedItems();
 }
 
 QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
@@ -249,7 +249,7 @@ void OpenDynamicCreator::loadClipGroupEditorWidget(QModelIndex i)
 	ClipGroupEditorWidget *cgew = new ClipGroupEditorWidget();
 	int rowcount = clip->rowCount();
 	for(int row=0; row<rowcount; row++)
-		cgew->addClipGroupEditor(static_cast<ClipItem*>(clip->child(row)), track->beatsPerMeasure());
+		cgew->addClipGroupEditor(static_cast<ClipItem*>(clip->child(row)), track->tempo(), track->beatsPerMeasure(), track->beatUnit());
 	this->setCentralWidget(cgew);
 }
 
@@ -260,7 +260,7 @@ void OpenDynamicCreator::loadClipEditorWidget(QModelIndex i)
 	ClipItem *clip = static_cast<ClipItem*>(this->modelMusic->itemFromIndex(i));
 	if(!clip)	return;
 	ClipEditorWidget *cew = new ClipEditorWidget();
-	cew->setClipEditor(clip, track->beatsPerMeasure());
+	cew->setClipEditor(clip, track->tempo(), track->beatsPerMeasure(), track->beatUnit());
 	this->setCentralWidget(cew);
 }
 
