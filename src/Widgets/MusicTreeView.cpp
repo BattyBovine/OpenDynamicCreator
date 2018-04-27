@@ -11,21 +11,22 @@ void MusicTreeView::keyPressEvent(QKeyEvent *e)
 
 void MusicTreeView::deleteSelectedItems()
 {
+	if(QMessageBox::warning(this, "Delete selected?", "Are you sure you want to delete the selected items?",
+							QMessageBox::Yes|QMessageBox::No, QMessageBox::No)!=QMessageBox::Yes)
+		return;
 	QModelIndexList selectedindices = this->selectedIndexes();
 	if(selectedindices.size()>0) {
 		QStandardItemModel *model = qobject_cast<QStandardItemModel*>(this->model());
-		if(model) {
-			QStandardItem *selection = model->itemFromIndex(selectedindices[0]);
-            if(selection) {
-                if(QMessageBox::warning(this,"","Are you sure you want to delete this?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No)==QMessageBox::Yes) {
-                    if(selection->type()==MusicItemType::MIT_TRACK)
-						model->removeRow(selectedindices[0].row());
-					else
-                        selection->parent()->removeRow(selectedindices[0].row());
-				}
-			}
+		foreach(QModelIndex i, selectedindices) {
+			model->removeRow(i.row(), i.parent());
 		}
 	}
+}
+
+void MusicTreeView::playMusic()
+{
+	QModelIndexList selectedindices = this->selectedIndexes();
+	return;
 }
 
 
@@ -161,13 +162,35 @@ TrackItem::TrackItem(QString t) : BaseMusicItem(t)
 	this->setPlaybackSpeed(1.0f);
 }
 
+
+
 ClipGroupItem::ClipGroupItem(QString t) : BaseMusicItem(t)
 {
 	this->setIcon(QIcon(":/icons/mixer"));
 }
 
+
+
 ClipItem::ClipItem(QString t, QString f) : BaseMusicItem(t)
 {
 	this->setIcon(QIcon(":/icons/waveform"));
 	this->setClip(f);
+}
+
+void ClipItem::setClip(QString c)
+{
+	if(c.isEmpty())
+		return;
+	if(this->mpClip) delete this->mpClip;
+	this->mpClip = new QMediaPlayer();
+	this->mpClip->setMedia(QUrl(c));
+}
+
+int ClipItem::measureCount()
+{
+	if(!this->mpClip) return 0;
+	TrackItem *track = (TrackItem*)this->parent();
+	while(track->type()!=MIT_TRACK)
+		track = (TrackItem*)track->parent();
+	return Beat::fromSeconds(this->mpClip->duration()/1000.0f, track->tempo(), track->beatUnit(), track->beatsPerMeasure()).measureCount();
 }

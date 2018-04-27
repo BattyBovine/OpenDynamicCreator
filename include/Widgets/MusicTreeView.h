@@ -15,25 +15,38 @@
 #define MIT_MIME "Qt/MusicItemType"
 
 
+enum MusicItemType
+{
+	MIT_TRACK = Qt::UserRole+1000,
+	MIT_CLIP,
+	MIT_CLIPGROUP
+};
+
+
 class Beat
 {
 public:
-	Beat(int beat=0, float tempo=120.0f, quint8 beatunit=4)
+	Beat(int beat=0, float tempo=120.0f, quint8 beatunit=4, quint8 beatspermeasure=4)
 	{
 		this->iBeat=beat;
 		this->fTempo=tempo;
 		this->iBeatUnit=beatunit;
+		this->iBeatsPerMeasure=beatspermeasure;
 	}
 
 	void setBeat(int b) { this->iBeat=b; }
 	void setTempo(float t) { this->fTempo=t; }
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
+	void setBeatsPerMeasure(quint8 m) { this->iBeatsPerMeasure=m; }
 
 	int beat() { return this->iBeat; }
 	float tempo() { return this->fTempo; }
 	quint8 beatUnit() { return this->iBeatUnit; }
-	static Beat fromSeconds(float secs, float tempo, quint8 beatunit) { return Beat(roundf((secs*(60.0f*beatunit))/tempo), tempo, beatunit); }
-	float toSeconds() const { return (this->fTempo/60.0f) * (this->iBeat/float(this->iBeatUnit)); }
+	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
+
+	static Beat fromSeconds(float secs, float tempo=120.0f, quint8 beatunit=4, quint8 beatspermeasure=4) { return Beat(roundf(((secs*tempo)/60)*((float(beatunit)/beatspermeasure))), tempo, beatunit, beatspermeasure); }
+	float toSeconds() const { return ((60*this->iBeat*(float(this->iBeatsPerMeasure)/this->iBeatUnit))/this->fTempo); }
+	int measureCount() const { return ceilf(this->iBeat/float(this->iBeatsPerMeasure)); }
 
 	bool operator==(Beat &b) { return (this->beat()==b.beat() && this->unitMatch(b)); }
 	Beat operator+(Beat &b)  { if(!this->unitMatch(b)) return Beat(); return Beat(this->beat()+b.beat(), this->tempo(), this->beatUnit()); }
@@ -43,32 +56,27 @@ public:
 
 private:
 	bool unitMatch(Beat &b) { return (this->tempo()==b.tempo() && this->beatUnit()==b.beatUnit()); }
+
 	float fTempo;
 	int iBeat;
 	quint8 iBeatUnit;
+	quint8 iBeatsPerMeasure;
 };
 
 class MusicEvent
 {
 public:
-	MusicEvent(Beat b=Beat()) { this->setBeat(b); }
+	MusicEvent(Beat &b=Beat()) { this->setBeat(b); }
 
-	void setBeat(Beat b) { this->oBeat=b; }
+	void setBeat(Beat &b) { this->oBeat=b; }
 	Beat beat() const { return this->oBeat; }
 
 private:
 	Beat oBeat;
 };
-
-
-enum MusicItemType
-{
-    MIT_TRACK = Qt::UserRole+1000,
-	MIT_CLIP,
-	MIT_CLIPGROUP
-};
-
 typedef QVector<MusicEvent> MusicEventList;
+
+
 
 class BaseMusicItem : public QStandardItem
 {
@@ -103,7 +111,9 @@ public:
 	virtual MusicEvent event(int i) const { return this->vEvents[i]; }
 	virtual MusicEventList events() const { return this->vEvents; }
 
-	virtual int measureLength() = NULL;
+	virtual void play() = NULL;
+	virtual float seconds() = NULL;
+	virtual int measureCount() = NULL;
 
 protected:
 	float fVolume;
@@ -142,7 +152,9 @@ public:
 	virtual int beatUnit() const { return this->iBeatUnit; }
 	virtual float playbackSpeed() const { return this->fPlaybackSpeed; }
 
-	virtual int measureLength() { return 0; }
+	virtual void play() { return; }
+	virtual float seconds() { return 0.0f; }
+	virtual int measureCount() { return 0; }
 
 private:
 	float fTempo;
@@ -163,28 +175,35 @@ public:
 		return cgi;
 	}
 
-	virtual int measureLength() { return 0; }
+	virtual void play() { return; }
+	virtual float seconds() { return 0.0f; }
+	virtual int measureCount() { return 0; }
 };
 
 class ClipItem : public BaseMusicItem
 {
 public:
 	ClipItem(QString, QString f="");
+	~ClipItem() { if(this->mpClip) delete this->mpClip; }
+
 	virtual int type() const { return MusicItemType::MIT_CLIP; }
 	virtual QStandardItem *clone() const
 	{
-		ClipItem *ci = new ClipItem(this->text(), this->sClipFile);
+		ClipItem *ci = new ClipItem(this->text(), this->mpClip->media().canonicalUrl().toString());
 		this->cloneBase(ci);
 		return ci;
 	}
 
-	void setClip(QString s) { this->sClipFile=s; }
-	QString clip() { return this->sClipFile; }
+	void setClip(QString);
 
-	virtual int measureLength() { return 0; }
+	virtual void setVolume(float v) { BaseMusicItem::setVolume(v); if(this->mpClip) this->mpClip->setVolume(roundf(v)); }
+
+	virtual void play() { if(this->mpClip) this->mpClip->play(); }
+	virtual float seconds() { if(!this->mpClip) return 0.0f; return this->mpClip->duration()/1000.0f; }
+	virtual int measureCount();
 
 private:
-	QString sClipFile;
+	QMediaPlayer *mpClip = NULL;
 };
 
 
@@ -216,6 +235,7 @@ public:
 
 public slots:
 	void deleteSelectedItems();
+	void playMusic();
 
 protected:
 	void keyPressEvent(QKeyEvent*);

@@ -12,6 +12,9 @@
 #define TW_BEAT_MARKER_LENGTH	3.0f
 #define TW_MEASURE_MARKER_MULT	2.0f
 
+#define TW_MIN_MEASURE_SPACING	8.0f
+#define TW_MAX_MEASURE_SPACING	480.0f
+
 class TimelineWidget : public QWidget
 {
 	Q_OBJECT
@@ -47,13 +50,14 @@ protected:
 private:
 	void setTopSpacing(float t) { this->fTopSpacing=t; }
 
+	void drawClip(QPainter&);
 	void drawPlayMarker(QPainter&);
 	void drawEventMarkers(QPainter&);
-	void drawMeasureMarkers(QPainter&, int);
+	void drawMeasureMarkers(QPainter&);
 
 	float posToSeconds(int pos) { return ((pos/this->fMeasureSpacing)*this->iBeatUnit) / (this->fTempo/60.0f); }
-	Beat posToBeat(int pos) { return Beat::fromSeconds(this->posToSeconds(pos), this->fTempo, this->iBeatUnitSnap); }
-	int secondsToPos(float secs) { return roundf(this->fMeasureSpacing*((secs*(this->fTempo/60.0))/this->iBeatUnit)); }
+	float secondsToPos(float secs) { return this->fMeasureSpacing*((secs*(this->fTempo/60.0))/this->iBeatUnit); }
+	Beat posToBeat(int pos) { return Beat::fromSeconds(this->posToSeconds(pos), this->fTempo, this->iBeatUnitSnap, this->iBeatsPerMeasure); }
 
 	BaseMusicItem *bmiMusicItem = NULL;
 
