@@ -55,9 +55,9 @@ private:
 	void drawMeasureMarkers(QPainter&);
 
 	float posToSeconds(float pos) const { return pos/(this->fMeasureSpacing/this->iBeatsPerMeasure)*(60.0f/this->fTempo); }
-	float secondsToPos(float secs) const { return (secs*(this->fTempo/60.0f)/this->iBeatsPerMeasure)*this->fMeasureSpacing; }
-	float beatToPos(Beat beat) const { return this->secondsToPos(beat.toSeconds()); }
-	Beat posToBeat(float pos) const { return Beat::fromSeconds(this->posToSeconds(pos), this->fTempo, this->iBeatsPerMeasure, this->iBeatUnitSnap); }
+	Beat posToBeat(float pos) const { return Beat::fromSeconds(this->posToSeconds(pos*(this->iBeatUnitSnap/float(this->iBeatUnit))), this->fTempo, roundf(this->iBeatsPerMeasure*(this->iBeatUnitSnap/float(this->iBeatUnit)))); }
+	float secondsToPos(float secs) const { return secs*(this->fTempo/60.0f)*(this->fMeasureSpacing/this->iBeatsPerMeasure); }
+	float beatToPos(Beat beat) const { return this->secondsToPos(beat.toSeconds()*(this->iBeatUnit/float(this->iBeatUnitSnap))); }
 
 	BaseMusicItem *bmiMusicItem = NULL;
 

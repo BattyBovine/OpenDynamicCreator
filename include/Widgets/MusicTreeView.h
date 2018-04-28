@@ -26,40 +26,37 @@ enum MusicItemType
 class Beat
 {
 public:
-	Beat(int beat=0, float tempo=120.0f, quint8 beatspermeasure=4, quint8 beatunit=4)
+	Beat(int beat=0, float tempo=120.0f, quint8 beatspermeasure=4)
 	{
 		this->iBeat=beat;
 		this->fTempo=tempo;
 		this->iBeatsPerMeasure=beatspermeasure;
-		this->iBeatUnit=beatunit;
 	}
 
 	void setBeat(int b) { this->iBeat=b; }
 	void setTempo(float t) { this->fTempo=t; }
 	void setBeatsPerMeasure(quint8 m) { this->iBeatsPerMeasure=m; }
-	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 
 	int beat() { return this->iBeat; }
 	float tempo() { return this->fTempo; }
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
-	quint8 beatUnit() { return this->iBeatUnit; }
 
-	static Beat fromSeconds(float secs, float tempo, quint8 beatspermeasure, quint8 beatunit) { return Beat(roundf((secs*(60.0f/tempo))*float(beatunit)), tempo, beatspermeasure, beatunit); }
-	float toSeconds() const { return (this->iBeat/float(this->iBeatUnit))/(60.0f/this->fTempo); }
+	static Beat fromSeconds(float secs, float tempo, quint8 beatspermeasure) { return Beat(roundf(secs/(60.0f/tempo)), tempo, beatspermeasure); }
+	float toSeconds() const { return this->iBeat*(60.0f/this->fTempo); }
 	int measureCount() const { return ceilf(this->iBeat/float(this->iBeatsPerMeasure)); }
 
 	bool operator==(Beat &b) { return (this->beat()==b.beat() && this->unitMatch(b)); }
-	Beat operator+(Beat &b)  { if(!this->unitMatch(b)) return Beat(); return Beat(this->beat()+b.beat(), this->tempo(), this->beatUnit()); }
+	Beat operator+(Beat &b)  { if(!this->unitMatch(b)) return Beat(); return Beat(this->beat()+b.beat(), this->tempo()); }
 	void operator+=(Beat &b) { if(this->unitMatch(b)) this->setBeat(this->beat()+b.beat()); }
-	Beat operator-(Beat &b)  { if(!this->unitMatch(b)) return Beat(); return Beat(this->beat()-b.beat(), this->tempo(), this->beatUnit()); }
+	Beat operator-(Beat &b)  { if(!this->unitMatch(b)) return Beat(); return Beat(this->beat()-b.beat(), this->tempo()); }
 	void operator-=(Beat &b) { if(this->unitMatch(b)) this->setBeat(this->beat()+b.beat()); }
 
 private:
-	bool unitMatch(Beat &b) { return (this->tempo()==b.tempo() && this->beatUnit()==b.beatUnit()); }
+	bool unitMatch(Beat &b) { return (this->tempo()==b.tempo()); }
 
 	int iBeat;
 	float fTempo;
-	quint8 iBeatsPerMeasure, iBeatUnit;
+	quint8 iBeatsPerMeasure;
 };
 
 class MusicEvent
