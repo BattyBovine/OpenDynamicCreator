@@ -26,26 +26,26 @@ enum MusicItemType
 class Beat
 {
 public:
-	Beat(int beat=0, float tempo=120.0f, quint8 beatunit=4, quint8 beatspermeasure=4)
+	Beat(int beat=0, float tempo=120.0f, quint8 beatspermeasure=4, quint8 beatunit=4)
 	{
 		this->iBeat=beat;
 		this->fTempo=tempo;
-		this->iBeatUnit=beatunit;
 		this->iBeatsPerMeasure=beatspermeasure;
+		this->iBeatUnit=beatunit;
 	}
 
 	void setBeat(int b) { this->iBeat=b; }
 	void setTempo(float t) { this->fTempo=t; }
-	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 	void setBeatsPerMeasure(quint8 m) { this->iBeatsPerMeasure=m; }
+	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 
 	int beat() { return this->iBeat; }
 	float tempo() { return this->fTempo; }
-	quint8 beatUnit() { return this->iBeatUnit; }
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
+	quint8 beatUnit() { return this->iBeatUnit; }
 
-	static Beat fromSeconds(float secs, float tempo=120.0f, quint8 beatunit=4, quint8 beatspermeasure=4) { return Beat(roundf(((secs*tempo)/60)*((float(beatunit)/beatspermeasure))), tempo, beatunit, beatspermeasure); }
-	float toSeconds() const { return ((60*this->iBeat*(float(this->iBeatsPerMeasure)/this->iBeatUnit))/this->fTempo); }
+	static Beat fromSeconds(float secs, float tempo, quint8 beatspermeasure, quint8 beatunit) { return Beat(roundf(secs/60.0f*tempo), tempo, beatspermeasure, beatunit); }
+	float toSeconds() const { return ((60.0f*this->iBeat)/this->fTempo); }
 	int measureCount() const { return ceilf(this->iBeat/float(this->iBeatsPerMeasure)); }
 
 	bool operator==(Beat &b) { return (this->beat()==b.beat() && this->unitMatch(b)); }
@@ -57,10 +57,9 @@ public:
 private:
 	bool unitMatch(Beat &b) { return (this->tempo()==b.tempo() && this->beatUnit()==b.beatUnit()); }
 
-	float fTempo;
 	int iBeat;
-	quint8 iBeatUnit;
-	quint8 iBeatsPerMeasure;
+	float fTempo;
+	quint8 iBeatsPerMeasure, iBeatUnit;
 };
 
 class MusicEvent

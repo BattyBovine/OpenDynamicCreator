@@ -7,22 +7,22 @@ TimelineWidget::TimelineWidget(BaseMusicItem *musicitem, float tempo, int beatsp
 	this->setBeatsPerMeasure(beatspermeasure);
 	this->setBeatUnit(beatunit);
 	this->setTopSpacing(5.0f);
-	this->setMeasureSpacing(40.0f);
+	this->setMeasureSpacing(TW_DEFAULT_MEASURE_SPACING);
 	this->setReadOnly(readonly);
 }
 
 void TimelineWidget::mousePressEvent(QMouseEvent *e)
 {
-	this->oMouseClickPos = Beat::fromSeconds(this->posToSeconds(e->pos().x()), this->fTempo, this->iBeatUnitSnap, this->iBeatsPerMeasure);
+	this->beatMouseClickPos = this->posToBeat(e->pos().x());
 	QWidget::mousePressEvent(e);
 }
 
 void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 {
 	if(!this->bReadOnly) {
-		this->oMouseMovePos = Beat::fromSeconds(this->posToSeconds(e->pos().x()), this->fTempo, this->iBeatUnitSnap, this->iBeatsPerMeasure);
-		if(abs(this->oMouseClickPos.beat()-this->oMouseMovePos.beat())>=2)
-			this->bMoveMode = true;
+		this->beatMouseMovePos = this->posToBeat(e->pos().x());
+//		if(abs(this->beatMouseClick.beat()-this->beatMouseMove.beat())>=2)
+//			this->bMoveMode = true;
 	}
 	QWidget::mouseMoveEvent(e);
 	this->repaint();
@@ -33,10 +33,10 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 	switch(e->button()) {
 	case Qt::LeftButton:
 		if(!this->bMoveMode)
-			this->oPlayMarker = Beat::fromSeconds(this->posToSeconds(e->pos().x()), this->fTempo, this->iBeatUnitSnap, this->iBeatsPerMeasure);
+			this->beatPlayMarker = this->beatMouseClickPos;
 		break;
 	case Qt::RightButton:
-		this->bmiMusicItem->addEvent(MusicEvent(Beat::fromSeconds(this->posToSeconds(e->pos().x()), this->fTempo, this->iBeatUnitSnap, this->iBeatsPerMeasure)));
+		this->bmiMusicItem->addEvent(MusicEvent(this->beatMouseClickPos));
 		break;
 	}
 	this->bMoveMode = false;
@@ -48,8 +48,8 @@ void TimelineWidget::wheelEvent(QWheelEvent *e)
 {
 	float newspacing = 0;
 	int scroll = e->pixelDelta().y();
-	if(scroll==0)	newspacing = (this->measureSpacing()+(e->angleDelta().y()/60.0f));
-	else			newspacing = (this->measureSpacing()+scroll);
+	if(scroll==0)	newspacing = (this->fMeasureSpacing+(e->angleDelta().y()/60.0f));
+	else			newspacing = (this->fMeasureSpacing+scroll);
 	this->setMeasureSpacing(std::max(TW_MIN_MEASURE_SPACING, std::min(newspacing, TW_MAX_MEASURE_SPACING)));
 	this->repaint();
 }
@@ -62,8 +62,8 @@ void TimelineWidget::paintEvent(QPaintEvent*)
 		painter.setPen(QColor(0, 0, 255));
 		painter.setBrush(QColor(0, 0, 255, 64));
 		painter.drawRect(QRectF(
-						QPointF(this->secondsToPos(this->oMouseClickPos.toSeconds()), this->fTopSpacing),
-						QPointF(this->secondsToPos(this->oMouseMovePos.toSeconds()), this->height()-1)
+						QPointF(this->beatToPos(this->beatMouseClickPos), this->fTopSpacing),
+						QPointF(this->beatToPos(this->beatMouseMovePos), this->height()-1)
 						));
 	}
 
@@ -91,7 +91,7 @@ void TimelineWidget::drawClip(QPainter &p)
 
 void TimelineWidget::drawPlayMarker(QPainter &p)
 {
-	float pos = this->secondsToPos(this->oPlayMarker.toSeconds());
+	float pos = this->beatToPos(this->beatPlayMarker);
 	p.setPen(Qt::NoPen);
 	QBrush playbrush(QColor(0, 255, 0));
 	p.setBrush(playbrush);
@@ -105,7 +105,7 @@ void TimelineWidget::drawEventMarkers(QPainter &p)
 	p.setBrush(Qt::NoBrush);
 	p.setPen(QColor(255, 0, 0));
 	foreach(MusicEvent event, this->bmiMusicItem->events()) {
-		float pos = this->secondsToPos(event.beat().toSeconds());
+		float pos = this->beatToPos(event.beat());
 		QVector<QPointF> polyline;
 		polyline << QPointF(pos, 0.0f)
 				 << QPointF(pos-(this->fTopSpacing/2.0f), (this->fTopSpacing/2.0f))
@@ -124,11 +124,11 @@ void TimelineWidget::drawMeasureMarkers(QPainter &p)
 //		p.setPen(QColor(255, 0, 0));
 //	else
 		p.setPen(this->palette().foreground().color());
-	float beatspacing = this->fMeasureSpacing/this->iBeatsPerMeasure;
 	unsigned int measurecount = static_cast<ClipItem*>(this->bmiMusicItem)->measureCount();
 	for(unsigned int measure=0; measure<measurecount; measure++) {
 		for(int beat=1; beat<=this->iBeatsPerMeasure; beat++) {
-			float xpos = (this->fMeasureSpacing*measure) + (beat*beatspacing);
+			float beatspacing = this->fMeasureSpacing/this->iBeatsPerMeasure;
+			float xpos = (this->fMeasureSpacing*measure) + (beatspacing*beat);
 //			if(count<0)	xpos = -xpos;
 			p.drawLine(	QPointF(xpos, this->fTopSpacing),
 						QPointF(xpos, this->fTopSpacing+(TW_BEAT_MARKER_LENGTH*((beat==this->iBeatsPerMeasure)?TW_MEASURE_MARKER_MULT:1.0f)))

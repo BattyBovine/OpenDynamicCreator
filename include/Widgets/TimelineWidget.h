@@ -9,11 +9,12 @@
 
 #include "Widgets/MusicTreeView.h"
 
-#define TW_BEAT_MARKER_LENGTH	3.0f
-#define TW_MEASURE_MARKER_MULT	2.0f
+#define TW_BEAT_MARKER_LENGTH		3.0f
+#define TW_MEASURE_MARKER_MULT		2.0f
 
-#define TW_MIN_MEASURE_SPACING	8.0f
-#define TW_MAX_MEASURE_SPACING	480.0f
+#define TW_MIN_MEASURE_SPACING		8.0f
+#define TW_DEFAULT_MEASURE_SPACING	40.0f
+#define TW_MAX_MEASURE_SPACING		480.0f
 
 class TimelineWidget : public QWidget
 {
@@ -26,15 +27,13 @@ public:
 	int beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	int beatUnit() { return this->iBeatUnit; }
 	float measureSpacing() { return this->fMeasureSpacing; }
-	float beatSpacing() { return this->fBeatSpacing; }
 
 public slots:
 	void setMusicItem(BaseMusicItem *i) { this->bmiMusicItem=i; }
 	void setTempo(float t) { this->fTempo=t; }
 	void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure=b; }
 	void setBeatUnit(int b) { this->iBeatUnit=b; }
-	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; this->fBeatSpacing=(m/this->iBeatsPerMeasure); }
-	void setBeatSpacing(float b) { this->fBeatSpacing=b; this->fMeasureSpacing=(b*this->iBeatsPerMeasure); }
+	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; }
 
 	void setReadOnly(bool r) { this->bReadOnly=r; }
 	void setBeatUnitSnap(int s) { this->iBeatUnitSnap=s; }
@@ -55,9 +54,10 @@ private:
 	void drawEventMarkers(QPainter&);
 	void drawMeasureMarkers(QPainter&);
 
-	float posToSeconds(int pos) { return ((pos/this->fMeasureSpacing)*this->iBeatUnit) / (this->fTempo/60.0f); }
-	float secondsToPos(float secs) { return this->fMeasureSpacing*((secs*(this->fTempo/60.0))/this->iBeatUnit); }
-	Beat posToBeat(int pos) { return Beat::fromSeconds(this->posToSeconds(pos), this->fTempo, this->iBeatUnitSnap, this->iBeatsPerMeasure); }
+	float posToSeconds(float pos) const { return (pos/this->fMeasureSpacing) / (this->fTempo/60.0f); }
+	float secondsToPos(float secs) const { return ((this->fTempo/60.0f*secs) * this->fMeasureSpacing); }
+	float beatToPos(Beat beat) const { return roundf(this->iBeatUnit/float(this->iBeatUnitSnap)*beat.beat()/float(beat.beatsPerMeasure())*this->fMeasureSpacing); }
+	Beat posToBeat(float pos) const { return Beat(roundf(pos/this->fMeasureSpacing*this->iBeatsPerMeasure*float(this->iBeatUnitSnap)/this->iBeatUnit), this->fTempo, this->iBeatsPerMeasure, this->iBeatUnitSnap); }
 
 	BaseMusicItem *bmiMusicItem = NULL;
 
@@ -66,10 +66,9 @@ private:
 	int iBeatUnit;
 	float fTopSpacing = 0.0f;
 	float fMeasureSpacing = 0.0f;
-	float fBeatSpacing = 0.0f;
 
-	Beat oPlayMarker;
-	Beat oMouseClickPos, oMouseMovePos;
+	Beat beatPlayMarker;
+	Beat beatMouseClickPos, beatMouseMovePos;
 	quint8 iBeatUnitSnap = 4;
 	bool bReadOnly = false;
 	bool bMoveMode = false;
