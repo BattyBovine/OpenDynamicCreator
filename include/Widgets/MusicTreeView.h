@@ -44,9 +44,8 @@ public:
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	quint8 beatUnit() { return this->iBeatUnit; }
 
-	static Beat fromSeconds(float secs, float tempo, quint8 beatspermeasure, quint8 beatunit, float beatratio=1.0f) { return Beat(roundf((secs/60.0f*tempo)*beatratio), tempo, beatspermeasure, beatunit); }
-	static float toSeconds(Beat &beat, float beatratio=1.0f) { return (beat.toSeconds()/beatratio); }
-	float toSeconds() const { return ((60.0f*this->iBeat)/this->fTempo); }
+	static Beat fromSeconds(float secs, float tempo, quint8 beatspermeasure, quint8 beatunit) { return Beat(roundf((secs*(60.0f/tempo))*float(beatunit)), tempo, beatspermeasure, beatunit); }
+	float toSeconds() const { return (this->iBeat/float(this->iBeatUnit))/(60.0f/this->fTempo); }
 	int measureCount() const { return ceilf(this->iBeat/float(this->iBeatsPerMeasure)); }
 
 	bool operator==(Beat &b) { return (this->beat()==b.beat() && this->unitMatch(b)); }
