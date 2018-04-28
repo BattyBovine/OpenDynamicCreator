@@ -58,6 +58,8 @@ void TimelineWidget::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
 
+	this->drawClip(painter);
+
 	if(this->bMoveMode) {
 		painter.setPen(QColor(0, 0, 255));
 		painter.setBrush(QColor(0, 0, 255, 64));
@@ -85,7 +87,7 @@ void TimelineWidget::drawClip(QPainter &p)
 	ClipItem *clip = static_cast<ClipItem*>(this->bmiMusicItem);
 	if(!clip) return;
 	float pos = this->secondsToPos(clip->seconds());
-	p.setPen(QColor(255, 255, 0));
+	p.setPen(QColor(0, 0, 255));
 	p.drawLine(QPointF(pos, this->fTopSpacing), QPointF(pos, this->height()));
 }
 
