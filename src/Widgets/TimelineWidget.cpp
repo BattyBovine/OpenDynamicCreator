@@ -126,7 +126,7 @@ void TimelineWidget::drawMeasureMarkers(QPainter &p)
 //		p.setPen(QColor(255, 0, 0));
 //	else
 		p.setPen(this->palette().foreground().color());
-	unsigned int measurecount = static_cast<ClipItem*>(this->bmiMusicItem)->measureCount();
+	unsigned int measurecount = static_cast<ClipItem*>(this->bmiMusicItem)->length().measureCount();
 	for(unsigned int measure=0; measure<measurecount; measure++) {
 		for(int beat=1; beat<=this->iBeatsPerMeasure; beat++) {
 			float beatspacing = this->fMeasureSpacing/this->iBeatsPerMeasure;

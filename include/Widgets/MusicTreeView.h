@@ -60,7 +60,7 @@ public:
 
 	virtual void play() = NULL;
 	virtual float seconds() = NULL;
-	virtual int measureCount() = NULL;
+	virtual Beat length() = NULL;
 
 protected:
 	float fVolume;
@@ -101,7 +101,7 @@ public:
 
 	virtual void play() { return; }
 	virtual float seconds() { return 0.0f; }
-	virtual int measureCount() { return 0; }
+	virtual Beat length() { return Beat(); }
 
 private:
 	float fTempo;
@@ -124,7 +124,7 @@ public:
 
 	virtual void play() { return; }
 	virtual float seconds() { return 0.0f; }
-	virtual int measureCount() { return 0; }
+	virtual Beat length() { return Beat(); }
 };
 
 class ClipItem : public BaseMusicItem
@@ -147,7 +147,7 @@ public:
 
 	virtual void play() { if(this->mpClip) this->mpClip->play(); }
 	virtual float seconds() { if(!this->mpClip) return 0.0f; return this->mpClip->duration()/1000.0f; }
-	virtual int measureCount();
+	virtual Beat length();
 
 private:
 	QMediaPlayer *mpClip = NULL;

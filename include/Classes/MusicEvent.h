@@ -12,10 +12,7 @@ public:
 
 	static Beat fromTimelinePosition(float pos, float measurespacing, int beatspermeasure, quint8 beatunit, quint8 snap) { return Beat((roundf(((pos/measurespacing)*(beatspermeasure/float(beatunit)))*snap)/snap)*BEAT_TICK_UNIT); }
 	float toTimelinePosition(float measurespacing, int beatspermeasure, quint8 beatunit) const { return (this->iBeat/BEAT_TICK_UNIT)*measurespacing*(beatunit/float(beatspermeasure)); }
-	static Beat fromSeconds(float secs, float tempo, int beatspermeasure, int beatunit) {
-//		return Beat(secs*(60.0f/tempo)*BASE_BEAT_UNIT);
-		return Beat((roundf(secs*(60.0f/tempo)*(beatspermeasure/float(beatunit))*BEAT_TICK_UNIT)));
-	}
+	static Beat fromSeconds(float secs, float tempo, int beatspermeasure) { return Beat(roundf(secs*(tempo/60.0f)/beatspermeasure*BEAT_TICK_UNIT)); }
 //	float toSeconds() const { return this->iBeat*(60.0f/this->fTempo); }
 	int measureCount() const { return ceilf(this->iBeat/BEAT_TICK_UNIT); }
 
