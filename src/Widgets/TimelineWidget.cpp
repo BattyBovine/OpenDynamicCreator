@@ -21,8 +21,8 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 {
 	if(!this->bReadOnly) {
 		this->beatMouseMovePos = Beat::fromTimelinePosition(e->pos().x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
-//		if(abs(this->beatMouseClick.beat()-this->beatMouseMove.beat())>=2)
-//			this->bMoveMode = true;
+		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).beat()) >= Beat::quarterNote())
+			this->bMoveMode = true;
 	}
 	QWidget::mouseMoveEvent(e);
 	this->repaint();

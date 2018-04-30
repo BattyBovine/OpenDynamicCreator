@@ -19,7 +19,7 @@ void ClipEditorWidget::setClipEditor(BaseMusicItem *musicitem, float tempo, int 
 {
 	if(musicitem) {
 		MixerWidget *mw = new MixerWidget(musicitem, false, this);
-		TimelineWidget *tw = new TimelineWidget(musicitem, tempo, beatspermeasure, beatunit, this);
+		TimelineWidget *tw = new TimelineWidget(musicitem, tempo, beatspermeasure, beatunit, false, this);
 		connect(mw, SIGNAL(snapChanged(int)), tw, SLOT(setBeatUnitSnapFromCombo(int)));
 		ui->layoutClipEditor->addWidget(mw, 0, 0);
 		ui->layoutClipEditor->addWidget(tw, 0, 1);

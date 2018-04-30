@@ -22,7 +22,7 @@ class TimelineWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TimelineWidget(BaseMusicItem*, float, int, int, bool, QWidget *parent=0);
+	explicit TimelineWidget(BaseMusicItem*, float, int, int, bool readonly=true, QWidget *parent=0);
 
 	BaseMusicItem *musicItem() { return this->bmiMusicItem; }
 	float tempo() { return this->fTempo; }

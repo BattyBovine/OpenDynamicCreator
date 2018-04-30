@@ -20,7 +20,7 @@ void ClipGroupEditorWidget::addClipGroupEditor(BaseMusicItem *musicitem, float t
 	if(musicitem) {
 		int row = ui->layoutClips->rowCount();
 		MixerWidget *mw = new MixerWidget(musicitem, true, this);
-		TimelineWidget *tw = new TimelineWidget(musicitem, tempo, beatspermeasure, beatunit, this);
+		TimelineWidget *tw = new TimelineWidget(musicitem, tempo, beatspermeasure, beatunit, true, this);
 		connect(mw, SIGNAL(snapChanged(int)), tw, SLOT(setBeatUnitSnapFromCombo(int)));
 		ui->layoutClips->addWidget(mw, row, 0);
 		ui->layoutClips->addWidget(tw, row, 1);
