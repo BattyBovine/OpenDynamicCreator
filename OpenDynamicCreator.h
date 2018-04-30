@@ -64,7 +64,7 @@ public slots:
 	void deleteStateItem();
 	QStandardItem *checkSelectedStateTreeItem();
 
-	void swapEditorWidget(QModelIndex);
+	void swapEditorWidget(QItemSelection);
 	void customContextMenuMusic(QPoint);
 	void showAboutDialogue();
 

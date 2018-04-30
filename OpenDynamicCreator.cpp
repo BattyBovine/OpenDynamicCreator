@@ -37,7 +37,7 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 	connect(ui->actionRedo, SIGNAL(triggered()), this->odcUndo, SLOT(redo()));
 
 	connect(this->modelMusic, SIGNAL(audioClipsDropped(QModelIndex,QStringList)), this, SLOT(addClipList(QModelIndex,QStringList)));
-	connect(this->selMusic, SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(swapEditorWidget(QModelIndex)));
+	connect(this->selMusic, SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(swapEditorWidget(QItemSelection)));
 
 	ui->statusMain->showMessage(tr("Ready"));
 }
@@ -179,23 +179,29 @@ QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 
 
 
-void OpenDynamicCreator::swapEditorWidget(QModelIndex i)
+void OpenDynamicCreator::swapEditorWidget(QItemSelection i)
 {
-	QStandardItem *item = this->modelMusic->itemFromIndex(i);
-	if(!item) {
+	if(this->selMusic->selectedIndexes().size()>1) {
 		this->setCentralWidget(new QWidget());
 		return;
 	}
-	switch(item->type()) {
-	case MusicItemType::MIT_TRACK:
-		this->loadTrackEditorWidget(i);
-		break;
-	case MusicItemType::MIT_CLIPGROUP:
-		this->loadClipGroupEditorWidget(i);
-		break;
-	case MusicItemType::MIT_CLIP:
-		this->loadClipEditorWidget(i);
-		break;
+	QModelIndexList selected = i.indexes();
+	foreach(QModelIndex index, selected) {
+		QStandardItem *item = this->modelMusic->itemFromIndex(index);
+		if(!item)
+			continue;
+		switch(item->type()) {
+		case MusicItemType::MIT_TRACK:
+			this->loadTrackEditorWidget(index);
+			break;
+		case MusicItemType::MIT_CLIPGROUP:
+			this->loadClipGroupEditorWidget(index);
+			break;
+		case MusicItemType::MIT_CLIP:
+			this->loadClipEditorWidget(index);
+			break;
+		}
+		return;
 	}
 }
 
