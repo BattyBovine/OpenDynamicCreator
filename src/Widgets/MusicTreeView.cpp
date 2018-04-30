@@ -192,5 +192,5 @@ int ClipItem::measureCount()
 	TrackItem *track = (TrackItem*)this->parent();
 	while(track->type()!=MIT_TRACK)
 		track = (TrackItem*)track->parent();
-	return Beat::fromSeconds(this->mpClip->duration()/1000.0f, track->tempo(), track->beatsPerMeasure()).measureCount();
+	return Beat::fromSeconds(this->mpClip->duration()/1000.0f, track->tempo(), track->beatsPerMeasure(), track->beatUnit()).measureCount();
 }

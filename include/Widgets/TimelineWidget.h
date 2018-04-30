@@ -8,6 +8,7 @@
 #include <QWheelEvent>
 
 #include "Widgets/MusicTreeView.h"
+#include "Classes/MusicEvent.h"
 
 #define TW_BEAT_MARKER_LENGTH		3.0f
 #define TW_MEASURE_MARKER_MULT		2.0f
@@ -15,6 +16,7 @@
 #define TW_MIN_MEASURE_SPACING		8.0f
 #define TW_DEFAULT_MEASURE_SPACING	40.0f
 #define TW_MAX_MEASURE_SPACING		480.0f
+
 
 class TimelineWidget : public QWidget
 {
@@ -55,9 +57,7 @@ private:
 	void drawMeasureMarkers(QPainter&);
 
 	float posToSeconds(float pos) const { return pos/(this->fMeasureSpacing/this->iBeatsPerMeasure)*(60.0f/this->fTempo); }
-	Beat posToBeat(float pos) const { return Beat::fromSeconds(this->posToSeconds(pos*(this->iBeatUnitSnap/float(this->iBeatUnit))), this->fTempo, roundf(this->iBeatsPerMeasure*(this->iBeatUnitSnap/float(this->iBeatUnit)))); }
 	float secondsToPos(float secs) const { return secs*(this->fTempo/60.0f)*(this->fMeasureSpacing/this->iBeatsPerMeasure); }
-	float beatToPos(Beat beat) const { return this->secondsToPos(beat.toSeconds()*(this->iBeatUnit/float(this->iBeatUnitSnap))); }
 
 	BaseMusicItem *bmiMusicItem = NULL;
 

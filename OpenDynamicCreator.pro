@@ -50,7 +50,8 @@ HEADERS  += version.h \
 	include/ClipEditorWidget.h \
     include/Widgets/MixerWidget.h \
     include/Widgets/MixerVolumeSlider.h \
-    include/Widgets/MixerPanSlider.h
+    include/Widgets/MixerPanSlider.h \
+    include/Classes/MusicEvent.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \

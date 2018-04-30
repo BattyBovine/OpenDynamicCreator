@@ -13,14 +13,14 @@ TimelineWidget::TimelineWidget(BaseMusicItem *musicitem, float tempo, int beatsp
 
 void TimelineWidget::mousePressEvent(QMouseEvent *e)
 {
-	this->beatMouseClickPos = this->posToBeat(e->pos().x());
+	this->beatMouseClickPos = Beat::fromTimelinePosition(e->pos().x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
 	QWidget::mousePressEvent(e);
 }
 
 void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 {
 	if(!this->bReadOnly) {
-		this->beatMouseMovePos = this->posToBeat(e->pos().x());
+		this->beatMouseMovePos = Beat::fromTimelinePosition(e->pos().x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
 //		if(abs(this->beatMouseClick.beat()-this->beatMouseMove.beat())>=2)
 //			this->bMoveMode = true;
 	}
@@ -64,8 +64,8 @@ void TimelineWidget::paintEvent(QPaintEvent*)
 		painter.setPen(QColor(0, 0, 255));
 		painter.setBrush(QColor(0, 0, 255, 64));
 		painter.drawRect(QRectF(
-						QPointF(this->beatToPos(this->beatMouseClickPos), this->fTopSpacing),
-						QPointF(this->beatToPos(this->beatMouseMovePos), this->height()-1)
+						QPointF(this->beatMouseClickPos.toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit), this->fTopSpacing),
+						QPointF(this->beatMouseMovePos.toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit), this->height()-1)
 						));
 	}
 
@@ -93,7 +93,7 @@ void TimelineWidget::drawClip(QPainter &p)
 
 void TimelineWidget::drawPlayMarker(QPainter &p)
 {
-	float pos = this->beatToPos(this->beatPlayMarker);
+	float pos = this->beatPlayMarker.toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
 	p.setPen(Qt::NoPen);
 	QBrush playbrush(QColor(0, 255, 0));
 	p.setBrush(playbrush);
@@ -107,7 +107,7 @@ void TimelineWidget::drawEventMarkers(QPainter &p)
 	p.setBrush(Qt::NoBrush);
 	p.setPen(QColor(255, 0, 0));
 	foreach(MusicEvent event, this->bmiMusicItem->events()) {
-		float pos = this->beatToPos(event.beat());
+		float pos = event.beat().toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
 		QVector<QPointF> polyline;
 		polyline << QPointF(pos, 0.0f)
 				 << QPointF(pos-(this->fTopSpacing/2.0f), (this->fTopSpacing/2.0f))
