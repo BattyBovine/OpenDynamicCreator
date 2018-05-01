@@ -12,10 +12,12 @@
 
 #define TW_BEAT_MARKER_LENGTH		3.0f
 #define TW_MEASURE_MARKER_MULT		2.0f
+#define TW_BEAT_MARKER_MULT			0.75
 
 #define TW_MIN_MEASURE_SPACING		8.0f
 #define TW_DEFAULT_MEASURE_SPACING	40.0f
 #define TW_MAX_MEASURE_SPACING		480.0f
+#define TW_SUB_BEAT_SPACING			4.0f
 
 
 class TimelineWidget : public QWidget
@@ -38,8 +40,10 @@ public slots:
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; }
 
 	void setReadOnly(bool r) { this->bReadOnly=r; }
-	void setBeatUnitSnap(int s) { this->iBeatUnitSnap=s; }
 	void setBeatUnitSnapFromCombo(int s) { this->iBeatUnitSnap=powf(2,s); }
+
+signals:
+	void zoomChanged(float);
 
 protected:
 	virtual void mousePressEvent(QMouseEvent*);
@@ -55,6 +59,7 @@ private:
 	void drawPlayMarker(QPainter&);
 	void drawEventMarkers(QPainter&);
 	void drawMeasureMarkers(QPainter&);
+	void drawBeatMarkers(float, float, float, QPainter&);
 
 	float posToSeconds(float pos) const { return pos/(this->fMeasureSpacing/this->iBeatsPerMeasure)*(60.0f/this->fTempo); }
 	float secondsToPos(float secs) const { return secs*(this->fTempo/60.0f)*(this->fMeasureSpacing/this->iBeatsPerMeasure); }

@@ -52,6 +52,7 @@ void TimelineWidget::wheelEvent(QWheelEvent *e)
 	else			newspacing = (this->fMeasureSpacing+scroll);
 	this->setMeasureSpacing(std::max(TW_MIN_MEASURE_SPACING, std::min(newspacing, TW_MAX_MEASURE_SPACING)));
 	this->repaint();
+	emit(zoomChanged(this->fMeasureSpacing));
 }
 
 void TimelineWidget::paintEvent(QPaintEvent*)
@@ -129,12 +130,33 @@ void TimelineWidget::drawMeasureMarkers(QPainter &p)
 	unsigned int measurecount = static_cast<ClipItem*>(this->bmiMusicItem)->length().measureCount();
 	for(unsigned int measure=0; measure<measurecount; measure++) {
 		for(int beat=1; beat<=this->iBeatsPerMeasure; beat++) {
-			float beatspacing = this->fMeasureSpacing/this->iBeatsPerMeasure;
-			float xpos = (this->fMeasureSpacing*measure) + (beatspacing*beat);
-//			if(count<0)	xpos = -xpos;
-			p.drawLine(	QPointF(xpos, this->fTopSpacing),
-						QPointF(xpos, this->fTopSpacing+(TW_BEAT_MARKER_LENGTH*((beat==this->iBeatsPerMeasure)?TW_MEASURE_MARKER_MULT:1.0f)))
-						);
+			float spacing = this->fMeasureSpacing/this->iBeatsPerMeasure;
+			float xpos = (this->fMeasureSpacing*measure) + (spacing*beat);
+			if(beat!=this->iBeatsPerMeasure) {
+				p.drawLine(	QPointF(xpos, this->fTopSpacing),
+							QPointF(xpos, this->fTopSpacing+TW_BEAT_MARKER_LENGTH)
+							);
+			}
+			spacing /= 2.0f;
+			if(spacing<=TW_SUB_BEAT_SPACING)
+				continue;
+			this->drawBeatMarkers(xpos-spacing, spacing, TW_BEAT_MARKER_LENGTH*TW_BEAT_MARKER_MULT, p);
+			if(xpos>this->width())
+				break;
 		}
+		p.drawLine(	QPointF(this->fMeasureSpacing*(measure+1), this->fTopSpacing),
+					QPointF(this->fMeasureSpacing*(measure+1), this->fTopSpacing+(TW_BEAT_MARKER_LENGTH*TW_MEASURE_MARKER_MULT))
+					);
 	}
+}
+void TimelineWidget::drawBeatMarkers(float pos, float spacing, float length, QPainter &p)
+{
+	p.drawLine(	QPointF(pos, this->fTopSpacing),
+				QPointF(pos, this->fTopSpacing+length)
+				);
+	spacing /= 2.0f;
+	if(spacing<TW_SUB_BEAT_SPACING)
+		return;
+	this->drawBeatMarkers(pos-spacing, spacing, length*TW_BEAT_MARKER_MULT, p);
+	this->drawBeatMarkers(pos+spacing, spacing, length*TW_BEAT_MARKER_MULT, p);
 }
