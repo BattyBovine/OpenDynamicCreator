@@ -181,7 +181,7 @@ QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 
 void OpenDynamicCreator::swapEditorWidget(QItemSelection i)
 {
-	if(this->selMusic->selectedIndexes().size()>1) {
+	if(this->selMusic->selectedIndexes().size()!=1) {
 		this->setCentralWidget(new QWidget());
 		return;
 	}

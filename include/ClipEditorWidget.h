@@ -23,6 +23,9 @@ public:
 
 private:
 	Ui::ClipEditorWidget *ui;
+
+	MixerWidget *widgetMixer = NULL;
+	TimelineWidget *widgetTimeline = NULL;
 };
 
 #endif // CLIPEDITORWIDGET_H
