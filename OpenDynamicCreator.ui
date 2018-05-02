@@ -77,6 +77,12 @@
   </widget>
   <widget class="QStatusBar" name="statusMain"/>
   <widget class="QDockWidget" name="dockMusic">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>

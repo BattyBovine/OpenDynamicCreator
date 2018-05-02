@@ -21,8 +21,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += include
+INCLUDEPATH += include \
+	thirdparty/include
 
+LIBS += -L"$$PWD/thirdparty/lib" -logg -lvorbis -lvorbisfile
+win32:CONFIG(release, debug|release): LIBS += /NODEFAULTLIB:library
 
 SOURCES += main.cpp \
 	OpenDynamicCreator.cpp \
@@ -36,7 +39,8 @@ SOURCES += main.cpp \
 	src/ClipEditorWidget.cpp \
     src/Widgets/MixerWidget.cpp \
     src/Widgets/MixerVolumeSlider.cpp \
-    src/Widgets/MixerPanSlider.cpp
+    src/Widgets/MixerPanSlider.cpp \
+    src/Classes/ClipPlayer.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -51,7 +55,8 @@ HEADERS  += version.h \
     include/Widgets/MixerWidget.h \
     include/Widgets/MixerVolumeSlider.h \
     include/Widgets/MixerPanSlider.h \
-    include/Classes/MusicEvent.h
+    include/Classes/MusicEvent.h \
+    include/Classes/ClipPlayer.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \

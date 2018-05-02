@@ -17,8 +17,8 @@ void MusicTreeView::deleteSelectedItems()
 	QModelIndexList selectedindices = this->selectedIndexes();
 	if(selectedindices.size()>0) {
 		QStandardItemModel *model = qobject_cast<QStandardItemModel*>(this->model());
-		foreach(QModelIndex i, selectedindices) {
-			model->removeRow(i.row(), i.parent());
+		for(int i=selectedindices.size()-1; i>=0; i--) {
+			model->removeRow(selectedindices[i].row(), selectedindices[i].parent());
 		}
 	}
 }
@@ -181,14 +181,17 @@ void ClipItem::setClip(QString c)
 {
 	if(c.isEmpty())
 		return;
-	if(this->mpClip) delete this->mpClip;
-	this->mpClip = new QMediaPlayer();
-	this->mpClip->setMedia(QUrl(c));
+	this->urlClip = QUrl(c);
+	this->playerClip.loadAudioFile(this->urlClip);
+}
+
+void ClipItem::play()
+{
+	this->playerClip.play();
 }
 
 Beat ClipItem::length()
 {
-	if(!this->mpClip) return 0;
 	TrackItem *track = (TrackItem*)this->parent();
 	while(track->type()!=MIT_TRACK)
 		track = (TrackItem*)track->parent();

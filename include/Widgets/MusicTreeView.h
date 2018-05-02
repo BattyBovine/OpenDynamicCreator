@@ -8,11 +8,13 @@
 
 #include <QMimeData>
 #include <QKeyEvent>
+#include <QAudioOutput>
 #include <QMediaPlayer>
 #include <QMessageBox>
 #include <QUuid>
 
 #include "Classes/MusicEvent.h"
+#include "Classes/ClipPlayer.h"
 
 #define MIT_MIME "Qt/MusicItemType"
 
@@ -131,26 +133,27 @@ class ClipItem : public BaseMusicItem
 {
 public:
 	ClipItem(QString, QString f="");
-	~ClipItem() { if(this->mpClip) delete this->mpClip; }
+	~ClipItem(){}
 
 	virtual int type() const { return MusicItemType::MIT_CLIP; }
 	virtual QStandardItem *clone() const
 	{
-		ClipItem *ci = new ClipItem(this->text(), this->mpClip->media().canonicalUrl().toString());
+		ClipItem *ci = new ClipItem(this->text(), this->urlClip.toString());
 		this->cloneBase(ci);
 		return ci;
 	}
 
 	void setClip(QString);
 
-	virtual void setVolume(float v) { BaseMusicItem::setVolume(v); if(this->mpClip) this->mpClip->setVolume(roundf(v)); }
+	virtual void setVolume(float v) { BaseMusicItem::setVolume(v); }
 
-	virtual void play() { if(this->mpClip) this->mpClip->play(); }
-	virtual float seconds() { if(!this->mpClip) return 0.0f; return this->mpClip->duration()/1000.0f; }
+	virtual void play();
+	virtual float seconds() { return playerClip.length(); }
 	virtual Beat length();
 
 private:
-	QMediaPlayer *mpClip = NULL;
+	QUrl urlClip;
+	ClipPlayer playerClip;
 };
 
 

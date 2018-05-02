@@ -85,11 +85,10 @@ void TimelineWidget::paintEvent(QPaintEvent*)
 
 void TimelineWidget::drawClip(QPainter &p)
 {
-	ClipItem *clip = static_cast<ClipItem*>(this->bmiMusicItem);
-	if(!clip) return;
-	float pos = this->secondsToPos(clip->seconds());
 	p.setPen(QColor(0, 0, 255));
-	p.drawLine(QPointF(pos, this->fTopSpacing), QPointF(pos, this->height()));
+	p.setBrush(QColor(0, 0, 255, 64));
+	float pos = this->secondsToPos(this->bmiMusicItem->seconds());
+	p.drawRoundedRect(QRectF(QPointF(0, this->fTopSpacing+TW_BEAT_MARKER_LENGTH), QPointF(pos, this->height()-1)), 4.0f, 4.0f);
 }
 
 void TimelineWidget::drawPlayMarker(QPainter &p)
