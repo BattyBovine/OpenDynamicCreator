@@ -56,7 +56,8 @@ HEADERS  += version.h \
     include/Widgets/MixerVolumeSlider.h \
     include/Widgets/MixerPanSlider.h \
     include/Classes/MusicEvent.h \
-    include/Classes/ClipPlayer.h
+    include/Classes/ClipPlayer.h \
+    include/Libraries/dr_wav.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \

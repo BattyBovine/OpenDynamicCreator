@@ -17,7 +17,8 @@ public:
 	~ClipPlayer();
 
 	int loadAudioFile(QUrl);
-	bool loadVorbis(QUrl, OggVorbis_File);
+	bool loadWav(QUrl);
+	bool loadVorbis(QUrl);
 	void play();
 
 	void setSampleRate(int s) { this->iSampleRate=s; }
@@ -38,6 +39,7 @@ private:
 	int iNominalBitrate=0;
 	int iUpperBitrate=0;
 	int iBitrateWindow=0;
+	quint8 iSampleSize=0;
 	qreal fSeconds=0.0f;
 
 	QUrl urlFilePath;
