@@ -181,6 +181,7 @@ QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 
 void OpenDynamicCreator::swapEditorWidget(QItemSelection i)
 {
+	ui->actionStop->toggle();
 	if(this->selMusic->selectedIndexes().size()!=1) {
 		this->setCentralWidget(new QWidget());
 		return;
@@ -255,7 +256,7 @@ void OpenDynamicCreator::loadClipGroupEditorWidget(QModelIndex i)
 	ClipGroupEditorWidget *cgew = new ClipGroupEditorWidget();
 	int rowcount = clip->rowCount();
 	for(int row=0; row<rowcount; row++)
-		cgew->addClipGroupEditor(static_cast<ClipItem*>(clip->child(row)), track->tempo(), track->beatsPerMeasure(), track->beatUnit());
+		cgew->addClipGroupEditor(static_cast<ClipItem*>(clip->child(row)), track->tempo(), track->beatsPerMeasure(), track->beatUnit(), ui->actionPlayPause, ui->actionStop);
 	this->setCentralWidget(cgew);
 }
 
@@ -266,7 +267,7 @@ void OpenDynamicCreator::loadClipEditorWidget(QModelIndex i)
 	ClipItem *clip = static_cast<ClipItem*>(this->modelMusic->itemFromIndex(i));
 	if(!clip)	return;
 	ClipEditorWidget *cew = new ClipEditorWidget();
-	cew->setClipEditor(clip, track->tempo(), track->beatsPerMeasure(), track->beatUnit());
+	cew->setClipEditor(clip, track->tempo(), track->beatsPerMeasure(), track->beatUnit(), ui->actionPlayPause, ui->actionStop);
 	this->setCentralWidget(cew);
 }
 
@@ -275,4 +276,9 @@ QModelIndex OpenDynamicCreator::findTrack(QModelIndex index)
 	while(index.parent().isValid())
 		index = index.parent();
 	return index;
+}
+
+void OpenDynamicCreator::resetPlayerState()
+{
+	ui->actionPlayPause->setChecked(false);
 }

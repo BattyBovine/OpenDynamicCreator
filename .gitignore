@@ -1,4 +1,10 @@
 build
 open-iconic
+debug
+release
+
 *.pro.user
-thirdparty
+ui_*
+Makefile*
+*.stash
+*resource.rc

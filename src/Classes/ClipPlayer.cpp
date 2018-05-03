@@ -108,8 +108,13 @@ void ClipPlayer::play()
 	this->aoPlayer->start(&this->bufferPCMData);
 }
 
-void ClipPlayer::stop()
+void ClipPlayer::pause()
 {
 	if(this->aoPlayer) this->aoPlayer->stop();
+}
+
+void ClipPlayer::stop()
+{
+	this->pause();
 	this->bufferPCMData.close();
 }

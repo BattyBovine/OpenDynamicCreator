@@ -1,6 +1,6 @@
 #include "Widgets/TimelineWidget.h"
 
-TimelineWidget::TimelineWidget(BaseMusicItem *musicitem, float tempo, int beatspermeasure, int beatunit, bool readonly, QWidget *parent) : QWidget(parent)
+TimelineWidget::TimelineWidget(BaseMusicItem *musicitem, float tempo, int beatspermeasure, int beatunit, QAction *playpause, QAction *stop, bool readonly, QWidget *parent) : QWidget(parent)
 {
 	this->setMusicItem(musicitem);
 	this->setTempo(tempo);
@@ -9,6 +9,9 @@ TimelineWidget::TimelineWidget(BaseMusicItem *musicitem, float tempo, int beatsp
 	this->setTopSpacing(5.0f);
 	this->setMeasureSpacing(TW_DEFAULT_MEASURE_SPACING);
 	this->setReadOnly(readonly);
+
+	connect(playpause, SIGNAL(toggled(bool)), this, SLOT(togglePlayPause(bool)));
+	connect(stop, SIGNAL(triggered(bool)), this, SLOT(clipStop()));
 }
 
 void TimelineWidget::mousePressEvent(QMouseEvent *e)
@@ -76,7 +79,7 @@ void TimelineWidget::paintEvent(QPaintEvent*)
 	painter.setPen(this->palette().foreground().color());
 	painter.drawLine(QLineF(	// Beat 0 marker
 						 QPointF(0.0f, this->fTopSpacing),
-						 QPointF(0.0f, this->fTopSpacing+(TW_BEAT_MARKER_LENGTH*TW_MEASURE_MARKER_MULT)))
+						 QPointF(0.0f, this->fTopSpacing+TW_MEASURE_MARKER_LENGTH))
 					 );
 	this->drawMeasureMarkers(painter);
 }
@@ -88,7 +91,7 @@ void TimelineWidget::drawClip(QPainter &p)
 	p.setPen(QColor(0, 0, 255));
 	p.setBrush(QColor(0, 0, 255, 64));
 	float pos = this->secondsToPos(this->bmiMusicItem->seconds());
-	p.drawRoundedRect(QRectF(QPointF(0, this->fTopSpacing+TW_BEAT_MARKER_LENGTH), QPointF(pos, this->height()-1)), 4.0f, 4.0f);
+	p.drawRoundedRect(QRectF(QPointF(0, this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA*TW_BEAT_MARKER_DELTA)), QPointF(pos, this->height()-1)), 4.0f, 4.0f);
 }
 
 void TimelineWidget::drawPlayMarker(QPainter &p)
@@ -131,20 +134,21 @@ void TimelineWidget::drawMeasureMarkers(QPainter &p)
 		for(int beat=1; beat<=this->iBeatsPerMeasure; beat++) {
 			float spacing = this->fMeasureSpacing/this->iBeatsPerMeasure;
 			float xpos = (this->fMeasureSpacing*measure) + (spacing*beat);
+			float markerlength = (TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA);
 			if(beat!=this->iBeatsPerMeasure) {
 				p.drawLine(	QPointF(xpos, this->fTopSpacing),
-							QPointF(xpos, this->fTopSpacing+TW_BEAT_MARKER_LENGTH)
+							QPointF(xpos, this->fTopSpacing+markerlength)
 							);
 			}
 			spacing /= 2.0f;
 			if(spacing<=TW_SUB_BEAT_SPACING)
 				continue;
-			this->drawBeatMarkers(xpos-spacing, spacing, TW_BEAT_MARKER_LENGTH*TW_BEAT_MARKER_MULT, p);
+			this->drawBeatMarkers(xpos-spacing, spacing, markerlength*TW_BEAT_MARKER_DELTA, p);
 			if(xpos>this->width())
 				break;
 		}
 		p.drawLine(	QPointF(this->fMeasureSpacing*(measure+1), this->fTopSpacing),
-					QPointF(this->fMeasureSpacing*(measure+1), this->fTopSpacing+(TW_BEAT_MARKER_LENGTH*TW_MEASURE_MARKER_MULT))
+					QPointF(this->fMeasureSpacing*(measure+1), this->fTopSpacing+TW_MEASURE_MARKER_LENGTH)
 					);
 	}
 }
@@ -156,6 +160,19 @@ void TimelineWidget::drawBeatMarkers(float pos, float spacing, float length, QPa
 	spacing /= 2.0f;
 	if(spacing<TW_SUB_BEAT_SPACING)
 		return;
-	this->drawBeatMarkers(pos-spacing, spacing, length*TW_BEAT_MARKER_MULT, p);
-	this->drawBeatMarkers(pos+spacing, spacing, length*TW_BEAT_MARKER_MULT, p);
+	this->drawBeatMarkers(pos-spacing, spacing, length*TW_BEAT_MARKER_DELTA, p);
+	this->drawBeatMarkers(pos+spacing, spacing, length*TW_BEAT_MARKER_DELTA, p);
+}
+
+void TimelineWidget::togglePlayPause(bool play)
+{
+	if(play)
+		this->bmiMusicItem->play();
+	else
+		this->bmiMusicItem->pause();
+}
+
+void TimelineWidget::clipStop()
+{
+	this->bmiMusicItem->stop();
 }

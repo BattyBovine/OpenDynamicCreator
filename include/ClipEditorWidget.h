@@ -19,7 +19,7 @@ public:
 	explicit ClipEditorWidget(QWidget *parent = 0);
 	~ClipEditorWidget();
 
-	void setClipEditor(BaseMusicItem*, float, int, int);
+	void setClipEditor(BaseMusicItem*, float, int, int, QAction*, QAction*);
 
 private:
 	Ui::ClipEditorWidget *ui;

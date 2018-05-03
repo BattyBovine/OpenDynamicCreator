@@ -169,6 +169,34 @@ ClipGroupItem::ClipGroupItem(QString t) : BaseMusicItem(t)
 	this->setIcon(QIcon(":/icons/mixer"));
 }
 
+void ClipGroupItem::play()
+{
+	int count = this->rowCount();
+	BaseMusicItem **children = new BaseMusicItem*[count];
+	for(int i=0; i<count; i++)
+		children[i] = static_cast<BaseMusicItem*>(this->child(i));
+	for(int i=0; i<count; i++)
+		children[i]->play();
+}
+void ClipGroupItem::pause()
+{
+	int count = this->rowCount();
+	BaseMusicItem **children = new BaseMusicItem*[count];
+	for(int i=0; i<count; i++)
+		children[i] = static_cast<BaseMusicItem*>(this->child(i));
+	for(int i=0; i<count; i++)
+		children[i]->pause();
+}
+void ClipGroupItem::stop()
+{
+	int count = this->rowCount();
+	BaseMusicItem **children = new BaseMusicItem*[count];
+	for(int i=0; i<count; i++)
+		children[i] = static_cast<BaseMusicItem*>(this->child(i));
+	for(int i=0; i<count; i++)
+		children[i]->stop();
+}
+
 
 
 ClipItem::ClipItem(QString t, QString f) : BaseMusicItem(t)
@@ -188,11 +216,6 @@ void ClipItem::setClip(QString c)
 void ClipItem::setVolume(float v)
 {
 	this->playerClip.setVolume(v);
-}
-
-void ClipItem::play()
-{
-	this->playerClip.play();
 }
 
 Beat ClipItem::length()

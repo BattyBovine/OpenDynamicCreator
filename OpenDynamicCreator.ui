@@ -469,6 +469,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionStop</sender>
+   <signal>triggered()</signal>
+   <receiver>OpenDynamicCreator</receiver>
+   <slot>resetPlayerState()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>525</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setExtraConditionValueVisible(int)</slot>
@@ -486,5 +502,6 @@
   <slot>redo()</slot>
   <slot>addState()</slot>
   <slot>addStateSwitch()</slot>
+  <slot>resetPlayerState()</slot>
  </slots>
 </ui>

@@ -19,7 +19,9 @@ public:
 	int loadAudioFile(QUrl);
 	bool loadWav(QUrl);
 	bool loadVorbis(QUrl);
+
 	void play();
+	void pause();
 	void stop();
 
 	void setSampleRate(int s) { this->iSampleRate=s; }

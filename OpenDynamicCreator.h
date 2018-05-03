@@ -68,6 +68,8 @@ public slots:
 	void customContextMenuMusic(QPoint);
 	void showAboutDialogue();
 
+	void resetPlayerState();
+
 private:
 	Ui::OpenDynamicCreator *ui;
 

@@ -2,6 +2,7 @@
 #define TIMELINEWIDGET_H
 
 #include <QWidget>
+#include <QAction>
 #include <QPainter>
 #include <QPaintEvent>
 #include <QMouseEvent>
@@ -10,21 +11,20 @@
 #include "Widgets/MusicTreeView.h"
 #include "Classes/MusicEvent.h"
 
-#define TW_BEAT_MARKER_LENGTH		3.0f
-#define TW_MEASURE_MARKER_MULT		2.0f
-#define TW_BEAT_MARKER_MULT			0.75
+#define TW_MEASURE_MARKER_LENGTH	6.0f
+#define TW_BEAT_MARKER_DELTA		0.75f
+#define TW_SUB_BEAT_SPACING			8.0f
 
 #define TW_MIN_MEASURE_SPACING		8.0f
 #define TW_DEFAULT_MEASURE_SPACING	40.0f
 #define TW_MAX_MEASURE_SPACING		480.0f
-#define TW_SUB_BEAT_SPACING			4.0f
 
 
 class TimelineWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TimelineWidget(BaseMusicItem*, float, int, int, bool readonly=true, QWidget *parent=0);
+	explicit TimelineWidget(BaseMusicItem*, float, int, int, QAction*, QAction*, bool readonly=true, QWidget *parent=0);
 
 	BaseMusicItem *musicItem() { return this->bmiMusicItem; }
 	float tempo() { return this->fTempo; }
@@ -41,6 +41,9 @@ public slots:
 
 	void setReadOnly(bool r) { this->bReadOnly=r; }
 	void setBeatUnitSnapFromCombo(int s) { this->iBeatUnitSnap=powf(2,s); }
+
+	void togglePlayPause(bool);
+	void clipStop();
 
 signals:
 	void zoomChanged(float);

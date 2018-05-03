@@ -61,6 +61,8 @@ public:
 	virtual MusicEventList events() const { return this->vEvents; }
 
 	virtual void play() = NULL;
+	virtual void pause() = NULL;
+	virtual void stop() = NULL;
 	virtual float seconds() = NULL;
 	virtual Beat length() = NULL;
 
@@ -102,6 +104,9 @@ public:
 	virtual float playbackSpeed() const { return this->fPlaybackSpeed; }
 
 	virtual void play() { return; }
+	virtual void pause() { return; }
+	virtual void stop() { return; }
+
 	virtual float seconds() { return 0.0f; }
 	virtual Beat length() { return Beat(); }
 
@@ -124,7 +129,10 @@ public:
 		return cgi;
 	}
 
-	virtual void play() { return; }
+	virtual void play();
+	virtual void pause();
+	virtual void stop();
+
 	virtual float seconds() { return 0.0f; }
 	virtual Beat length() { return Beat(); }
 };
@@ -147,7 +155,10 @@ public:
 
 	virtual void setVolume(float);
 
-	virtual void play();
+	virtual void play() { this->playerClip.play(); }
+	virtual void pause() { this->playerClip.pause(); }
+	virtual void stop() { this->playerClip.stop(); }
+
 	virtual float seconds() { return playerClip.length(); }
 	virtual Beat length();
 
