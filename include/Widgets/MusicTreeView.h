@@ -145,7 +145,7 @@ public:
 
 	void setClip(QString);
 
-	virtual void setVolume(float v) { BaseMusicItem::setVolume(v); }
+	virtual void setVolume(float);
 
 	virtual void play();
 	virtual float seconds() { return playerClip.length(); }

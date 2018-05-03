@@ -1,5 +1,5 @@
-#ifndef PCMDATA_H
-#define PCMDATA_H
+#ifndef CLIPPLAYER_H
+#define CLIPPLAYER_H
 
 #include <QDebug>
 #include <QUrl>
@@ -20,10 +20,14 @@ public:
 	bool loadWav(QUrl);
 	bool loadVorbis(QUrl);
 	void play();
+	void stop();
 
 	void setSampleRate(int s) { this->iSampleRate=s; }
 
-	QByteArray *data() { return &this->baPCMData; }
+	void setVolume(float v) { this->fVolume=v; if(this->aoPlayer) this->aoPlayer->setVolume(v); }
+
+	float volume() { return this->fVolume; }
+
 	int sampleRate() { return this->iSampleRate; }
 	quint8 channelCount() { return this->iChannelCount; }
 	int bitrateLower() { return this->iLowerBitrate; }
@@ -33,6 +37,8 @@ public:
 	qreal length() { return this->fSeconds; }
 
 private:
+	void configurePlayer();
+
 	int iSampleRate=0;
 	quint8 iChannelCount=0;
 	int iLowerBitrate=0;
@@ -43,8 +49,10 @@ private:
 	qreal fSeconds=0.0f;
 
 	QUrl urlFilePath;
-	QByteArray baPCMData;
+	QBuffer bufferPCMData;
 	QAudioOutput *aoPlayer=NULL;
+
+	qreal fVolume=1.0f;
 
 	enum ClipError {
 		CLIP_OK,
@@ -53,4 +61,4 @@ private:
 	};
 };
 
-#endif // PCMDATA_H
+#endif // CLIPPLAYER_H

@@ -10,18 +10,17 @@ ClipPlayer::ClipPlayer(QUrl file)
 }
 ClipPlayer::~ClipPlayer()
 {
-	this->aoPlayer->stop();
-	if(this->aoPlayer)
-		this->aoPlayer->deleteLater();
+	this->stop();
+	if(this->aoPlayer) this->aoPlayer->deleteLater();
 }
 
 int ClipPlayer::loadAudioFile(QUrl file)
 {
-	if(this->loadWav(file))
-		return CLIP_OK;
-	if(this->loadVorbis(file))
-		return CLIP_OK;
-	return CLIP_FORMAT_UNRECOGNIZED;
+	this->stop();
+	if(!this->loadWav(file) && !this->loadVorbis(file))
+		return CLIP_FORMAT_UNRECOGNIZED;
+	this->configurePlayer();
+	return CLIP_OK;
 }
 bool ClipPlayer::loadWav(QUrl file)
 {
@@ -38,7 +37,8 @@ bool ClipPlayer::loadWav(QUrl file)
 
 	char *pcmbuffer = new char[wav.totalSampleCount*wav.bytesPerSample];
 	size_t bytecount = drwav_read_raw(&wav, wav.totalSampleCount*wav.bytesPerSample, pcmbuffer);
-	this->baPCMData.append(pcmbuffer, bytecount);
+	this->bufferPCMData.buffer().clear();
+	this->bufferPCMData.buffer().append(pcmbuffer, bytecount);
 	delete pcmbuffer;
 	drwav_uninit(&wav);
 
@@ -60,10 +60,10 @@ bool ClipPlayer::loadVorbis(QUrl file)
 	this->iSampleSize = 16;
 	this->fSeconds = ov_time_total(&vorb,-1);
 
+	this->bufferPCMData.buffer().clear();
 	char pcmbuffer[4096];
 	int section;
 	bool eof = false;
-	this->baPCMData.clear();
 	while(!eof) {
 		long retval = ov_read(&vorb, pcmbuffer, sizeof(pcmbuffer), 0, 2, 1, &section);
 		if(retval==0) {
@@ -71,14 +71,15 @@ bool ClipPlayer::loadVorbis(QUrl file)
 		} else if(retval<0) {
 			qDebug() << QString("Error decoding Ogg Vorbis data; attempting to ignore...");
 		} else {
-			this->baPCMData.append(pcmbuffer, retval);
+			this->bufferPCMData.buffer().append(pcmbuffer, retval);
 		}
 	}
 	ov_clear(&vorb);
+
 	return true;
 }
 
-void ClipPlayer::play()
+void ClipPlayer::configurePlayer()
 {
 	QAudioFormat format;
 	format.setSampleRate(this->iSampleRate);
@@ -91,17 +92,24 @@ void ClipPlayer::play()
 	QAudioDeviceInfo device;
 	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 	foreach(device, devices) {
-		if(device.isFormatSupported(format)) {
-			qDebug() << QString(device.deviceName());
-			qDebug() << QString("  Requested format supported by %1").arg(device.deviceName());
+		if(device.isFormatSupported(format))
 			break;
-		}
 	}
 
-	if(this->aoPlayer) delete this->aoPlayer;
+	if(this->aoPlayer) this->aoPlayer->deleteLater();
 	this->aoPlayer = new QAudioOutput(device, format);
-	this->aoPlayer->setVolume(1.0f);
-	QBuffer *buf = new QBuffer(&this->baPCMData);
-	buf->open(QIODevice::ReadOnly);
-	this->aoPlayer->start(buf);
+	this->aoPlayer->setVolume(this->fVolume);
+}
+
+void ClipPlayer::play()
+{
+	if(!this->bufferPCMData.isOpen())
+		this->bufferPCMData.open(QIODevice::ReadOnly);
+	this->aoPlayer->start(&this->bufferPCMData);
+}
+
+void ClipPlayer::stop()
+{
+	if(this->aoPlayer) this->aoPlayer->stop();
+	this->bufferPCMData.close();
 }

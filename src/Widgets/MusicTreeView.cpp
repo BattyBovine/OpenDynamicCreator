@@ -185,6 +185,11 @@ void ClipItem::setClip(QString c)
 	this->playerClip.loadAudioFile(this->urlClip);
 }
 
+void ClipItem::setVolume(float v)
+{
+	this->playerClip.setVolume(v);
+}
+
 void ClipItem::play()
 {
 	this->playerClip.play();
