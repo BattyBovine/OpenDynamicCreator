@@ -24,6 +24,13 @@ TimelineWidget::TimelineWidget(BaseMusicItem *musicitem, float tempo, int beatsp
 	this->pmiPlayMarker->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	this->gsTimeline->addItem(this->pmiPlayMarker);
 
+	if(musicitem) {
+		this->ctiClip = new ClipTimelineItem(this->fTopSpacing);
+		this->ctiClip->setTimelinePos(Beat().toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit));
+		this->ctiClip->setLength(this->secondsToPos(musicitem->seconds()));
+		this->gsTimeline->addItem(this->ctiClip);
+	}
+
 	connect(playpause, SIGNAL(toggled(bool)), this, SLOT(togglePlayPause(bool)));
 	connect(stop, SIGNAL(triggered(bool)), this, SLOT(clipStop()));
 }
@@ -36,6 +43,7 @@ void TimelineWidget::resizeEvent(QResizeEvent *e)
 	this->setAlignment(Qt::AlignTop|Qt::AlignLeft);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	this->ctiClip->setHeight(100.0f);
 	QGraphicsView::resizeEvent(e);
 }
 
@@ -92,10 +100,6 @@ void TimelineWidget::wheelEvent(QWheelEvent *e)
 
 void TimelineWidget::drawClip()
 {
-//	p.setPen(QColor(0, 0, 255));
-//	p.setBrush(QColor(0, 0, 255, 64));
-//	float pos = this->secondsToPos(this->bmiMusicItem->seconds());
-//	p.drawRoundedRect(QRectF(QPointF(0, this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA*TW_BEAT_MARKER_DELTA)), QPointF(pos, this->height()-1)), 4.0f, 4.0f);
 }
 
 void TimelineWidget::drawEventMarkers()

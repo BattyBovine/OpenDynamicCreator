@@ -8,6 +8,7 @@
 #include <QWheelEvent>
 
 #include "Widgets/GraphicsItems/PlayMarkerItem.h"
+#include "Widgets/GraphicsItems/ClipTimelineItem.h"
 #include "Widgets/MusicTreeView.h"
 #include "Classes/MusicEvent.h"
 
@@ -70,6 +71,7 @@ private:
 	QGraphicsScene *gsTimeline=NULL;
 	BaseMusicItem *bmiMusicItem=NULL;
 	PlayMarkerItem *pmiPlayMarker=NULL;
+	ClipTimelineItem *ctiClip=NULL;
 	QList<QGraphicsLineItem*> lMeasureLines;
 
 	float fTempo;
