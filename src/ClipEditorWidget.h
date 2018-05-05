@@ -5,7 +5,7 @@
 
 #include "Widgets/MusicTreeView.h"
 #include "Widgets/MixerWidget.h"
-#include "Widgets/TimelineWidget.h"
+#include "Widgets/GraphicsItems/TimelineWidget.h"
 
 namespace Ui {
 class ClipEditorWidget;

@@ -7,12 +7,12 @@ MixerWidget::MixerWidget(BaseMusicItem *musicitem, bool groupmode, QWidget *pare
 {
 	ui->setupUi(this);
 
-	this->attachMusicItem(musicitem);
-	this->setGroupMode(groupmode);
-
 	connect(ui->comboNoteSnap, SIGNAL(currentIndexChanged(int)), this, SLOT(snapComboChanged(int)));
 	connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(volumedBChanged(int)));
 	connect(ui->sliderPan, SIGNAL(valueChanged(int)), this, SLOT(panChanged(int)));
+
+	this->attachMusicItem(musicitem);
+	this->setGroupMode(groupmode);
 }
 
 MixerWidget::~MixerWidget()

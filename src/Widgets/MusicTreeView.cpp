@@ -216,6 +216,7 @@ void ClipItem::setClip(QString c)
 void ClipItem::setVolume(float v)
 {
 	this->playerClip.setVolume(v);
+	BaseMusicItem::setVolume(v);
 }
 
 Beat ClipItem::length()

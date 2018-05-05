@@ -21,7 +21,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-INCLUDEPATH += include
+INCLUDEPATH += src
 
 LIBS += -logg -lvorbis -lvorbisfile
 
@@ -33,29 +33,31 @@ SOURCES += main.cpp \
 	src/Commands/OdcUndoCommands.cpp \
 	src/ClipGroupEditorWidget.cpp \
 	src/MusicPropertiesWidget.cpp \
-	src/Widgets/TimelineWidget.cpp \
+	src/Widgets/GraphicsItems/TimelineWidget.cpp \
 	src/ClipEditorWidget.cpp \
     src/Widgets/MixerWidget.cpp \
     src/Widgets/MixerVolumeSlider.cpp \
     src/Widgets/MixerPanSlider.cpp \
-    src/Classes/ClipPlayer.cpp
+    src/Classes/ClipPlayer.cpp \
+    src/Widgets/GraphicsItems/PlayMarkerItem.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
-	include/StatePropertiesEditor.h \
-	include/Widgets/MusicTreeView.h \
-	include/Widgets/StatesTreeView.h \
-	include/Commands/OdcUndoCommands.h \
-	include/ClipGroupEditorWidget.h \
-	include/MusicPropertiesWidget.h \
-	include/Widgets/TimelineWidget.h \
-	include/ClipEditorWidget.h \
-    include/Widgets/MixerWidget.h \
-    include/Widgets/MixerVolumeSlider.h \
-    include/Widgets/MixerPanSlider.h \
-    include/Classes/MusicEvent.h \
-    include/Classes/ClipPlayer.h \
-    include/Libraries/dr_wav.h
+	src/StatePropertiesEditor.h \
+	src/Widgets/MusicTreeView.h \
+	src/Widgets/StatesTreeView.h \
+	src/Commands/OdcUndoCommands.h \
+	src/ClipGroupEditorWidget.h \
+	src/MusicPropertiesWidget.h \
+	src/Widgets/GraphicsItems/TimelineWidget.h \
+	src/ClipEditorWidget.h \
+	src/Widgets/MixerWidget.h \
+	src/Widgets/MixerVolumeSlider.h \
+	src/Widgets/MixerPanSlider.h \
+	src/Classes/MusicEvent.h \
+	src/Classes/ClipPlayer.h \
+	src/Libraries/dr_wav.h \
+    src/Widgets/GraphicsItems/PlayMarkerItem.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \
