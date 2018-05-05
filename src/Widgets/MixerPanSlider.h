@@ -13,9 +13,11 @@ class MixerPanSlider : public QSlider
 	Q_PROPERTY(int centerSnapRange READ centerSnapRange WRITE setCenterSnapRange)
 
 public:
-	explicit MixerPanSlider(QWidget *parent = 0);
+	explicit MixerPanSlider(QWidget *parent = 0) : QSlider(parent){}
 
+	virtual void keyPressEvent(QKeyEvent*);
 	virtual void mousePressEvent(QMouseEvent*);
+	virtual void mouseMoveEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);
 	virtual void mouseDoubleClickEvent(QMouseEvent*);
 
@@ -27,7 +29,6 @@ private slots:
 
 private:
 	int iCentreSnapRange = 0;
-	bool bSnapToCentre = false;
 };
 
 #endif // MIXERPANSLIDER_H

@@ -1,21 +1,30 @@
 #include "Widgets/MixerPanSlider.h"
 
-MixerPanSlider::MixerPanSlider(QWidget *parent) : QSlider(parent)
+void MixerPanSlider::keyPressEvent(QKeyEvent *e)
 {
-	connect(this, SIGNAL(valueChanged(int)), this, SLOT(sliderConvenience(int)));
+	QSlider::keyPressEvent(e);
+	this->sliderConvenience(this->value());
 }
-
 void MixerPanSlider::mousePressEvent(QMouseEvent *e)
 {
 	QSlider::mousePressEvent(e);
-	if(e->button()==Qt::LeftButton)
-		this->bSnapToCentre = true;
+	this->sliderConvenience(this->value());
+}
+void MixerPanSlider::mouseMoveEvent(QMouseEvent *e)
+{
+	if(e->button()==Qt::LeftButton && (abs(this->value())<=this->centerSnapRange()))
+		this->setValue(0);
+	else
+		QSlider::mouseMoveEvent(e);
+	this->sliderConvenience(this->value());
 }
 void MixerPanSlider::mouseReleaseEvent(QMouseEvent *e)
 {
 	QSlider::mouseReleaseEvent(e);
-	if(e->button()==Qt::LeftButton)
-		this->bSnapToCentre = false;
+	if(e->button()==Qt::LeftButton && (abs(this->value())<=this->centerSnapRange()))
+		this->setValue(0);
+	else
+		QSlider::mouseReleaseEvent(e);
 }
 void MixerPanSlider::mouseDoubleClickEvent(QMouseEvent *e)
 {
@@ -28,10 +37,6 @@ void MixerPanSlider::mouseDoubleClickEvent(QMouseEvent *e)
 
 void MixerPanSlider::sliderConvenience(int value)
 {
-	if(this->bSnapToCentre && (value!=0 && abs(value)<=this->iCentreSnapRange)) {
-		this->setValue(0);
-		return;
-	}
 	QMargins margins = this->parentWidget()->layout()->contentsMargins();
 	QRect geometry = this->rect();
 	int w = geometry.width()-margins.left()-margins.right();
