@@ -63,8 +63,7 @@ public:
 	virtual void play() = NULL;
 	virtual void pause() = NULL;
 	virtual void stop() = NULL;
-	virtual float seconds() = NULL;
-	virtual Beat length() = NULL;
+	virtual Beat beats() = NULL;
 
 protected:
 	float fVolume;
@@ -106,9 +105,7 @@ public:
 	virtual void play() { return; }
 	virtual void pause() { return; }
 	virtual void stop() { return; }
-
-	virtual float seconds() { return 0.0f; }
-	virtual Beat length() { return Beat(); }
+	virtual Beat beats() { return Beat(); }
 
 private:
 	float fTempo;
@@ -132,9 +129,7 @@ public:
 	virtual void play();
 	virtual void pause();
 	virtual void stop();
-
-	virtual float seconds() { return 0.0f; }
-	virtual Beat length() { return Beat(); }
+	virtual Beat beats() { return Beat(); }
 };
 
 class ClipItem : public BaseMusicItem
@@ -152,19 +147,19 @@ public:
 	}
 
 	void setClip(QString);
+	void setOffset(Beat);
 
 	virtual void setVolume(float);
 
 	virtual void play() { this->playerClip.play(); }
 	virtual void pause() { this->playerClip.pause(); }
 	virtual void stop() { this->playerClip.stop(); }
-
-	virtual float seconds() { return playerClip.length(); }
-	virtual Beat length();
+	virtual Beat beats();
 
 private:
 	QUrl urlClip;
 	ClipPlayer playerClip;
+	Beat beatLength;
 };
 
 

@@ -219,10 +219,13 @@ void ClipItem::setVolume(float v)
 	BaseMusicItem::setVolume(v);
 }
 
-Beat ClipItem::length()
+Beat ClipItem::beats()
 {
-	TrackItem *track = (TrackItem*)this->parent();
-	while(track->type()!=MIT_TRACK)
-		track = (TrackItem*)track->parent();
-	return Beat::fromSeconds(this->seconds(), track->tempo(), track->beatsPerMeasure());
+	if(this->beatLength==Beat()) {
+		TrackItem *track = (TrackItem*)this->parent();
+		while(track->type()!=MIT_TRACK)
+			track = (TrackItem*)track->parent();
+		this->beatLength = Beat::fromSeconds(this->playerClip.length(), track->tempo(), track->beatsPerMeasure());
+	}
+	return this->beatLength;
 }

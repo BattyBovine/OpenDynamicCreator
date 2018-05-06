@@ -14,17 +14,16 @@ class TimelineItem : public QGraphicsItem
 public:
 	TimelineItem(float topspacing);
 
-	void setTopSpacing(float s) { this->fTopSpacing=s; }
-	void setTimelineBeat(Beat p, float s, quint8 b, quint8 u) { this->beatPosition=p; this->setTimelinePos(p.toTimelinePosition(s,b,u)); }
-	void setTimelinePos(float p) { this->setPos(p,0.0f); }
+	virtual void setTopSpacing(float s) { this->fTopSpacing=s; }
+	virtual void setTimelinePos(Beat p, float s, quint8 b, quint8 u) { this->beatPosition=p; this->setTimelinePos(p.toTimelinePosition(s,b,u)); }
+	virtual void setTimelinePos(float p) { this->setPos(p,0.0f); }
 
 	float topSpacing() { return this->fTopSpacing; }
 	Beat timelineBeat() { return this->beatPosition; }
 	float timelinePos() { return this->pos().x(); }
 
 protected:
-	void setBoundingRect(QRectF b) { this->rectBounds=b; }
-	QRectF boundingRect() const;
+	virtual QRectF boundingRect() const { return this->rectBounds; }
 
 private:
 	QRectF rectBounds;

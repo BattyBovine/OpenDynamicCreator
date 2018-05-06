@@ -12,12 +12,12 @@ TimelineWidget::TimelineWidget(BaseMusicItem *musicitem, float tempo, int beatsp
 
 	this->setFrameShape(Shape::NoFrame);
 	this->setAttribute(Qt::WA_TranslucentBackground);
+	this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 	this->viewport()->setAutoFillBackground(false);
 
 	this->gsTimeline = new QGraphicsScene(this);
-	this->gsTimeline->setSceneRect(0,0,this->bmiMusicItem->length().toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit),100);
+	this->gsTimeline->setSceneRect(0,0,this->bmiMusicItem->beats().toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit),100);
 	this->setScene(this->gsTimeline);
-	this->redrawStageElements();
 
 	this->pmiPlayMarker = new PlayMarkerItem(this->fTopSpacing);
 	this->pmiPlayMarker->setTimelinePos(0.0f);
@@ -26,10 +26,13 @@ TimelineWidget::TimelineWidget(BaseMusicItem *musicitem, float tempo, int beatsp
 
 	if(musicitem) {
 		this->ctiClip = new ClipTimelineItem(this->fTopSpacing);
-		this->ctiClip->setTimelinePos(Beat().toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit));
-		this->ctiClip->setLength(this->secondsToPos(musicitem->seconds()));
+		this->ctiClip->setTimelinePos(Beat(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
+		this->ctiClip->setLength(musicitem->beats(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
+		this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 		this->gsTimeline->addItem(this->ctiClip);
 	}
+
+	this->setZoom(-1000.0f);
 
 	connect(playpause, SIGNAL(toggled(bool)), this, SLOT(togglePlayPause(bool)));
 	connect(stop, SIGNAL(triggered(bool)), this, SLOT(clipStop()));
@@ -43,24 +46,30 @@ void TimelineWidget::resizeEvent(QResizeEvent *e)
 	this->setAlignment(Qt::AlignTop|Qt::AlignLeft);
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	this->ctiClip->setHeight(100.0f);
+	this->ctiClip->setHeight(this->height()-this->horizontalScrollBar()->height());
 	QGraphicsView::resizeEvent(e);
 }
 
 void TimelineWidget::mousePressEvent(QMouseEvent *e)
 {
-	this->beatMouseClickPos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
-	QWidget::mousePressEvent(e);
+	if(e->button()==Qt::LeftButton) {
+		this->bClickMode = true;
+		this->beatMouseClickPos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
+		this->beatClipItemStart = this->ctiClip->timelineBeat();
+	}
+	QGraphicsView::mousePressEvent(e);
 }
 
 void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 {
-	if(!this->bReadOnly) {
+	if(this->bClickMode && !this->bReadOnly) {
 		this->beatMouseMovePos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
 		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).beat()) >= Beat::quarterNote())
 			this->bMoveMode = true;
+		if(this->bMoveMode)
+			this->ctiClip->setTimelinePos(this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
 	}
-	QWidget::mouseMoveEvent(e);
+	QGraphicsView::mouseMoveEvent(e);
 }
 
 void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
@@ -68,39 +77,29 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 	switch(e->button()) {
 	case Qt::LeftButton:
 		if(!this->bMoveMode)
-			this->beatPlayMarker = this->beatMouseClickPos;
+			this->pmiPlayMarker->setTimelinePos(this->beatMouseClickPos, this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
 		break;
 	case Qt::RightButton:
 		this->bmiMusicItem->addEvent(MusicEvent(this->beatMouseClickPos));
 		break;
 	}
-	this->bMoveMode = false;
-	this->pmiPlayMarker->setTimelinePos(this->beatPlayMarker.toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit));
-	QWidget::mouseReleaseEvent(e);
+	this->bClickMode = this->bMoveMode = false;
+	QGraphicsView::mouseReleaseEvent(e);
 }
 
 void TimelineWidget::wheelEvent(QWheelEvent *e)
 {
-	float scalefactor = 0;
+	this->setTransformationAnchor(QGraphicsView::NoAnchor);
+	this->setResizeAnchor(QGraphicsView::NoAnchor);
+
+	float zoomdelta = 0.0f;
 	int scroll = e->pixelDelta().y();
-	if(scroll==0)	scalefactor = (e->angleDelta().y()/2400.0f);
-	else			scalefactor = (scroll/20.0f);
-
-	QTransform transform = this->transform();
-	float scale = transform.m11()+scalefactor;
-	scale = std::max(TW_MIN_SCALE, std::min(scale, TW_MAX_SCALE));
-	transform.setMatrix(scale,				transform.m12(),	transform.m13(),
-						transform.m21(),	transform.m22(),	transform.m23(),
-						transform.m31(),	transform.m32(),	transform.m33());
-	this->setTransform(transform);
-	this->redrawStageElements(scale);
+	if(scroll==0)	zoomdelta = (e->angleDelta().y()/2400.0f);
+	else			zoomdelta = (scroll/20.0f);
+	this->setZoom(zoomdelta);
 }
 
 
-
-void TimelineWidget::drawClip()
-{
-}
 
 void TimelineWidget::drawEventMarkers()
 {
@@ -132,7 +131,7 @@ void TimelineWidget::drawMeasureMarkers(float scale)
 	this->lMeasureLines.append(this->gsTimeline->addLine(0.0f, this->fTopSpacing,
 														 0.0f, this->fTopSpacing+TW_MEASURE_MARKER_LENGTH,
 														 pen));
-	unsigned int measurecount = static_cast<ClipItem*>(this->bmiMusicItem)->length().measureCount();
+	unsigned int measurecount = static_cast<ClipItem*>(this->bmiMusicItem)->beats().measureCount();
 	for(unsigned int measure=0; measure<measurecount; measure++) {
 		for(int beat=1; beat<=this->iBeatsPerMeasure; beat++) {
 			float spacing = this->fMeasureSpacing/this->iBeatsPerMeasure;
@@ -180,7 +179,25 @@ void TimelineWidget::clipStop()
 
 
 
+void TimelineWidget::setZoom(float zoomdelta)
+{
+	QTransform transform = this->transform();
+	float scale = transform.m11()+zoomdelta;
+	scale = std::max(TW_MIN_SCALE, std::min(scale, TW_MAX_SCALE));
+	transform.setMatrix(scale,				transform.m12(),	transform.m13(),
+						transform.m21(),	transform.m22(),	transform.m23(),
+						transform.m31(),	transform.m32(),	transform.m33());
+	this->setTransform(transform);
+	if(this->pmiPlayMarker)
+		this->centerOn(this->pmiPlayMarker->x(),0.0f);
+	else
+		this->centerOn(0.0f,0.0f);
+	this->redrawStageElements(scale);
+}
+
 void TimelineWidget::redrawStageElements(float scale)
 {
 	this->drawMeasureMarkers(scale);
+	if(this->ctiClip)
+		this->ctiClip->setTimelineScale(scale);
 }

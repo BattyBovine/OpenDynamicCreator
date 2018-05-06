@@ -39,6 +39,7 @@ public slots:
 	void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure=b; }
 	void setBeatUnit(int b) { this->iBeatUnit=b; }
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; }
+	void setZoom(float);
 
 	void setReadOnly(bool r) { this->bReadOnly=r; }
 	void setBeatUnitSnapFromCombo(int s) { this->iBeatUnitSnap=powf(2,s); }
@@ -60,7 +61,6 @@ private:
 	void setTopSpacing(float t) { this->fTopSpacing=t; }
 	void redrawStageElements(float scale=1.0f);
 
-	void drawClip();
 	void drawEventMarkers();
 	void drawMeasureMarkers(float);
 	void drawBeatMarkers(float, float, float, float, QPen&);
@@ -79,11 +79,13 @@ private:
 	int iBeatUnit;
 	float fTopSpacing=0.0f;
 	float fMeasureSpacing=0.0f;
+	bool bReadOnly=false;
 
 	Beat beatPlayMarker;
 	Beat beatMouseClickPos, beatMouseMovePos;
+	Beat beatClipItemStart;
 	quint8 iBeatUnitSnap=4;
-	bool bReadOnly=false;
+	bool bClickMode=false;
 	bool bMoveMode=false;
 };
 
