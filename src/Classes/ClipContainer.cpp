@@ -1,20 +1,45 @@
-#include "Classes/ClipPlayer.h"
+#include "Classes/ClipContainer.h"
 
 #define DR_WAV_IMPLEMENTATION
 #include <Libraries/dr_wav.h>
 #undef DR_WAV_IMPLEMENTATION
 
-ClipPlayer::ClipPlayer(QUrl file)
+ClipContainer::ClipContainer(QUrl file)
 {
 	this->loadAudioFile(file);
 }
-ClipPlayer::~ClipPlayer()
+ClipContainer::ClipContainer(const ClipContainer &c)
+{
+	this->copy(c);
+}
+ClipContainer &ClipContainer::operator=(const ClipContainer &c)
+{
+	this->copy(c);
+	return *this;
+}
+ClipContainer::~ClipContainer()
 {
 	this->stop();
 	if(this->aoPlayer) this->aoPlayer->deleteLater();
 }
+void ClipContainer::copy(const ClipContainer &c)
+{
+	this->urlFilePath = c.urlFilePath;
+	this->bufferPCMData.setData(c.bufferPCMData.buffer());
+	this->iSampleRate = c.iSampleRate;
+	this->iChannelCount = c.iChannelCount;
+	this->iLowerBitrate = c.iLowerBitrate;
+	this->iNominalBitrate = c.iNominalBitrate;
+	this->iUpperBitrate = c.iUpperBitrate;
+	this->iBitrateWindow = c.iBitrateWindow;
+	this->iSampleSize = c.iSampleSize;
+	this->fSeconds = c.fSeconds;
+	this->fVolume = c.fVolume;
 
-int ClipPlayer::loadAudioFile(QUrl file)
+	this->configurePlayer();
+}
+
+int ClipContainer::loadAudioFile(QUrl file)
 {
 	this->stop();
 	if(!this->loadWav(file) && !this->loadVorbis(file))
@@ -22,7 +47,7 @@ int ClipPlayer::loadAudioFile(QUrl file)
 	this->configurePlayer();
 	return CLIP_OK;
 }
-bool ClipPlayer::loadWav(QUrl file)
+bool ClipContainer::loadWav(QUrl file)
 {
 	drwav wav;
 	if(!drwav_init_file(&wav, file.toLocalFile().toStdString().c_str()))
@@ -44,7 +69,7 @@ bool ClipPlayer::loadWav(QUrl file)
 
 	return true;
 }
-bool ClipPlayer::loadVorbis(QUrl file)
+bool ClipContainer::loadVorbis(QUrl file)
 {
 	OggVorbis_File vorb;
 	if(ov_fopen(file.toLocalFile().toStdString().c_str(), &vorb) < 0)
@@ -79,7 +104,7 @@ bool ClipPlayer::loadVorbis(QUrl file)
 	return true;
 }
 
-void ClipPlayer::configurePlayer()
+void ClipContainer::configurePlayer()
 {
 	QAudioFormat format;
 	format.setSampleRate(this->iSampleRate);
@@ -96,24 +121,24 @@ void ClipPlayer::configurePlayer()
 			break;
 	}
 
-	if(this->aoPlayer) this->aoPlayer->deleteLater();
+	if(this->aoPlayer) delete this->aoPlayer;
 	this->aoPlayer = new QAudioOutput(device, format);
 	this->aoPlayer->setVolume(this->fVolume);
 }
 
-void ClipPlayer::play()
+void ClipContainer::play()
 {
 	if(!this->bufferPCMData.isOpen())
 		this->bufferPCMData.open(QIODevice::ReadOnly);
 	this->aoPlayer->start(&this->bufferPCMData);
 }
 
-void ClipPlayer::pause()
+void ClipContainer::pause()
 {
 	if(this->aoPlayer) this->aoPlayer->stop();
 }
 
-void ClipPlayer::stop()
+void ClipContainer::stop()
 {
 	this->pause();
 	this->bufferPCMData.close();

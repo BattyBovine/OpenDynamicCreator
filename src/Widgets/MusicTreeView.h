@@ -14,7 +14,7 @@
 #include <QUuid>
 
 #include "Classes/MusicEvent.h"
-#include "Classes/ClipPlayer.h"
+#include "Classes/ClipContainer.h"
 
 #define MIT_MIME "Qt/MusicItemType"
 
@@ -141,12 +141,13 @@ public:
 	virtual int type() const { return MusicItemType::MIT_CLIP; }
 	virtual QStandardItem *clone() const
 	{
-		ClipItem *ci = new ClipItem(this->text(), this->urlClip.toString());
+		ClipItem *ci = new ClipItem(this->text());
 		this->cloneBase(ci);
+		ci->playerClip = ClipContainer(this->playerClip);
 		return ci;
 	}
 
-	void setClip(QString);
+	void loadClip(QString);
 	void setOffset(Beat);
 
 	virtual void setVolume(float);
@@ -157,8 +158,7 @@ public:
 	virtual Beat beats();
 
 private:
-	QUrl urlClip;
-	ClipPlayer playerClip;
+	ClipContainer playerClip;
 	Beat beatLength;
 };
 

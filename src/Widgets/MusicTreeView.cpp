@@ -202,15 +202,15 @@ void ClipGroupItem::stop()
 ClipItem::ClipItem(QString t, QString f) : BaseMusicItem(t)
 {
 	this->setIcon(QIcon(":/icons/waveform"));
-	this->setClip(f);
+	if(!f.isEmpty())
+		this->loadClip(f);
 }
 
-void ClipItem::setClip(QString c)
+void ClipItem::loadClip(QString c)
 {
 	if(c.isEmpty())
 		return;
-	this->urlClip = QUrl(c);
-	this->playerClip.loadAudioFile(this->urlClip);
+	this->playerClip.loadAudioFile(QUrl(c));
 }
 
 void ClipItem::setVolume(float v)

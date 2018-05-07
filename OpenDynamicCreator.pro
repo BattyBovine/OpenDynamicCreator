@@ -38,10 +38,10 @@ SOURCES += main.cpp \
     src/Widgets/MixerWidget.cpp \
     src/Widgets/MixerVolumeSlider.cpp \
     src/Widgets/MixerPanSlider.cpp \
-    src/Classes/ClipPlayer.cpp \
     src/Widgets/GraphicsItems/PlayMarkerItem.cpp \
     src/Widgets/GraphicsItems/TimelineItem.cpp \
-    src/Widgets/GraphicsItems/ClipTimelineItem.cpp
+    src/Widgets/GraphicsItems/ClipTimelineItem.cpp \
+    src/Classes/ClipContainer.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -57,11 +57,11 @@ HEADERS  += version.h \
 	src/Widgets/MixerVolumeSlider.h \
 	src/Widgets/MixerPanSlider.h \
 	src/Classes/MusicEvent.h \
-	src/Classes/ClipPlayer.h \
 	src/Libraries/dr_wav.h \
     src/Widgets/GraphicsItems/PlayMarkerItem.h \
     src/Widgets/GraphicsItems/TimelineItem.h \
-    src/Widgets/GraphicsItems/ClipTimelineItem.h
+    src/Widgets/GraphicsItems/ClipTimelineItem.h \
+    src/Classes/ClipContainer.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \

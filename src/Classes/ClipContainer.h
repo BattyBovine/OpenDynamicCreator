@@ -1,5 +1,5 @@
-#ifndef CLIPPLAYER_H
-#define CLIPPLAYER_H
+#ifndef CLIPCONTAINER_H
+#define CLIPCONTAINER_H
 
 #include <QDebug>
 #include <QUrl>
@@ -10,11 +10,14 @@
 #include <vorbis/vorbisfile.h>
 
 
-class ClipPlayer
+class ClipContainer
 {
 public:
-	ClipPlayer(QUrl file=QUrl());
-	~ClipPlayer();
+	ClipContainer(QUrl file=QUrl());
+	ClipContainer(const ClipContainer&);
+	~ClipContainer();
+	ClipContainer &operator=(const ClipContainer&);
+	void copy(const ClipContainer&);
 
 	int loadAudioFile(QUrl);
 	bool loadWav(QUrl);
@@ -63,4 +66,4 @@ private:
 	};
 };
 
-#endif // CLIPPLAYER_H
+#endif // CLIPCONTAINER_H
