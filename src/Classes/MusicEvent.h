@@ -3,24 +3,23 @@
 
 class Beat
 {
-#define BEAT_TICK_UNIT 256.0f
+#define WHOLE_NOTE_TICKS 256.0f
 public:
 	Beat(int beat=0) { this->iBeat=beat; }
 
 	void setBeat(int b) { this->iBeat=b; }
 	int beat() { return this->iBeat; }
 
-	static Beat wholeNote() { return Beat(BEAT_TICK_UNIT); }
-	static Beat halfNote() { return Beat(BEAT_TICK_UNIT/2); }
-	static Beat quarterNote() { return Beat(BEAT_TICK_UNIT/4); }
-	static Beat eighthNote() { return Beat(BEAT_TICK_UNIT/8); }
-	static Beat sixteenthNote() { return Beat(BEAT_TICK_UNIT/16); }
+	static Beat wholeNote() { return Beat(WHOLE_NOTE_TICKS); }
+	static Beat halfNote() { return Beat(WHOLE_NOTE_TICKS/2); }
+	static Beat quarterNote() { return Beat(WHOLE_NOTE_TICKS/4); }
+	static Beat eighthNote() { return Beat(WHOLE_NOTE_TICKS/8); }
+	static Beat sixteenthNote() { return Beat(WHOLE_NOTE_TICKS/16); }
 
-	static Beat fromTimelinePosition(float pos, float measurespacing, int beatspermeasure, quint8 beatunit, quint8 snap) { return Beat((roundf(((pos/measurespacing)*(beatspermeasure/float(beatunit)))*snap)/snap)*BEAT_TICK_UNIT); }
-	float toTimelinePosition(float measurespacing, int beatspermeasure, quint8 beatunit) const { return (this->iBeat/BEAT_TICK_UNIT)*measurespacing*(beatunit/float(beatspermeasure)); }
-	static Beat fromSeconds(float secs, float tempo, int beatspermeasure) { return Beat(roundf(secs*(tempo/60.0f)/beatspermeasure*BEAT_TICK_UNIT)); }
-//	float toSeconds() const { return this->iBeat*(60.0f/this->fTempo); }
-	int measureCount() const { return ceilf(this->iBeat/BEAT_TICK_UNIT); }
+	static Beat fromTimelinePosition(float pos, float measurespacing, quint8 beatspermeasure, quint8 beatunit, quint8 snap) { return Beat((roundf(((pos/measurespacing)*(beatspermeasure/float(beatunit)))*snap)/snap)*WHOLE_NOTE_TICKS); }
+	float toTimelinePosition(float measurespacing, quint8 beatspermeasure, quint8 beatunit) const { return (this->iBeat*beatunit/WHOLE_NOTE_TICKS)*(measurespacing/beatspermeasure); }
+	static Beat fromSeconds(float secs, float tempo, quint8 beatunit) { return Beat(roundf(secs*(tempo/60.0f)/beatunit*WHOLE_NOTE_TICKS)); }
+	int measureCount(quint8 beatspermeasure, quint8 beatunit) const { return ceilf((this->iBeat/WHOLE_NOTE_TICKS)*(beatunit/float(beatspermeasure))); }
 
 	Beat operator+(const Beat &b)	{ return Beat(iBeat+b.iBeat); }
 	Beat operator-(const Beat &b)	{ return Beat(iBeat-b.iBeat); }

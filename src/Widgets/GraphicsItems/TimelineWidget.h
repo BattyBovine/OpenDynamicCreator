@@ -6,6 +6,7 @@
 #include <QAction>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QTimer>
 
 #include "Widgets/GraphicsItems/PlayMarkerItem.h"
 #include "Widgets/GraphicsItems/ClipTimelineItem.h"
@@ -25,16 +26,14 @@ class TimelineWidget : public QGraphicsView
 {
 	Q_OBJECT
 public:
-	explicit TimelineWidget(BaseMusicItem*, float, int, int, QAction*, QAction*, bool readonly=true, QWidget *parent=0);
+	explicit TimelineWidget(ClipItem*, float, int, int, QAction*, QAction*, bool readonly=true, QWidget *parent=0);
 
-	BaseMusicItem *musicItem() { return this->bmiMusicItem; }
 	float tempo() { return this->fTempo; }
 	int beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	int beatUnit() { return this->iBeatUnit; }
 	float measureSpacing() { return this->fMeasureSpacing; }
 
 public slots:
-	void setMusicItem(BaseMusicItem *i) { this->bmiMusicItem=i; }
 	void setTempo(float t) { this->fTempo=t; }
 	void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure=b; }
 	void setBeatUnit(int b) { this->iBeatUnit=b; }
@@ -46,6 +45,8 @@ public slots:
 
 	void togglePlayPause(bool);
 	void clipStop();
+
+	void movePlayMarkerToClipPos();
 
 signals:
 	void zoomChanged(float);
@@ -68,25 +69,27 @@ private:
 	float posToSeconds(float pos) const { return pos/(this->fMeasureSpacing/this->iBeatsPerMeasure)*(60.0f/this->fTempo); }
 	float secondsToPos(float secs) const { return secs*(this->fTempo/60.0f)*(this->fMeasureSpacing/this->iBeatsPerMeasure); }
 
-	QGraphicsScene *gsTimeline=NULL;
-	BaseMusicItem *bmiMusicItem=NULL;
-	PlayMarkerItem *pmiPlayMarker=NULL;
-	ClipTimelineItem *ctiClip=NULL;
+	QGraphicsScene *gsTimeline = NULL;
+	ClipContainer ccClip;
+	PlayMarkerItem *pmiPlayMarker = NULL;
+	ClipTimelineItem *ctiClip = NULL;
 	QList<QGraphicsLineItem*> lMeasureLines;
 
-	float fTempo;
-	int iBeatsPerMeasure;
-	int iBeatUnit;
-	float fTopSpacing=0.0f;
-	float fMeasureSpacing=0.0f;
-	bool bReadOnly=false;
+	float fTempo = 120.0f;
+	int iBeatsPerMeasure = 4;
+	int iBeatUnit = 4;
+	float fTopSpacing = 0.0f;
+	float fMeasureSpacing = 0.0f;
+	bool bReadOnly = false;
 
 	Beat beatPlayMarker;
 	Beat beatMouseClickPos, beatMouseMovePos;
 	Beat beatClipItemStart;
-	quint8 iBeatUnitSnap=4;
-	bool bClickMode=false;
-	bool bMoveMode=false;
+	quint8 iBeatUnitSnap = 4;
+	bool bClickMode = false;
+	bool bMoveMode = false;
+
+	QTimer timerPlayMarker;
 };
 
 #endif // TIMELINEWIDGET_H

@@ -32,8 +32,9 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->iNominalBitrate = c.iNominalBitrate;
 	this->iUpperBitrate = c.iUpperBitrate;
 	this->iBitrateWindow = c.iBitrateWindow;
-	this->iSampleSize = c.iSampleSize;
-	this->fSeconds = c.fSeconds;
+	this->iBytesPerSample = c.iBytesPerSample;
+	this->fLengthSeconds = c.fLengthSeconds;
+	this->beatLength = c.beatLength;
 	this->fVolume = c.fVolume;
 
 	this->configurePlayer();
@@ -57,15 +58,16 @@ bool ClipContainer::loadWav(QUrl file)
 	this->iSampleRate = wav.sampleRate;
 	this->iChannelCount = wav.channels;
 	this->iLowerBitrate = this->iNominalBitrate = this->iUpperBitrate = this->iBitrateWindow = 0;
-	this->iSampleSize = wav.bitsPerSample;
-	this->fSeconds = wav.totalSampleCount / float(wav.sampleRate) / float(wav.bytesPerSample);
+	this->iBytesPerSample = wav.bytesPerSample;
 
-	char *pcmbuffer = new char[wav.totalSampleCount*wav.bytesPerSample];
+	char *pcmbuffer = new char[wav.totalSampleCount*wav.bytesPerSample*wav.channels];
 	size_t bytecount = drwav_read_raw(&wav, wav.totalSampleCount*wav.bytesPerSample, pcmbuffer);
 	this->bufferPCMData.buffer().clear();
 	this->bufferPCMData.buffer().append(pcmbuffer, bytecount);
 	delete pcmbuffer;
 	drwav_uninit(&wav);
+
+	this->fLengthSeconds = this->bufferPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
 
 	return true;
 }
@@ -82,8 +84,7 @@ bool ClipContainer::loadVorbis(QUrl file)
 	this->iNominalBitrate = vorb.vi->bitrate_nominal;
 	this->iUpperBitrate = vorb.vi->bitrate_upper;
 	this->iBitrateWindow = vorb.vi->bitrate_window;
-	this->iSampleSize = 16;
-	this->fSeconds = ov_time_total(&vorb,-1);
+	this->iBytesPerSample = 2;
 
 	this->bufferPCMData.buffer().clear();
 	char pcmbuffer[4096];
@@ -101,6 +102,8 @@ bool ClipContainer::loadVorbis(QUrl file)
 	}
 	ov_clear(&vorb);
 
+	this->fLengthSeconds = this->bufferPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
+
 	return true;
 }
 
@@ -109,7 +112,7 @@ void ClipContainer::configurePlayer()
 	QAudioFormat format;
 	format.setSampleRate(this->iSampleRate);
 	format.setChannelCount(this->iChannelCount);
-	format.setSampleSize(this->iSampleSize);
+	format.setSampleSize(this->iBytesPerSample*8);
 	format.setCodec("audio/pcm");
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::SignedInt);
@@ -131,11 +134,13 @@ void ClipContainer::play()
 	if(!this->bufferPCMData.isOpen())
 		this->bufferPCMData.open(QIODevice::ReadOnly);
 	this->aoPlayer->start(&this->bufferPCMData);
+	this->bIsPlaying = true;
 }
 
 void ClipContainer::pause()
 {
 	if(this->aoPlayer) this->aoPlayer->stop();
+	this->bIsPlaying = false;
 }
 
 void ClipContainer::stop()

@@ -199,33 +199,33 @@ void ClipGroupItem::stop()
 
 
 
+ClipItem::ClipItem(QString t, QUrl f) : BaseMusicItem(t)
+{
+	this->setIcon(QIcon(":/icons/waveform"));
+	this->loadClip(f);
+}
 ClipItem::ClipItem(QString t, QString f) : BaseMusicItem(t)
 {
 	this->setIcon(QIcon(":/icons/waveform"));
-	if(!f.isEmpty())
-		this->loadClip(f);
+	this->loadClip(f);
 }
 
+void ClipItem::loadClip(QUrl c)
+{
+	if(!c.isLocalFile())
+		return;
+	this->ccClip.loadAudioFile(c);
+}
 void ClipItem::loadClip(QString c)
 {
-	if(c.isEmpty())
-		return;
-	this->playerClip.loadAudioFile(QUrl(c));
+	this->loadClip(QUrl(c));
 }
 
-void ClipItem::setVolume(float v)
+ClipContainer ClipItem::clipContainer()
 {
-	this->playerClip.setVolume(v);
-	BaseMusicItem::setVolume(v);
-}
-
-Beat ClipItem::beats()
-{
-	if(this->beatLength==Beat()) {
-		TrackItem *track = (TrackItem*)this->parent();
-		while(track->type()!=MIT_TRACK)
-			track = (TrackItem*)track->parent();
-		this->beatLength = Beat::fromSeconds(this->playerClip.length(), track->tempo(), track->beatsPerMeasure());
-	}
-	return this->beatLength;
+	TrackItem *track = (TrackItem*)this->parent();
+	while(track->type()!=MIT_TRACK)
+		track = (TrackItem*)track->parent();
+	this->ccClip.beatLength = Beat::fromSeconds(this->ccClip.length(), track->tempo(), track->beatUnit());
+	return this->ccClip;
 }

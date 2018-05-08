@@ -9,9 +9,13 @@
 
 #include <vorbis/vorbisfile.h>
 
+#include "MusicEvent.h"
 
-class ClipContainer
+
+class ClipContainer : public QObject
 {
+	friend class ClipItem;
+	Q_OBJECT
 public:
 	ClipContainer(QUrl file=QUrl());
 	ClipContainer(const ClipContainer&);
@@ -27,11 +31,11 @@ public:
 	void pause();
 	void stop();
 
+	bool isPlaying() { return this->bIsPlaying; }
+
 	void setSampleRate(int s) { this->iSampleRate=s; }
 
 	void setVolume(float v) { this->fVolume=v; if(this->aoPlayer) this->aoPlayer->setVolume(v); }
-
-	float volume() { return this->fVolume; }
 
 	int sampleRate() { return this->iSampleRate; }
 	quint8 channelCount() { return this->iChannelCount; }
@@ -39,25 +43,32 @@ public:
 	int bitrateNominal() { return this->iNominalBitrate; }
 	int bitrateUpper() { return this->iUpperBitrate; }
 	int bitrateWindow() { return this->iBitrateWindow; }
-	qreal length() { return this->fSeconds; }
+	qreal length() { return this->fLengthSeconds; }
+	Beat beats() { return this->beatLength; }
+
+	float volume() { return this->fVolume; }
+	float secondsElapsed() { return (this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)); }
 
 private:
 	void configurePlayer();
 
-	int iSampleRate=0;
-	quint8 iChannelCount=0;
-	int iLowerBitrate=0;
-	int iNominalBitrate=0;
-	int iUpperBitrate=0;
-	int iBitrateWindow=0;
-	quint8 iSampleSize=0;
-	qreal fSeconds=0.0f;
+	int iSampleRate = 0;
+	quint8 iChannelCount = 0;
+	int iLowerBitrate = 0;
+	int iNominalBitrate = 0;
+	int iUpperBitrate = 0;
+	int iBitrateWindow = 0;
+	quint8 iBytesPerSample = 0;
+	qreal fLengthSeconds = 0.0f;
+	Beat beatLength;
 
 	QUrl urlFilePath;
 	QBuffer bufferPCMData;
-	QAudioOutput *aoPlayer=NULL;
+	QAudioOutput *aoPlayer = NULL;
+	bool bIsPlaying = false;
 
-	qreal fVolume=1.0f;
+	qreal fVolume = 1.0f;
+	qreal fPlayOffsetSeconds = 0.0f;
 
 	enum ClipError {
 		CLIP_OK,

@@ -63,7 +63,6 @@ public:
 	virtual void play() = NULL;
 	virtual void pause() = NULL;
 	virtual void stop() = NULL;
-	virtual Beat beats() = NULL;
 
 protected:
 	float fVolume;
@@ -105,7 +104,6 @@ public:
 	virtual void play() { return; }
 	virtual void pause() { return; }
 	virtual void stop() { return; }
-	virtual Beat beats() { return Beat(); }
 
 private:
 	float fTempo;
@@ -129,37 +127,35 @@ public:
 	virtual void play();
 	virtual void pause();
 	virtual void stop();
-	virtual Beat beats() { return Beat(); }
 };
 
 class ClipItem : public BaseMusicItem
 {
 public:
+	ClipItem(QString, QUrl);
 	ClipItem(QString, QString f="");
-	~ClipItem(){}
-
 	virtual int type() const { return MusicItemType::MIT_CLIP; }
 	virtual QStandardItem *clone() const
 	{
 		ClipItem *ci = new ClipItem(this->text());
 		this->cloneBase(ci);
-		ci->playerClip = ClipContainer(this->playerClip);
+		ci->ccClip = ClipContainer(this->ccClip);
 		return ci;
 	}
 
+	void loadClip(QUrl);
 	void loadClip(QString);
-	void setOffset(Beat);
 
-	virtual void setVolume(float);
+	virtual void setVolume(float v) { this->ccClip.setVolume(v); }
 
-	virtual void play() { this->playerClip.play(); }
-	virtual void pause() { this->playerClip.pause(); }
-	virtual void stop() { this->playerClip.stop(); }
-	virtual Beat beats();
+	virtual void play() { this->ccClip.play(); }
+	virtual void pause() { this->ccClip.pause(); }
+	virtual void stop() { this->ccClip.stop(); }
+
+	ClipContainer clipContainer();
 
 private:
-	ClipContainer playerClip;
-	Beat beatLength;
+	ClipContainer ccClip;
 };
 
 

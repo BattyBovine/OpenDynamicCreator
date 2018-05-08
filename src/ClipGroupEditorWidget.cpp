@@ -15,13 +15,13 @@ ClipGroupEditorWidget::~ClipGroupEditorWidget()
 
 
 
-void ClipGroupEditorWidget::addClipGroupEditor(BaseMusicItem *musicitem, float tempo, int beatspermeasure, int beatunit, QAction *playpause, QAction *stop)
+void ClipGroupEditorWidget::addClipGroupEditor(ClipItem *clip, float tempo, int beatspermeasure, int beatunit, QAction *playpause, QAction *stop)
 {
-	if(musicitem) {
-		musicitem->stop();
+	if(clip) {
+		clip->stop();
 		int row = ui->layoutClips->rowCount();
-		MixerWidget *mw = new MixerWidget(musicitem, true, this);
-		TimelineWidget *tw = new TimelineWidget(musicitem, tempo, beatspermeasure, beatunit, playpause, stop, true, this);
+		MixerWidget *mw = new MixerWidget(clip, true, this);
+		TimelineWidget *tw = new TimelineWidget(clip, tempo, beatspermeasure, beatunit, playpause, stop, true, this);
 		connect(mw, SIGNAL(snapChanged(int)), tw, SLOT(setBeatUnitSnapFromCombo(int)));
 		ui->layoutClips->addWidget(mw, row, 0);
 		ui->layoutClips->addWidget(tw, row, 1);
