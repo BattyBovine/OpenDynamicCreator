@@ -19,7 +19,7 @@
 
 #define TW_MIN_SCALE				0.2f
 #define TW_DEFAULT_MEASURE_SPACING	40.0f
-#define TW_MAX_SCALE				10.0f
+#define TW_MAX_SCALE				20.0f
 
 
 class TimelineWidget : public QGraphicsView

@@ -30,6 +30,8 @@ TimelineWidget::TimelineWidget(ClipItem *clip, float tempo, int beatspermeasure,
 		this->ctiClip->setTimelinePos(Beat(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
 		this->ctiClip->setLength(this->ccClip.beats(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
 		this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+		this->ctiClip->generateWaveform(this->ccClip.rawData(), this->ccClip.rawDataLength(),
+										this->ccClip.bytesPerSample(), this->ccClip.channelCount());
 		this->gsTimeline->addItem(this->ctiClip);
 	}
 

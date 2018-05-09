@@ -15,6 +15,7 @@ public:
 	static Beat quarterNote() { return Beat(WHOLE_NOTE_TICKS/4); }
 	static Beat eighthNote() { return Beat(WHOLE_NOTE_TICKS/8); }
 	static Beat sixteenthNote() { return Beat(WHOLE_NOTE_TICKS/16); }
+	static Beat fromUnit(int u) { return Beat(WHOLE_NOTE_TICKS/u); }
 
 	static Beat fromTimelinePosition(float pos, float measurespacing, quint8 beatspermeasure, quint8 beatunit, quint8 snap) { return Beat((roundf(((pos/measurespacing)*(beatspermeasure/float(beatunit)))*snap)/snap)*WHOLE_NOTE_TICKS); }
 	float toTimelinePosition(float measurespacing, quint8 beatspermeasure, quint8 beatunit) const { return (this->iBeat*beatunit/WHOLE_NOTE_TICKS)*(measurespacing/beatspermeasure); }

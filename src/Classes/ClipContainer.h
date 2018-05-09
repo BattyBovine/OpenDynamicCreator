@@ -6,6 +6,8 @@
 #include <QByteArray>
 #include <QBuffer>
 #include <QAudioOutput>
+#include <QPixmap>
+#include <QPainter>
 
 #include <vorbis/vorbisfile.h>
 
@@ -43,8 +45,11 @@ public:
 	int bitrateNominal() { return this->iNominalBitrate; }
 	int bitrateUpper() { return this->iUpperBitrate; }
 	int bitrateWindow() { return this->iBitrateWindow; }
+	int bytesPerSample() { return this->iBytesPerSample; }
 	qreal length() { return this->fLengthSeconds; }
 	Beat beats() { return this->beatLength; }
+	const char *rawData() { return this->bufferPCMData.data().data(); }
+	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
 
 	float volume() { return this->fVolume; }
 	float secondsElapsed() { return (this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)); }
