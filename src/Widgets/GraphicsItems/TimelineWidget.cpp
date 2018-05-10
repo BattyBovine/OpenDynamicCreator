@@ -171,18 +171,18 @@ void TimelineWidget::drawBeatMarkers(float pos, float spacing, float scale, floa
 void TimelineWidget::togglePlayPause(bool play)
 {
 	if(play) {
-		this->ccClip.play();
 		this->timerPlayMarker.start(16);
+		this->ccClip.play();
 	} else {
-		this->ccClip.pause();
 		this->timerPlayMarker.stop();
+		this->ccClip.pause();
 	}
 }
 
 void TimelineWidget::clipStop()
 {
-	this->ccClip.stop();
 	this->timerPlayMarker.stop();
+	this->ccClip.stop();
 }
 
 
@@ -208,8 +208,7 @@ void TimelineWidget::redrawStageElements(float scale)
 	this->drawMeasureMarkers(scale);
 	if(this->ctiClip)
 		this->ctiClip->setTimelineScale(scale);
-	this->ctiClip->generateWaveform(this->ccClip.rawData(), this->ccClip.rawDataLength(), scale,
-									this->ccClip.bytesPerSample(), this->ccClip.channelCount());
+	this->ctiClip->generateWaveform(&this->ccClip, scale);
 }
 
 

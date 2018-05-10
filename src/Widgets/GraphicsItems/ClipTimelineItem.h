@@ -6,8 +6,9 @@
 #include <QDir>
 
 #include "TimelineItem.h"
+#include "Classes/ClipContainer.h"
 
-#define CTI_MAX_TILE_LENGTH	64.0f
+#define CTI_MAX_TILE_LENGTH	512.0f
 
 
 class ClipTimelineItem : public TimelineItem
@@ -20,7 +21,7 @@ public:
 	void setLength(Beat l, float s, quint8 b, quint8 u) { this->fLength=l.toTimelinePosition(s,b,u); this->updateBoundingRect(); }
 	void setHeight(float h) { this->fHeight=h; this->updateBoundingRect(); }
 	void setTimelineScale(qreal scale) { this->fTimelineScale=scale; this->updateBoundingRect(); }
-	void generateWaveform(const char*,quint64,float,int,int);
+	void generateWaveform(ClipContainer*,float);
 
 protected:
 	virtual QRectF boundingRect() const { return this->rectBounds; }
