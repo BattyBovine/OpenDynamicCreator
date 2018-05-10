@@ -20,28 +20,24 @@ TimelineWidget::TimelineWidget(ClipItem *clip, float tempo, int beatspermeasure,
 	this->gsTimeline->setSceneRect(0,0,this->ccClip.beats().toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit),100);
 	this->setScene(this->gsTimeline);
 
-	this->pmiPlayMarker = new PlayMarkerItem(this->fTopSpacing);
-	this->pmiPlayMarker->setTimelinePos(0.0f);
-	this->pmiPlayMarker->setFlag(QGraphicsItem::ItemIgnoresTransformations);
-	this->gsTimeline->addItem(this->pmiPlayMarker);
-
 	if(clip) {
 		this->ctiClip = new ClipTimelineItem(this->fTopSpacing);
 		this->ctiClip->setTimelinePos(Beat(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
 		this->ctiClip->setLength(this->ccClip.beats(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
 		this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
-		this->ctiClip->generateWaveform(this->ccClip.rawData(), this->ccClip.rawDataLength(),
-										this->ccClip.bytesPerSample(), this->ccClip.channelCount());
 		this->gsTimeline->addItem(this->ctiClip);
 	}
+
+	this->pmiPlayMarker = new PlayMarkerItem(this->fTopSpacing);
+	this->pmiPlayMarker->setTimelinePos(0.0f);
+	this->pmiPlayMarker->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+	this->gsTimeline->addItem(this->pmiPlayMarker);
 
 	this->setZoom(-1000.0f);
 
 	connect(playpause, SIGNAL(toggled(bool)), this, SLOT(togglePlayPause(bool)));
 	connect(stop, SIGNAL(triggered(bool)), this, SLOT(clipStop()));
-
 	connect(&this->timerPlayMarker, SIGNAL(timeout()), this, SLOT(movePlayMarkerToClipPos()));
-	this->timerPlayMarker.start(16);
 }
 
 
@@ -174,13 +170,19 @@ void TimelineWidget::drawBeatMarkers(float pos, float spacing, float scale, floa
 
 void TimelineWidget::togglePlayPause(bool play)
 {
-	if(play)	this->ccClip.play();
-	else		this->ccClip.pause();
+	if(play) {
+		this->ccClip.play();
+		this->timerPlayMarker.start(16);
+	} else {
+		this->ccClip.pause();
+		this->timerPlayMarker.stop();
+	}
 }
 
 void TimelineWidget::clipStop()
 {
 	this->ccClip.stop();
+	this->timerPlayMarker.stop();
 }
 
 
@@ -206,6 +208,8 @@ void TimelineWidget::redrawStageElements(float scale)
 	this->drawMeasureMarkers(scale);
 	if(this->ctiClip)
 		this->ctiClip->setTimelineScale(scale);
+	this->ctiClip->generateWaveform(this->ccClip.rawData(), this->ccClip.rawDataLength(), scale,
+									this->ccClip.bytesPerSample(), this->ccClip.channelCount());
 }
 
 

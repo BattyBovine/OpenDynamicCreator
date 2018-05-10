@@ -7,20 +7,20 @@
 
 #include "TimelineItem.h"
 
-#define CTI_MAX_TILE_LENGTH	4096.0f
+#define CTI_MAX_TILE_LENGTH	64.0f
 
 
 class ClipTimelineItem : public TimelineItem
 {
 public:
-	ClipTimelineItem(float topspacing) : TimelineItem(topspacing){}
+	ClipTimelineItem(float topspacing) : TimelineItem(topspacing) { this->setZValue(-10); }
 
 	virtual void setTimelinePos(Beat p, float s, quint8 b, quint8 u) { TimelineItem::setTimelinePos(p,s,b,u); this->updateBoundingRect(); }
 
 	void setLength(Beat l, float s, quint8 b, quint8 u) { this->fLength=l.toTimelinePosition(s,b,u); this->updateBoundingRect(); }
 	void setHeight(float h) { this->fHeight=h; this->updateBoundingRect(); }
 	void setTimelineScale(qreal scale) { this->fTimelineScale=scale; this->updateBoundingRect(); }
-	void generateWaveform(const char*,quint64,int,int);
+	void generateWaveform(const char*,quint64,float,int,int);
 
 protected:
 	virtual QRectF boundingRect() const { return this->rectBounds; }
@@ -33,7 +33,8 @@ private:
 	qreal fLength = 0.0f;
 	qreal fHeight = 0.0f;
 	qreal fTimelineScale = 1.0f;
-	QList<QPixmap> lWaveformPixmaps;
+	int iWaveformScale = 1;
+	/*QMap<*/QList<QPixmap>/* >*/ lWaveformPixmaps;
 };
 
 #endif // CLIPTIMELINEITEM_H

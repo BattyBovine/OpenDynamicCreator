@@ -9,21 +9,25 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 	QRectF mybounds = this->boundingRect();
 	float pixwidth = mybounds.width() / this->lWaveformPixmaps.size();
 	for(int i=0; i<this->lWaveformPixmaps.size(); i++) {
-		QRect pixmapbounds(pixwidth*i, mybounds.y(),
+		QRectF itemregion(pixwidth*i, mybounds.y(),
 						   pixwidth, mybounds.height());
-		p->drawPixmap(pixmapbounds, this->lWaveformPixmaps[i]);
+		QRectF pixmapbounds(0,0,this->lWaveformPixmaps[i].width(),this->lWaveformPixmaps[i].height());
+		p->drawPixmap(itemregion, this->lWaveformPixmaps[i],
+					  pixmapbounds);
 	}
 	p->drawRoundedRect(mybounds, 4.0f, 4.0f);
 }
 
-void ClipTimelineItem::generateWaveform(const char *pcm, quint64 datalength, int bytespersample, int channels)
+void ClipTimelineItem::generateWaveform(const char *pcm, quint64 datalength, float scale, int bytespersample, int channels)
 {
-	const int zeropoint = roundf(128/2.0f);
+	if(floorf(scale)==this->iWaveformScale)
+		return;
+	this->iWaveformScale=floorf(scale);
 
+	const int zeropoint = roundf(this->fHeight/2.0f);
 	const int samplesize = (bytespersample*channels);
 	const int samplecount = (datalength/samplesize);
-
-	const float waveformlength = samplecount/2.0f;
+	const float waveformlength = this->fLength*this->fTimelineScale;
 	float tilewidth = waveformlength;
 	int tilecount=1;
 	while(tilewidth>CTI_MAX_TILE_LENGTH)
@@ -37,11 +41,11 @@ void ClipTimelineItem::generateWaveform(const char *pcm, quint64 datalength, int
 		int roundedwidth;
 		if(tile>0)	roundedwidth = roundf(roundf(tilewidth*tile)/tile);
 		else		roundedwidth = roundf(tilewidth);
-		QPixmap waveform(roundedwidth, 128);
+		QPixmap waveform(roundedwidth, this->fHeight);
 		QPainter *paint = new QPainter(&waveform);
 		paint->setBrush(QColor(255,255,255));
 		paint->setPen(Qt::NoPen);
-		paint->drawRect(0,0,roundedwidth,128);
+		paint->drawRect(0,0,roundedwidth,this->fHeight);
 		paint->setPen(QColor(0,0,255));
 		for(int x=0; x<roundedwidth; x++) {
 			quint64 dataposition = roundf(((tile*tilewidth*samplesperpixel)+(x*samplesperpixel))/tilecount)*samplesize;
