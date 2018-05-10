@@ -11,7 +11,6 @@
 #include <QAudioOutput>
 #include <QMediaPlayer>
 #include <QMessageBox>
-#include <QUuid>
 
 #include "Classes/MusicEvent.h"
 #include "Classes/ClipContainer.h"
@@ -32,7 +31,6 @@ class BaseMusicItem : public QStandardItem
 public:
 	BaseMusicItem(QString t, float volume=1.0f, int pan=0)
 	{
-		this->setUuid(QUuid::createUuid());
 		this->setText(t);
 		this->setVolume(volume);
 		this->setPan(pan);
@@ -42,7 +40,6 @@ public:
 	{
 		for(int i=0; i<this->rowCount(); i++)
 			bmi->appendRow(this->child(i)->clone());
-		bmi->setUuid(this->uuid());
 		bmi->setVolume(this->volume());
 		bmi->setPan(this->pan());
 		bmi->setEvents(this->events());
@@ -53,8 +50,6 @@ public:
 	virtual void addEvent(MusicEvent e) { this->vEvents << e; }
 	virtual void insertEvent(int i, MusicEvent e) { this->vEvents.insert(i,e); }
 
-	virtual QUuid uuid() const { return this->qUuid; }
-	virtual QString uuidString() const { return this->qUuid.toString(); }
 	virtual float volume() const { return this->fVolume; }
 	virtual int pan() const { return this->iPan; }
 	virtual MusicEvent event(int i) const { return this->vEvents[i]; }
@@ -70,9 +65,7 @@ protected:
 	MusicEventList vEvents;
 
 private:
-	virtual void setUuid(QUuid u) { this->qUuid=u; }
 	virtual void setEvents(MusicEventList el) { this->vEvents = el; }
-	QUuid qUuid;
 };
 
 class TrackItem : public BaseMusicItem

@@ -6,6 +6,7 @@
 
 ClipContainer::ClipContainer(QUrl file)
 {
+	this->uuidUnique = QUuid::createUuid();
 	this->loadAudioFile(file);
 }
 ClipContainer::ClipContainer(const ClipContainer &c)
@@ -24,6 +25,7 @@ ClipContainer::~ClipContainer()
 }
 void ClipContainer::copy(const ClipContainer &c)
 {
+	this->uuidUnique = c.uuidUnique;
 	this->urlFilePath = c.urlFilePath;
 	this->bufferPCMData.setData(c.bufferPCMData.buffer());
 	this->iSampleRate = c.iSampleRate;

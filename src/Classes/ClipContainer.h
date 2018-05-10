@@ -8,6 +8,7 @@
 #include <QAudioOutput>
 #include <QPixmap>
 #include <QPainter>
+#include <QUuid>
 
 #include <vorbis/vorbisfile.h>
 
@@ -39,6 +40,8 @@ public:
 
 	void setVolume(float v) { this->fVolume=v; if(this->aoPlayer) this->aoPlayer->setVolume(v); }
 
+	QUuid uuid() { return this->uuidUnique; }
+	QString uuidString() { return this->uuidUnique.toString(); }
 	int sampleRate() { return this->iSampleRate; }
 	quint8 channelCount() { return this->iChannelCount; }
 	int bitrateLower() { return this->iLowerBitrate; }
@@ -57,6 +60,7 @@ public:
 private:
 	void configurePlayer();
 
+	QUuid uuidUnique;
 	int iSampleRate = 0;
 	quint8 iChannelCount = 0;
 	int iLowerBitrate = 0;
