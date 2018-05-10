@@ -2,6 +2,8 @@
 #define CLIPTIMELINEITEM_H
 
 #include <QPixmap>
+#include <QFile>
+#include <QDir>
 
 #include "TimelineItem.h"
 

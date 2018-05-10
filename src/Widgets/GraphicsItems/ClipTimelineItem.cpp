@@ -1,11 +1,3 @@
-#include <QFile>
-
-
-
-
-
-
-
 #include "ClipTimelineItem.h"
 
 void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidget*)
@@ -30,21 +22,21 @@ void ClipTimelineItem::generateWaveform(const char *pcm, quint64 datalength, int
 
 	const int samplesize = (bytespersample*channels);
 	const int samplecount = (datalength/samplesize);
-	float tilewidth = samplecount / 8.0f;
-	int tiledivisor = 0;
-	for(tiledivisor; tilewidth>CTI_MAX_TILE_LENGTH; tiledivisor++)
-		tilewidth = samplecount/float(tiledivisor);
 
-	const float waveformlength = ceilf(samplecount/4.0f);
-	const int tilecount = ceilf(samplecount/tilewidth);
-	const float samplespertile = (samplecount / waveformlength) * tilewidth;
+	const float waveformlength = samplecount/2.0f;
+	float tilewidth = waveformlength;
+	int tilecount=1;
+	while(tilewidth>CTI_MAX_TILE_LENGTH)
+		tilewidth = waveformlength/float(++tilecount);
+	const float samplesperpixel = samplecount / tilewidth;
 
 	this->lWaveformPixmaps.clear();
 	this->lWaveformPixmaps.reserve(tilecount);
 	QPoint previouspoint(0,zeropoint);
 	for(int tile=0; tile<tilecount; tile++) {
-		float roundedwidth = tilewidth;
-		if(tile>0)	roundedwidth = roundf(roundf(roundedwidth*tile)/tile);
+		int roundedwidth;
+		if(tile>0)	roundedwidth = roundf(roundf(tilewidth*tile)/tile);
+		else		roundedwidth = roundf(tilewidth);
 		QPixmap waveform(roundedwidth, 128);
 		QPainter *paint = new QPainter(&waveform);
 		paint->setBrush(QColor(255,255,255));
@@ -52,8 +44,7 @@ void ClipTimelineItem::generateWaveform(const char *pcm, quint64 datalength, int
 		paint->drawRect(0,0,roundedwidth,128);
 		paint->setPen(QColor(0,0,255));
 		for(int x=0; x<roundedwidth; x++) {
-			quint64 dataposition = ((tile*tilewidth)+x)*samplesize;
-			dataposition = floorf(dataposition/float(samplesize))*(samplesize);
+			quint64 dataposition = roundf(((tile*tilewidth*samplesperpixel)+(x*samplesperpixel))/tilecount)*samplesize;
 			quint32 samplevalue = 0;
 			switch(bytespersample) {
 			case 4:	samplevalue |= quint32(pcm[dataposition+3] << 24);
@@ -78,10 +69,14 @@ void ClipTimelineItem::generateWaveform(const char *pcm, quint64 datalength, int
 		}
 		delete paint;
 		this->lWaveformPixmaps.append(waveform);
-//		QFile out(QString("C:/Users/Jamie Greunbaum/Desktop/MGRRMusicSegments/immyownmasternow_185bpm/%1.png").arg(tile));
-//		out.open(QFile::WriteOnly);
-//		waveform.save(&out, "PNG");
-//		out.close();
+		QString outpath = QString("%1/%2/").arg(QDir::tempPath()).arg("OpenDynamicCreator");
+		QDir path(outpath);
+		path.mkpath(outpath);
+		outpath += QString("%1.png").arg(tile);
+		QFile out(outpath);
+		out.open(QFile::WriteOnly);
+		waveform.save(&out, "PNG");
+		out.close();
 		previouspoint.setX(0);
 	}
 }
