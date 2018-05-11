@@ -60,10 +60,10 @@ protected:
 
 private:
 	void setTopSpacing(float t) { this->fTopSpacing=t; }
-	void redrawStageElements(float scale=1.0f);
+	void redrawStageElements();
 
 	void drawEventMarkers();
-	void drawMeasureMarkers(float);
+	void drawMeasureMarkers();
 	void drawBeatMarkers(float, float, float, float, QPen&);
 
 	float posToSeconds(float pos) const { return pos/(this->fMeasureSpacing/this->iBeatsPerMeasure)*(60.0f/this->fTempo); }
@@ -75,6 +75,7 @@ private:
 	ClipTimelineItem *ctiClip = NULL;
 	QList<QGraphicsLineItem*> lMeasureLines;
 
+	float fScale = 1.0f;
 	float fTempo = 120.0f;
 	int iBeatsPerMeasure = 4;
 	int iBeatUnit = 4;

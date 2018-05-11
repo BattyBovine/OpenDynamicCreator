@@ -49,6 +49,7 @@ void TimelineWidget::resizeEvent(QResizeEvent *e)
 	this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 	this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	this->ctiClip->setHeight(this->height()-this->horizontalScrollBar()->height());
+	this->redrawStageElements();
 	QGraphicsView::resizeEvent(e);
 }
 
@@ -66,7 +67,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 {
 	if(this->bClickMode && !this->bReadOnly) {
 		this->beatMouseMovePos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
-		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).beat()) >= Beat::quarterNote())
+		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).beat()) >= Beat::fromUnit(this->iBeatUnitSnap))
 			this->bMoveMode = true;
 		if(this->bMoveMode)
 			this->ctiClip->setTimelinePos(this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
@@ -120,7 +121,7 @@ void TimelineWidget::drawEventMarkers()
 //	}
 }
 
-void TimelineWidget::drawMeasureMarkers(float scale)
+void TimelineWidget::drawMeasureMarkers()
 {
 	foreach(QGraphicsLineItem *line, this->lMeasureLines) {
 		this->gsTimeline->removeItem(line);
@@ -145,9 +146,9 @@ void TimelineWidget::drawMeasureMarkers(float scale)
 																	 pen));
 			}
 			spacing /= 2.0f;
-			if((spacing*scale)<=TW_SUB_BEAT_MIN_SPACING)
+			if((spacing*this->fScale)<=TW_SUB_BEAT_MIN_SPACING)
 				continue;
-			this->drawBeatMarkers(xpos-spacing, spacing, scale, markerlength*TW_BEAT_MARKER_DELTA, pen);
+			this->drawBeatMarkers(xpos-spacing, spacing, this->fScale, markerlength*TW_BEAT_MARKER_DELTA, pen);
 		}
 		this->lMeasureLines.append(this->gsTimeline->addLine(this->fMeasureSpacing*(measure+1), this->fTopSpacing,
 															 this->fMeasureSpacing*(measure+1), this->fTopSpacing+TW_MEASURE_MARKER_LENGTH,
@@ -200,15 +201,17 @@ void TimelineWidget::setZoom(float zoomdelta)
 		this->centerOn(this->pmiPlayMarker->x(),0.0f);
 	else
 		this->centerOn(0.0f,0.0f);
-	this->redrawStageElements(scale);
+	this->fScale = scale;
+	this->redrawStageElements();
 }
 
-void TimelineWidget::redrawStageElements(float scale)
+void TimelineWidget::redrawStageElements()
 {
-	this->drawMeasureMarkers(scale);
-	if(this->ctiClip)
-		this->ctiClip->setTimelineScale(scale);
-	this->ctiClip->generateWaveform(&this->ccClip, scale);
+	this->drawMeasureMarkers();
+	if(this->ctiClip) {
+		this->ctiClip->setTimelineScale(this->fScale);
+		this->ctiClip->generateWaveform(this->ccClip);
+	}
 }
 
 

@@ -1,7 +1,7 @@
 #ifndef CLIPTIMELINEITEM_H
 #define CLIPTIMELINEITEM_H
 
-#include <QPixmap>
+#include <QImage>
 #include <QFile>
 #include <QDir>
 
@@ -9,6 +9,7 @@
 #include "Classes/ClipContainer.h"
 
 #define CTI_MAX_TILE_LENGTH	512.0f
+#define CTI_RESOLUTION_SUBLEVELS 2
 
 
 class ClipTimelineItem : public TimelineItem
@@ -21,7 +22,8 @@ public:
 	void setLength(Beat l, float s, quint8 b, quint8 u) { this->fLength=l.toTimelinePosition(s,b,u); this->updateBoundingRect(); }
 	void setHeight(float h) { this->fHeight=h; this->updateBoundingRect(); }
 	void setTimelineScale(qreal scale) { this->fTimelineScale=scale; this->updateBoundingRect(); }
-	void generateWaveform(ClipContainer*,float);
+
+	void generateWaveform(ClipContainer&);
 
 protected:
 	virtual QRectF boundingRect() const { return this->rectBounds; }
@@ -34,8 +36,8 @@ private:
 	qreal fLength = 0.0f;
 	qreal fHeight = 0.0f;
 	qreal fTimelineScale = 1.0f;
-	int iWaveformScale = 1;
-	/*QMap<*/QList<QPixmap>/* >*/ lWaveformPixmaps;
+	int iWaveformResolution = 1;
+	QList<QPixmap> lWaveformPixmaps;
 };
 
 #endif // CLIPTIMELINEITEM_H
