@@ -4,11 +4,12 @@
 #include <QImage>
 #include <QFile>
 #include <QDir>
+#include <QCoreApplication>
 
 #include "TimelineItem.h"
 #include "Classes/ClipContainer.h"
 
-#define CTI_MAX_TILE_LENGTH	512.0f
+#define CTI_MAX_TILE_LENGTH	256.0f
 #define CTI_RESOLUTION_SUBLEVELS 2
 
 

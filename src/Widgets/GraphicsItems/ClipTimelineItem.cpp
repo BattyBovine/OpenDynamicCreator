@@ -20,9 +20,10 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 
 void ClipTimelineItem::generateWaveform(ClipContainer &clip)
 {
-	if(this->fHeight<1.0f || floorf(this->fTimelineScale*CTI_RESOLUTION_SUBLEVELS)==this->iWaveformResolution)
+	float zoomscale = roundf(this->fTimelineScale*CTI_RESOLUTION_SUBLEVELS);
+	if(this->fHeight<1.0f || zoomscale==this->iWaveformResolution)
 		return;
-	this->iWaveformResolution = floorf(this->fTimelineScale*CTI_RESOLUTION_SUBLEVELS);
+	this->iWaveformResolution = zoomscale;
 
 	const char *pcm = clip.rawData();
 	const quint64 datalength = clip.rawDataLength();
@@ -42,7 +43,7 @@ void ClipTimelineItem::generateWaveform(ClipContainer &clip)
 
 	QString outpath = QString("%1/%2/%3/%4/")
 					  .arg(QDir::tempPath())
-					  .arg("OpenDynamicCreator")
+					  .arg(QCoreApplication::applicationName())
 					  .arg(clip.uuidString())
 					  .arg(this->iWaveformResolution);
 	QDir path(outpath);
@@ -67,32 +68,54 @@ void ClipTimelineItem::generateWaveform(ClipContainer &clip)
 		paint->setPen(QColor(0,0,255));
 		for(int x=0; x<tilewidth; x++) {
 			quint64 dataposition = ((tile*tilewidth)+x)*samplesperpixel*samplesize;
-			Q_ASSERT(dataposition<=datalength);
-			quint32 samplevalue = 0;
-			switch(bytespersample) {
-			case 4:	samplevalue |= quint32(pcm[dataposition+3] << 24);
-			case 3:	samplevalue |= quint32(pcm[dataposition+2] << 16);
-			case 2:	samplevalue |= quint16(pcm[dataposition+1] << 8);
-			case 1:	samplevalue |= quint8 (pcm[dataposition]);
+			int hivalue=0, lovalue=0;
+			for(int s=0; s<samplesperpixel; s++) {
+				quint64 dataoffset = dataposition+(s*samplesize);
+				Q_ASSERT(dataposition<=datalength);
+				quint32 samplevalue = 0;
+				switch(bytespersample) {
+				case 4:	samplevalue |= quint32(pcm[dataoffset+3] << 24);
+				case 3:	samplevalue |= quint32(pcm[dataoffset+2] << 16);
+				case 2:	samplevalue |= quint16(pcm[dataoffset+1] << 8);
+				case 1:	samplevalue |= quint8 (pcm[dataoffset]);
+				}
+				int convertedvalue = 0;
+				switch(bytespersample) {
+				case 4:	convertedvalue = qint32(samplevalue); break;
+				case 3:	convertedvalue = qint32(samplevalue); break;
+				case 2:	convertedvalue = qint16(samplevalue); break;
+				case 1:	convertedvalue = qint8 (samplevalue); break;
+				}
+				if(convertedvalue>hivalue || hivalue==0)
+					hivalue = convertedvalue;
+				if(convertedvalue<lovalue || lovalue==0)
+					lovalue = convertedvalue;
 			}
-			int convertedvalue = 0;
-			switch(bytespersample) {
-			case 4:	convertedvalue = qint32(samplevalue); break;
-			case 3:	convertedvalue = qint32(samplevalue); break;
-			case 2:	convertedvalue = qint16(samplevalue); break;
-			case 1:	convertedvalue = qint8 (samplevalue); break;
+			float hipixelvalue=0.0f,lopixelvalue=0.0f;
+			if(hivalue!=0) {
+				switch(bytespersample) {
+				case 3:	hipixelvalue = (hivalue/float(INT_MAX)); break;
+				case 4:	hipixelvalue = (hivalue/float(INT_MAX)); break;
+				case 2:	hipixelvalue = (hivalue/float(SHRT_MAX)); break;
+				case 1:	hipixelvalue = (hivalue/float(CHAR_MAX)); break;
+				}
+				hipixelvalue *= zeropoint;
+				QPoint nextpoint(x,zeropoint-roundf(hipixelvalue));
+				paint->drawLine(previouspoint,nextpoint);
+				previouspoint=nextpoint;
 			}
-			float pixelvalue = 0;
-			switch(bytespersample) {
-			case 3:	pixelvalue = (convertedvalue/float(INT_MAX)); break;
-			case 4:	pixelvalue = (convertedvalue/float(INT_MAX)); break;
-			case 2:	pixelvalue = (convertedvalue/float(SHRT_MAX)); break;
-			case 1:	pixelvalue = (convertedvalue/float(CHAR_MAX)); break;
+			if(lovalue!=0) {
+				switch(bytespersample) {
+				case 3:	lopixelvalue = (lovalue/float(INT_MAX)); break;
+				case 4:	lopixelvalue = (lovalue/float(INT_MAX)); break;
+				case 2:	lopixelvalue = (lovalue/float(SHRT_MAX)); break;
+				case 1:	lopixelvalue = (lovalue/float(CHAR_MAX)); break;
+				}
+				lopixelvalue *= zeropoint;
+				QPoint nextpoint(x,zeropoint-roundf(lopixelvalue));
+				paint->drawLine(previouspoint,nextpoint);
+				previouspoint=nextpoint;
 			}
-			pixelvalue *= zeropoint;
-			QPoint nextpoint(x,zeropoint-roundf(pixelvalue));
-			paint->drawLine(previouspoint,nextpoint);
-			previouspoint=nextpoint;
 		}
 		delete paint;
 		this->lWaveformPixmaps.append(QPixmap::fromImage(waveform,Qt::MonoOnly));

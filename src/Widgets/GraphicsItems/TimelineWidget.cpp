@@ -222,4 +222,5 @@ void TimelineWidget::movePlayMarkerToClipPos()
 		return;
 	Beat pos = Beat::fromSeconds(this->ccClip.secondsElapsed(), this->fTempo, this->iBeatUnit);
 	this->pmiPlayMarker->setTimelinePos(pos.toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit));
+	this->centerOn(this->pmiPlayMarker->x(),0.0f);
 }
