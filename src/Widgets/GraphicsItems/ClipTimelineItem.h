@@ -37,7 +37,7 @@ private:
 	qreal fLength = 0.0f;
 	qreal fHeight = 0.0f;
 	qreal fTimelineScale = 1.0f;
-	int iWaveformResolution = 1;
+	quint8 iWaveformResolution = 1;
 	QList<QPixmap> lWaveformPixmaps;
 };
 
