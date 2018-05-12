@@ -169,34 +169,6 @@ ClipGroupItem::ClipGroupItem(QString t) : BaseMusicItem(t)
 	this->setIcon(QIcon(":/icons/mixer"));
 }
 
-void ClipGroupItem::play()
-{
-	int count = this->rowCount();
-	BaseMusicItem **children = new BaseMusicItem*[count];
-	for(int i=0; i<count; i++)
-		children[i] = static_cast<BaseMusicItem*>(this->child(i));
-	for(int i=0; i<count; i++)
-		children[i]->play();
-}
-void ClipGroupItem::pause()
-{
-	int count = this->rowCount();
-	BaseMusicItem **children = new BaseMusicItem*[count];
-	for(int i=0; i<count; i++)
-		children[i] = static_cast<BaseMusicItem*>(this->child(i));
-	for(int i=0; i<count; i++)
-		children[i]->pause();
-}
-void ClipGroupItem::stop()
-{
-	int count = this->rowCount();
-	BaseMusicItem **children = new BaseMusicItem*[count];
-	for(int i=0; i<count; i++)
-		children[i] = static_cast<BaseMusicItem*>(this->child(i));
-	for(int i=0; i<count; i++)
-		children[i]->stop();
-}
-
 
 
 ClipItem::ClipItem(QString t, QUrl f) : BaseMusicItem(t)
@@ -214,18 +186,21 @@ void ClipItem::loadClip(QUrl c)
 {
 	if(!c.isLocalFile())
 		return;
-	this->ccClip.loadAudioFile(c);
+	if(!this->ccClip)
+		this->ccClip = std::make_shared<ClipContainer>(ClipContainer());
+	this->ccClip->loadAudioFile(c);
 }
 void ClipItem::loadClip(QString c)
 {
 	this->loadClip(QUrl(c));
 }
 
-ClipContainer ClipItem::clipContainer()
+std::shared_ptr<ClipContainer> ClipItem::clipContainer()
 {
 	TrackItem *track = (TrackItem*)this->parent();
 	while(track->type()!=MIT_TRACK)
 		track = (TrackItem*)track->parent();
-	this->ccClip.beatLength = Beat::fromSeconds(this->ccClip.length(), track->tempo(), track->beatUnit());
+	this->ccClip->setName(this->text());
+	this->ccClip->setTimeInfo(track->tempo(), track->beatsPerMeasure(), track->beatUnit());
 	return this->ccClip;
 }

@@ -256,7 +256,7 @@ void OpenDynamicCreator::loadClipGroupEditorWidget(QModelIndex i)
 	ClipGroupEditorWidget *cgew = new ClipGroupEditorWidget();
 	int rowcount = clip->rowCount();
 	for(int row=0; row<rowcount; row++)
-		cgew->addClipGroupEditor(static_cast<ClipItem*>(clip->child(row)), track->tempo(), track->beatsPerMeasure(), track->beatUnit(), ui->actionPlayPause, ui->actionStop);
+		cgew->addClipGroupEditor(static_cast<ClipItem*>(clip->child(row))->clipContainer(), ui->actionPlayPause, ui->actionStop);
 	this->setCentralWidget(cgew);
 }
 
@@ -267,7 +267,7 @@ void OpenDynamicCreator::loadClipEditorWidget(QModelIndex i)
 	ClipItem *clip = static_cast<ClipItem*>(this->modelMusic->itemFromIndex(i));
 	if(!clip)	return;
 	ClipEditorWidget *cew = new ClipEditorWidget();
-	cew->setClipEditor(clip, track->tempo(), track->beatsPerMeasure(), track->beatUnit(), ui->actionPlayPause, ui->actionStop);
+	cew->setClipEditor(clip->clipContainer(), ui->actionPlayPause, ui->actionStop);
 	this->setCentralWidget(cew);
 }
 

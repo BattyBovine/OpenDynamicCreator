@@ -1,11 +1,8 @@
 #include "Widgets/GraphicsItems/TimelineWidget.h"
 
-TimelineWidget::TimelineWidget(ClipItem *clip, float tempo, int beatspermeasure, int beatunit, QAction *playpause, QAction *stop, bool readonly, QWidget *parent) : QGraphicsView(parent)
+TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *playpause, QAction *stop, bool readonly, QWidget *parent) : QGraphicsView(parent)
 {
-	this->setTempo(tempo);
-	this->setBeatsPerMeasure(beatspermeasure);
-	this->setBeatUnit(beatunit);
-	this->setTopSpacing(5.0f);
+	this->setTopSpacing(TW_DEFAULT_TOP_SPACING);
 	this->setMeasureSpacing(TW_DEFAULT_MEASURE_SPACING);
 	this->setReadOnly(readonly);
 
@@ -14,19 +11,17 @@ TimelineWidget::TimelineWidget(ClipItem *clip, float tempo, int beatspermeasure,
 	this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 	this->viewport()->setAutoFillBackground(false);
 
-	this->ccClip = clip->clipContainer();
+	this->ccClip = clip;
 
 	this->gsTimeline = new QGraphicsScene(this);
-	this->gsTimeline->setSceneRect(0,0,this->ccClip.beats().toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit),100);
+	this->gsTimeline->setSceneRect(0,0,this->ccClip->beats().toTimelinePosition(this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit()),100);
 	this->setScene(this->gsTimeline);
 
-	if(clip) {
-		this->ctiClip = new ClipTimelineItem(this->fTopSpacing);
-		this->ctiClip->setTimelinePos(Beat(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
-		this->ctiClip->setLength(this->ccClip.beats(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
-		this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
-		this->gsTimeline->addItem(this->ctiClip);
-	}
+	this->ctiClip = new ClipTimelineItem(this->fTopSpacing);
+	this->ctiClip->setTimelinePos(Beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+	this->ctiClip->setLength(this->ccClip->beats(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+	this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+	this->gsTimeline->addItem(this->ctiClip);
 
 	this->pmiPlayMarker = new PlayMarkerItem(this->fTopSpacing);
 	this->pmiPlayMarker->setTimelinePos(0.0f);
@@ -57,7 +52,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent *e)
 {
 	if(e->button()==Qt::LeftButton) {
 		this->bClickMode = true;
-		this->beatMouseClickPos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
+		this->beatMouseClickPos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit(), this->iBeatUnitSnap);
 		this->beatClipItemStart = this->ctiClip->timelineBeat();
 	}
 	QGraphicsView::mousePressEvent(e);
@@ -66,11 +61,11 @@ void TimelineWidget::mousePressEvent(QMouseEvent *e)
 void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 {
 	if(this->bClickMode && !this->bReadOnly) {
-		this->beatMouseMovePos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit, this->iBeatUnitSnap);
+		this->beatMouseMovePos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit(), this->iBeatUnitSnap);
 		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).beat()) >= Beat::fromUnit(this->iBeatUnitSnap))
 			this->bMoveMode = true;
 		if(this->bMoveMode)
-			this->ctiClip->setTimelinePos(this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos), this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
+			this->ctiClip->setTimelinePos(this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 	}
 	QGraphicsView::mouseMoveEvent(e);
 }
@@ -80,7 +75,7 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 	switch(e->button()) {
 	case Qt::LeftButton:
 		if(!this->bMoveMode)
-			this->pmiPlayMarker->setTimelinePos(this->beatMouseClickPos, this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit);
+			this->pmiPlayMarker->setTimelinePos(this->beatMouseClickPos, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 		break;
 	case Qt::RightButton:
 //		this->ciClipItem->addEvent(MusicEvent(this->beatMouseClickPos));
@@ -134,13 +129,13 @@ void TimelineWidget::drawMeasureMarkers()
 	this->lMeasureLines.append(this->gsTimeline->addLine(0.0f, this->fTopSpacing,
 														 0.0f, this->fTopSpacing+TW_MEASURE_MARKER_LENGTH,
 														 pen));
-	unsigned int measurecount = this->ccClip.beats().measureCount(this->iBeatsPerMeasure, this->iBeatUnit);
+	unsigned int measurecount = this->ccClip->beats().measureCount(this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 	for(unsigned int measure=0; measure<measurecount; measure++) {
-		for(int beat=1; beat<=this->iBeatsPerMeasure; beat++) {
-			float spacing = this->fMeasureSpacing/this->iBeatsPerMeasure;
+		for(int beat=1; beat<=this->ccClip->beatsPerMeasure(); beat++) {
+			float spacing = this->fMeasureSpacing/this->ccClip->beatsPerMeasure();
 			float xpos = (this->fMeasureSpacing*measure) + (spacing*beat);
 			float markerlength = (TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA);
-			if(beat!=this->iBeatsPerMeasure) {
+			if(beat!=this->ccClip->beatsPerMeasure()) {
 				this->lMeasureLines.append(this->gsTimeline->addLine(xpos, this->fTopSpacing,
 																	 xpos, this->fTopSpacing+markerlength,
 																	 pen));
@@ -173,17 +168,17 @@ void TimelineWidget::togglePlayPause(bool play)
 {
 	if(play) {
 		this->timerPlayMarker.start(16);
-		this->ccClip.play();
+		this->ccClip->play();
 	} else {
 		this->timerPlayMarker.stop();
-		this->ccClip.pause();
+		this->ccClip->pause();
 	}
 }
 
 void TimelineWidget::clipStop()
 {
 	this->timerPlayMarker.stop();
-	this->ccClip.stop();
+	this->ccClip->stop();
 }
 
 
@@ -218,9 +213,9 @@ void TimelineWidget::redrawStageElements()
 
 void TimelineWidget::movePlayMarkerToClipPos()
 {
-	if(!this->ccClip.isPlaying())
+	if(!this->ccClip->isPlaying())
 		return;
-	Beat pos = Beat::fromSeconds(this->ccClip.secondsElapsed(), this->fTempo, this->iBeatUnit);
-	this->pmiPlayMarker->setTimelinePos(pos.toTimelinePosition(this->fMeasureSpacing, this->iBeatsPerMeasure, this->iBeatUnit));
+	Beat pos = Beat::fromSeconds(this->ccClip->secondsElapsed(), this->ccClip->tempo(), this->ccClip->beatUnit());
+	this->pmiPlayMarker->setTimelinePos(pos.toTimelinePosition(this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit()));
 	this->centerOn(this->pmiPlayMarker->x(),0.0f);
 }

@@ -17,7 +17,6 @@
 
 class ClipContainer : public QObject
 {
-	friend class ClipItem;
 	Q_OBJECT
 public:
 	ClipContainer(QUrl file=QUrl());
@@ -37,7 +36,13 @@ public:
 	bool isPlaying() { return this->bIsPlaying; }
 
 	void setSampleRate(int s) { this->iSampleRate=s; }
-
+	void setName(QString n) { this->sName=n; }
+	void setTimeInfo(qreal t, quint8 b, quint8 u) {
+		this->setTempo(t);
+		this->setBeatsPerMeasure(b);
+		this->setBeatUnit(u);
+		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
+	}
 	void setVolume(float v) { this->fVolume=v; if(this->aoPlayer) this->aoPlayer->setVolume(v); }
 
 	QUuid uuid() { return this->uuidUnique; }
@@ -54,11 +59,19 @@ public:
 	const char *rawData() { return this->bufferPCMData.data().data(); }
 	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
 
+	QString name() { return this->sName; }
+	qreal tempo() { return this->fTempo; }
+	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
+	quint8 beatUnit() { return this->iBeatUnit; }
 	float volume() { return this->fVolume; }
 	float secondsElapsed() { return (this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)); }
 
 private:
 	void configurePlayer();
+	void setTempo(qreal t) { this->fTempo=t; }
+	void setBeatsPerMeasure(quint8 b) { this->iBeatsPerMeasure=b; }
+	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
+	void setBeatLength(Beat b) { this->beatLength=b; }
 
 	QUuid uuidUnique;
 	int iSampleRate = 0;
@@ -76,6 +89,10 @@ private:
 	QAudioOutput *aoPlayer = NULL;
 	bool bIsPlaying = false;
 
+	QString sName;
+	qreal fTempo = 0.0f;
+	quint8 iBeatsPerMeasure=0;
+	quint8 iBeatUnit=0;
 	qreal fVolume = 1.0f;
 	qreal fPlayOffsetSeconds = 0.0f;
 

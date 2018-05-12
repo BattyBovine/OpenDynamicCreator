@@ -5,7 +5,7 @@
 
 #include "Widgets/MusicTreeView.h"
 #include "Widgets/MixerWidget.h"
-#include "Widgets/GraphicsItems/TimelineWidget.h"
+#include "Widgets/TimelineWidget.h"
 
 namespace Ui {
 class ClipEditorWidget;
@@ -19,7 +19,7 @@ public:
 	explicit ClipEditorWidget(QWidget *parent = 0);
 	~ClipEditorWidget();
 
-	void setClipEditor(ClipItem*, float, int, int, QAction*, QAction*);
+	void setClipEditor(std::shared_ptr<ClipContainer>, QAction*, QAction*);
 
 private:
 	Ui::ClipEditorWidget *ui;

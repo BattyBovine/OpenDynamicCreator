@@ -18,17 +18,17 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 	p->drawRoundedRect(mybounds, 4.0f, 4.0f);
 }
 
-void ClipTimelineItem::generateWaveform(ClipContainer &clip)
+void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 {
 	const quint8 zoomscale = roundf(this->fTimelineScale*CTI_RESOLUTION_SUBLEVELS);
 	if(this->fHeight<1.0f || zoomscale==this->iWaveformResolution)
 		return;
 	this->iWaveformResolution = zoomscale;
 
-	const char *pcm = clip.rawData();
-	const quint64 datalength = clip.rawDataLength();
-	const quint8 bytespersample = clip.bytesPerSample();
-	const quint8 channels = clip.channelCount();
+	const char *pcm = clip->rawData();
+	const quint64 datalength = clip->rawDataLength();
+	const quint8 bytespersample = clip->bytesPerSample();
+	const quint8 channels = clip->channelCount();
 
 	const int zeropoint = roundf(this->fHeight/2.0f);
 	const int samplesize = (bytespersample*channels);
@@ -44,7 +44,7 @@ void ClipTimelineItem::generateWaveform(ClipContainer &clip)
 	QString outpath = QString("%1/%2/%3/%4/")
 					  .arg(QDir::tempPath())
 					  .arg(QCoreApplication::applicationName())
-					  .arg(clip.uuidString())
+					  .arg(clip->uuidString())
 					  .arg(this->iWaveformResolution);
 	QDir path(outpath);
 	path.mkpath(outpath);

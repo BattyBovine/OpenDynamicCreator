@@ -1,6 +1,8 @@
 #ifndef MUSICTREEVIEW_H
 #define MUSICTREEVIEW_H
 
+#include <memory>
+
 #include <QDebug>
 #include <QTreeView>
 #include <QStandardItemModel>
@@ -29,43 +31,16 @@ enum MusicItemType
 class BaseMusicItem : public QStandardItem
 {
 public:
-	BaseMusicItem(QString t, float volume=1.0f, int pan=0)
+	BaseMusicItem(QString t)
 	{
 		this->setText(t);
-		this->setVolume(volume);
-		this->setPan(pan);
 	}
 
 	void cloneBase(BaseMusicItem *bmi) const
 	{
 		for(int i=0; i<this->rowCount(); i++)
 			bmi->appendRow(this->child(i)->clone());
-		bmi->setVolume(this->volume());
-		bmi->setPan(this->pan());
-		bmi->setEvents(this->events());
 	}
-
-	virtual void setVolume(float v) { this->fVolume=v; }
-	virtual void setPan(int p) { this->iPan=p; }
-	virtual void addEvent(MusicEvent e) { this->vEvents << e; }
-	virtual void insertEvent(int i, MusicEvent e) { this->vEvents.insert(i,e); }
-
-	virtual float volume() const { return this->fVolume; }
-	virtual int pan() const { return this->iPan; }
-	virtual MusicEvent event(int i) const { return this->vEvents[i]; }
-	virtual MusicEventList events() const { return this->vEvents; }
-
-	virtual void play() = NULL;
-	virtual void pause() = NULL;
-	virtual void stop() = NULL;
-
-protected:
-	float fVolume;
-	int iPan;
-	MusicEventList vEvents;
-
-private:
-	virtual void setEvents(MusicEventList el) { this->vEvents = el; }
 };
 
 class TrackItem : public BaseMusicItem
@@ -94,10 +69,6 @@ public:
 	virtual int beatUnit() const { return this->iBeatUnit; }
 	virtual float playbackSpeed() const { return this->fPlaybackSpeed; }
 
-	virtual void play() { return; }
-	virtual void pause() { return; }
-	virtual void stop() { return; }
-
 private:
 	float fTempo;
 	int iBeatsPerMeasure;
@@ -116,10 +87,6 @@ public:
 		this->cloneBase(cgi);
 		return cgi;
 	}
-
-	virtual void play();
-	virtual void pause();
-	virtual void stop();
 };
 
 class ClipItem : public BaseMusicItem
@@ -132,23 +99,17 @@ public:
 	{
 		ClipItem *ci = new ClipItem(this->text());
 		this->cloneBase(ci);
-		ci->ccClip = ClipContainer(this->ccClip);
+		ci->ccClip = std::make_shared<ClipContainer>(*this->ccClip);
 		return ci;
 	}
 
 	void loadClip(QUrl);
 	void loadClip(QString);
 
-	virtual void setVolume(float v) { this->ccClip.setVolume(v); }
-
-	virtual void play() { this->ccClip.play(); }
-	virtual void pause() { this->ccClip.pause(); }
-	virtual void stop() { this->ccClip.stop(); }
-
-	ClipContainer clipContainer();
+	std::shared_ptr<ClipContainer> clipContainer();
 
 private:
-	ClipContainer ccClip;
+	std::shared_ptr<ClipContainer> ccClip=NULL;
 };
 
 

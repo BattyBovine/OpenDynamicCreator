@@ -1,7 +1,7 @@
 #include "Widgets/MixerWidget.h"
 #include "ui_MixerWidget.h"
 
-MixerWidget::MixerWidget(BaseMusicItem *musicitem, bool groupmode, QWidget *parent) :
+MixerWidget::MixerWidget(std::shared_ptr<ClipContainer> clip, bool groupmode, QWidget *parent) :
 	QWidget(parent),
 	ui(new Ui::MixerWidget)
 {
@@ -11,7 +11,7 @@ MixerWidget::MixerWidget(BaseMusicItem *musicitem, bool groupmode, QWidget *pare
 	connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(volumedBChanged(int)));
 	connect(ui->sliderPan, SIGNAL(valueChanged(int)), this, SLOT(panChanged(int)));
 
-	this->attachMusicItem(musicitem);
+	this->attachClipContainer(clip);
 	this->setGroupMode(groupmode);
 }
 
@@ -22,13 +22,13 @@ MixerWidget::~MixerWidget()
 
 
 
-void MixerWidget::attachMusicItem(BaseMusicItem *i)
+void MixerWidget::attachClipContainer(std::shared_ptr<ClipContainer> c)
 {
-	this->bmiMusicItem = i;
-	this->setVolumePercent(i->volume());
-	this->setPan(i->pan());
-	ui->labelClipName->setText(this->bmiMusicItem->text());
-	ui->labelClipName->setToolTip(this->bmiMusicItem->text());
+	this->ccClip = c;
+	this->setVolumePercent(this->ccClip->volume());
+//	this->setPan(this->ccClip->pan());
+	ui->labelClipName->setText(this->ccClip->name());
+	ui->labelClipName->setToolTip(this->ccClip->name());
 }
 
 void MixerWidget::setGroupMode(bool g)
@@ -40,8 +40,7 @@ void MixerWidget::setGroupMode(bool g)
 
 void MixerWidget::volumedBChanged(int d)
 {
-	if(this->bmiMusicItem)
-		this->bmiMusicItem->setVolume(this->dBToVolume(d));
+	this->ccClip->setVolume(this->dBToVolume(d));
 }
 void MixerWidget::setVolumedB(int d)
 {
@@ -61,10 +60,9 @@ float MixerWidget::volumePercent()
 	return this->dBToVolume(ui->sliderVolume->value());
 }
 
-void MixerWidget::panChanged(int p)
+void MixerWidget::panChanged(int/* p*/)
 {
-	if(this->bmiMusicItem)
-		this->bmiMusicItem->setPan(p);
+//	this->ccClip->setPan(p);
 }
 void MixerWidget::setPan(int p)
 {

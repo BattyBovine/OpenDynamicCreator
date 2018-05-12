@@ -1,6 +1,8 @@
 #ifndef TIMELINEWIDGET_H
 #define TIMELINEWIDGET_H
 
+#include <memory>
+
 #include <QGraphicsView>
 #include <QScrollBar>
 #include <QAction>
@@ -20,23 +22,17 @@
 #define TW_MIN_SCALE				0.2f
 #define TW_DEFAULT_MEASURE_SPACING	40.0f
 #define TW_MAX_SCALE				20.0f
+#define TW_DEFAULT_TOP_SPACING		5.0f
 
 
 class TimelineWidget : public QGraphicsView
 {
 	Q_OBJECT
 public:
-	explicit TimelineWidget(ClipItem*, float, int, int, QAction*, QAction*, bool readonly=true, QWidget *parent=0);
-
-	float tempo() { return this->fTempo; }
-	int beatsPerMeasure() { return this->iBeatsPerMeasure; }
-	int beatUnit() { return this->iBeatUnit; }
+	explicit TimelineWidget(std::shared_ptr<ClipContainer>, QAction*, QAction*, bool readonly=true, QWidget *parent=0);
 	float measureSpacing() { return this->fMeasureSpacing; }
 
 public slots:
-	void setTempo(float t) { this->fTempo=t; }
-	void setBeatsPerMeasure(int b) { this->iBeatsPerMeasure=b; }
-	void setBeatUnit(int b) { this->iBeatUnit=b; }
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; }
 	void setZoom(float);
 
@@ -66,19 +62,16 @@ private:
 	void drawMeasureMarkers();
 	void drawBeatMarkers(float, float, float, float, QPen&);
 
-	float posToSeconds(float pos) const { return pos/(this->fMeasureSpacing/this->iBeatsPerMeasure)*(60.0f/this->fTempo); }
-	float secondsToPos(float secs) const { return secs*(this->fTempo/60.0f)*(this->fMeasureSpacing/this->iBeatsPerMeasure); }
+	float posToSeconds(float pos) const { return pos/(this->fMeasureSpacing/this->ccClip->beatsPerMeasure())*(60.0f/this->ccClip->tempo()); }
+	float secondsToPos(float secs) const { return secs*(this->ccClip->tempo()/60.0f)*(this->fMeasureSpacing/this->ccClip->beatsPerMeasure()); }
 
 	QGraphicsScene *gsTimeline = NULL;
-	ClipContainer ccClip;
+	std::shared_ptr<ClipContainer> ccClip;
 	PlayMarkerItem *pmiPlayMarker = NULL;
 	ClipTimelineItem *ctiClip = NULL;
 	QList<QGraphicsLineItem*> lMeasureLines;
 
 	float fScale = 1.0f;
-	float fTempo = 120.0f;
-	int iBeatsPerMeasure = 4;
-	int iBeatUnit = 4;
 	float fTopSpacing = 0.0f;
 	float fMeasureSpacing = 0.0f;
 	bool bReadOnly = false;

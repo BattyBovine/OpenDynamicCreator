@@ -14,7 +14,7 @@ class MixerWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit MixerWidget(BaseMusicItem *musicitem, bool groupmode=false, QWidget *parent=0);
+	explicit MixerWidget(std::shared_ptr<ClipContainer>, bool groupmode=false, QWidget *parent=0);
 	~MixerWidget();
 
 	int volumedB();
@@ -22,7 +22,7 @@ public:
 	int pan();
 
 public slots:
-	void attachMusicItem(BaseMusicItem*);
+	void attachClipContainer(std::shared_ptr<ClipContainer>);
 	void setGroupMode(bool);
 	void setVolumedB(int);
 	void setVolumePercent(float);
@@ -41,7 +41,7 @@ private:
 	inline int volumeTodB(float v) { return roundf(20.0f * log10f(v)); }
 
 	Ui::MixerWidget *ui;
-	BaseMusicItem *bmiMusicItem = NULL;
+	std::shared_ptr<ClipContainer> ccClip = NULL;
 };
 
 #endif // MIXERWIDGET_H

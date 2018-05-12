@@ -1,6 +1,8 @@
 #ifndef CLIPTIMELINEITEM_H
 #define CLIPTIMELINEITEM_H
 
+#include <memory>
+
 #include <QImage>
 #include <QFile>
 #include <QDir>
@@ -24,7 +26,7 @@ public:
 	void setHeight(float h) { this->fHeight=h; this->updateBoundingRect(); }
 	void setTimelineScale(qreal scale) { this->fTimelineScale=scale; this->updateBoundingRect(); }
 
-	void generateWaveform(ClipContainer&);
+	void generateWaveform(std::shared_ptr<ClipContainer>);
 
 protected:
 	virtual QRectF boundingRect() const { return this->rectBounds; }

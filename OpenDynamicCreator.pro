@@ -30,10 +30,10 @@ SOURCES += main.cpp \
 	src/StatePropertiesEditor.cpp \
 	src/Widgets/MusicTreeView.cpp \
 	src/Widgets/StatesTreeView.cpp \
+	src/Widgets/TimelineWidget.cpp \
 	src/Commands/OdcUndoCommands.cpp \
 	src/ClipGroupEditorWidget.cpp \
 	src/MusicPropertiesWidget.cpp \
-	src/Widgets/GraphicsItems/TimelineWidget.cpp \
 	src/ClipEditorWidget.cpp \
     src/Widgets/MixerWidget.cpp \
     src/Widgets/MixerVolumeSlider.cpp \
@@ -48,10 +48,10 @@ HEADERS  += version.h \
 	src/StatePropertiesEditor.h \
 	src/Widgets/MusicTreeView.h \
 	src/Widgets/StatesTreeView.h \
+	src/Widgets/TimelineWidget.h \
 	src/Commands/OdcUndoCommands.h \
 	src/ClipGroupEditorWidget.h \
 	src/MusicPropertiesWidget.h \
-	src/Widgets/GraphicsItems/TimelineWidget.h \
 	src/ClipEditorWidget.h \
 	src/Widgets/MixerWidget.h \
 	src/Widgets/MixerVolumeSlider.h \
