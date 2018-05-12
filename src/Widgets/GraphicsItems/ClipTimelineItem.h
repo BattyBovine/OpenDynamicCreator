@@ -11,8 +11,8 @@
 #include "TimelineItem.h"
 #include "Classes/ClipContainer.h"
 
-#define CTI_MAX_TILE_LENGTH	256.0f
-#define CTI_RESOLUTION_SUBLEVELS 2
+#define CTI_MAX_TILE_LENGTH			256.0f
+#define CTI_RESOLUTION_MULTIPLIER	2
 
 
 class ClipTimelineItem : public TimelineItem

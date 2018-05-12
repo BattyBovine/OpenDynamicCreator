@@ -1,4 +1,4 @@
-#include "Widgets/GraphicsItems/TimelineWidget.h"
+#include "Widgets/TimelineWidget.h"
 
 TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *playpause, QAction *stop, bool readonly, QWidget *parent) : QGraphicsView(parent)
 {

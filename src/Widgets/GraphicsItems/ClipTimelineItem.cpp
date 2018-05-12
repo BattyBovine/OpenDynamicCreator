@@ -20,7 +20,7 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 
 void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 {
-	const quint8 zoomscale = roundf(this->fTimelineScale*CTI_RESOLUTION_SUBLEVELS);
+	const quint8 zoomscale = roundf(this->fTimelineScale);
 	if(this->fHeight<1.0f || zoomscale==this->iWaveformResolution)
 		return;
 	this->iWaveformResolution = zoomscale;
@@ -34,12 +34,9 @@ void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 	const int samplesize = (bytespersample*channels);
 	const int samplecount = (datalength/samplesize);
 
-	const float waveformlength = (this->fLength*this->fTimelineScale);
-	int tilewidth = waveformlength;
-	int tilecount = 1;
-	while(tilewidth>CTI_MAX_TILE_LENGTH)
-		tilewidth = (waveformlength/(++tilecount));
-	const int samplesperpixel = (samplecount/(tilewidth*tilecount));
+	const float waveformlength = (this->fLength*this->fTimelineScale*CTI_RESOLUTION_MULTIPLIER);
+	const int tilecount = ceilf(waveformlength/CTI_MAX_TILE_LENGTH);
+	const float samplesperpixel = (float(samplecount)/(CTI_MAX_TILE_LENGTH*tilecount));
 
 	QString outpath = QString("%1/%2/%3/%4/")
 					  .arg(QDir::tempPath())
@@ -60,16 +57,17 @@ void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 			this->lWaveformPixmaps.append(QPixmap::fromImage(waveform,Qt::MonoOnly));
 			continue;
 		}
-		waveform = QImage(tilewidth, this->fHeight, QImage::Format_Mono);
+		waveform = QImage(CTI_MAX_TILE_LENGTH, this->fHeight, QImage::Format_Mono);
 		QPainter *paint = new QPainter(&waveform);
 		paint->setBrush(QColor(255,255,255));
 		paint->setPen(Qt::NoPen);
-		paint->drawRect(0,0,tilewidth,this->fHeight);
+		paint->drawRect(0,0,CTI_MAX_TILE_LENGTH,this->fHeight);
 		paint->setPen(QColor(0,0,255));
-		for(int x=0; x<tilewidth; x++) {
-			quint64 dataposition = ((tile*tilewidth)+x)*samplesperpixel*samplesize;
+		for(int x=0; x<CTI_MAX_TILE_LENGTH; x++) {
+			quint64 dataposition = roundf(((tile*CTI_MAX_TILE_LENGTH)+x)*samplesperpixel)*samplesize;
 			int hivalue=0, lovalue=0;
-			for(int s=0; s<samplesperpixel; s++) {
+			const int roundedspp = roundf(roundf(samplesperpixel*x)/x);
+			for(int s=0; s<roundedspp; s++) {
 				for(int c=0; c<channels; c++) {
 					quint64 dataoffset = dataposition+(s*samplesize)+(c*bytespersample);
 					Q_ASSERT(dataposition<=datalength);
