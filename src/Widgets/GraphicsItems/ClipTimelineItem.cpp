@@ -71,7 +71,7 @@ void ClipTimelineItem::generateWaveform(ClipContainer &clip)
 			int hivalue=0, lovalue=0;
 			for(int s=0; s<samplesperpixel; s++) {
 				for(int c=0; c<channels; c++) {
-					quint64 dataoffset = dataposition+(s*samplesize);
+					quint64 dataoffset = dataposition+(s*samplesize)+(c*bytespersample);
 					Q_ASSERT(dataposition<=datalength);
 					quint32 samplevalue = 0;
 					switch(bytespersample) {
