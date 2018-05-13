@@ -9,8 +9,9 @@
 #define TLI_MAX_HEIGHT	2048.0f
 
 
-class TimelineItem : public QGraphicsItem
+class TimelineItem : public QGraphicsObject
 {
+	Q_OBJECT
 public:
 	TimelineItem(float topspacing);
 

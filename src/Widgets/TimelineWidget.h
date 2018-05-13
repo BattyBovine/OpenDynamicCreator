@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <QGraphicsView>
+#include <QOpenGLWidget>
 #include <QScrollBar>
 #include <QAction>
 #include <QMouseEvent>

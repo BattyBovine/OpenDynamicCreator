@@ -2,20 +2,25 @@
 
 void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidget*)
 {
-	p->setPen(QColor(0, 0, 255));
-	p->setBrush(QColor(0, 0, 255, 64));
 	p->setRenderHint(QPainter::HighQualityAntialiasing);
 	p->setRenderHint(QPainter::SmoothPixmapTransform);
 	QRectF mybounds = this->boundingRect();
-	float pixwidth = mybounds.width() / this->lWaveformPixmaps.size();
-	for(int i=0; i<this->lWaveformPixmaps.size(); i++) {
-		QRectF itemregion(pixwidth*i, mybounds.y(),
-						   pixwidth, mybounds.height());
-		QRectF pixmapbounds(0,0,this->lWaveformPixmaps[i].width(),this->lWaveformPixmaps[i].height());
-		p->drawPixmap(itemregion, this->lWaveformPixmaps[i],
-					  pixmapbounds);
+	float pixwidth = mybounds.width() / this->mapWaveforms[this->iWaveformResolution].size();
+	for(int i=0; i<this->mapWaveforms[this->iWaveformResolution].size(); i++) {
+		QRectF itemregion(pixwidth*i, mybounds.y(), pixwidth, mybounds.height());
+		QRectF pixmapbounds(0, 0, WT_MAX_TILE_LENGTH, this->mapWaveforms[this->iWaveformResolution][i].height());
+		p->drawPixmap(itemregion, this->mapWaveforms[this->iWaveformResolution][i], pixmapbounds);
+#ifdef QT_DEBUG
+		p->setPen(Qt::red);
+		p->setBrush(Qt::NoBrush);
+		p->drawRect(itemregion);
+#endif
 	}
+#ifndef QT_DEBUG
+	p->setPen(QColor(0, 0, 255));
+	p->setBrush(QColor(0, 0, 255, 64));
 	p->drawRoundedRect(mybounds, 4.0f, 4.0f);
+#endif
 }
 
 void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
@@ -25,103 +30,34 @@ void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 		return;
 	this->iWaveformResolution = zoomscale;
 
-	const char *pcm = clip->rawData();
-	const quint64 datalength = clip->rawDataLength();
-	const quint8 bytespersample = clip->bytesPerSample();
-	const quint8 channels = clip->channelCount();
+	float waveformlength;
+	if(this->iWaveformResolution==0)
+		waveformlength = this->fLength;
+	else
+		waveformlength = (this->fLength*this->iWaveformResolution*WT_RESOLUTION_MULTIPLIER);
+	const int tilecount = ceilf(waveformlength/WT_MAX_TILE_LENGTH);
 
-	const int zeropoint = roundf(this->fHeight/2.0f);
-	const int samplesize = (bytespersample*channels);
-	const int samplecount = (datalength/samplesize);
+	this->mapWaveforms[this->iWaveformResolution].clear();
+	this->mapWaveforms[this->iWaveformResolution].reserve(tilecount);
+	for(int i=0; i<tilecount; i++)
+		this->mapWaveforms[this->iWaveformResolution].append(QPixmap());
+	WaveformThread *thread = new WaveformThread(clip, this->fLength, this->fHeight, this->fTimelineScale,
+												this->iWaveformResolution, tilecount);
+	this->listWaveformThreads.insert(this->iWaveformResolution, thread);
+	connect(thread, SIGNAL(tileFinished(int,int,QPixmap)), this, SLOT(getWaveformTile(int,int,QPixmap)));
+	connect(thread, SIGNAL(finished()), this, SLOT(threadFinished()));
+	thread->start();
+}
 
-	const float waveformlength = (this->fLength*this->fTimelineScale*CTI_RESOLUTION_MULTIPLIER);
-	const int tilecount = ceilf(waveformlength/CTI_MAX_TILE_LENGTH);
-	const float samplesperpixel = (float(samplecount)/(CTI_MAX_TILE_LENGTH*tilecount));
+void ClipTimelineItem::getWaveformTile(int resolution, int tile, QPixmap pix)
+{
+	this->mapWaveforms[resolution][tile] = pix;
+	if(resolution==this->iWaveformResolution)
+		this->update(this->boundingRect());
+//		this->update(WT_MAX_TILE_LENGTH*tile,0.0f,pix.width(),this->fHeight);
+}
 
-	QString outpath = QString("%1/%2/%3/%4/")
-					  .arg(QDir::tempPath())
-					  .arg(QCoreApplication::applicationName())
-					  .arg(clip->uuidString())
-					  .arg(this->iWaveformResolution);
-	QDir path(outpath);
-	path.mkpath(outpath);
-
-	this->lWaveformPixmaps.clear();
-	this->lWaveformPixmaps.reserve(tilecount);
-	QPoint previouspoint(0,zeropoint);
-	for(int tile=0; tile<tilecount; tile++) {
-		QFile out(path.absolutePath()+QString("/%1.bmp").arg(tile));
-		QImage waveform;
-		if(out.exists()) {
-			waveform.load(&out,"BMP");
-			this->lWaveformPixmaps.append(QPixmap::fromImage(waveform,Qt::MonoOnly));
-			continue;
-		}
-		waveform = QImage(CTI_MAX_TILE_LENGTH, this->fHeight, QImage::Format_Mono);
-		QPainter *paint = new QPainter(&waveform);
-		paint->setBrush(QColor(255,255,255));
-		paint->setPen(Qt::NoPen);
-		paint->drawRect(0,0,CTI_MAX_TILE_LENGTH,this->fHeight);
-		paint->setPen(QColor(0,0,255));
-		for(int x=0; x<CTI_MAX_TILE_LENGTH; x++) {
-			quint64 dataposition = roundf(((tile*CTI_MAX_TILE_LENGTH)+x)*samplesperpixel)*samplesize;
-			int hivalue=0, lovalue=0;
-			const int roundedspp = roundf(roundf(samplesperpixel*x)/x);
-			for(int s=0; s<roundedspp; s++) {
-				for(int c=0; c<channels; c++) {
-					quint64 dataoffset = dataposition+(s*samplesize)+(c*bytespersample);
-					Q_ASSERT(dataposition<=datalength);
-					quint32 samplevalue = 0;
-					switch(bytespersample) {
-					case 4:	samplevalue |= quint32(pcm[dataoffset+3] << 24);
-					case 3:	samplevalue |= quint32(pcm[dataoffset+2] << 16);
-					case 2:	samplevalue |= quint16(pcm[dataoffset+1] << 8);
-					case 1:	samplevalue |= quint8 (pcm[dataoffset]);
-					}
-					int convertedvalue = 0;
-					switch(bytespersample) {
-					case 4:	convertedvalue = qint32(samplevalue); break;
-					case 3:	convertedvalue = qint32(samplevalue); break;
-					case 2:	convertedvalue = qint16(samplevalue); break;
-					case 1:	convertedvalue = qint8 (samplevalue); break;
-					}
-					if(convertedvalue>hivalue || hivalue==0)
-						hivalue = convertedvalue;
-					if(convertedvalue<lovalue || lovalue==0)
-						lovalue = convertedvalue;
-				}
-			}
-			float hipixelvalue=0.0f,lopixelvalue=0.0f;
-			if(hivalue!=0) {
-				switch(bytespersample) {
-				case 3:	hipixelvalue = (hivalue/float(INT_MAX)); break;
-				case 4:	hipixelvalue = (hivalue/float(INT_MAX)); break;
-				case 2:	hipixelvalue = (hivalue/float(SHRT_MAX)); break;
-				case 1:	hipixelvalue = (hivalue/float(CHAR_MAX)); break;
-				}
-				hipixelvalue *= zeropoint;
-				QPoint nextpoint(x,zeropoint-roundf(hipixelvalue));
-				paint->drawLine(previouspoint,nextpoint);
-				previouspoint=nextpoint;
-			}
-			if(lovalue!=0) {
-				switch(bytespersample) {
-				case 3:	lopixelvalue = (lovalue/float(INT_MAX)); break;
-				case 4:	lopixelvalue = (lovalue/float(INT_MAX)); break;
-				case 2:	lopixelvalue = (lovalue/float(SHRT_MAX)); break;
-				case 1:	lopixelvalue = (lovalue/float(CHAR_MAX)); break;
-				}
-				lopixelvalue *= zeropoint;
-				QPoint nextpoint(x,zeropoint-roundf(lopixelvalue));
-				paint->drawLine(previouspoint,nextpoint);
-				previouspoint=nextpoint;
-			}
-		}
-		delete paint;
-		this->lWaveformPixmaps.append(QPixmap::fromImage(waveform,Qt::MonoOnly));
-		out.open(QFile::WriteOnly);
-		waveform.save(&out);
-		out.close();
-		previouspoint.setX(0);
-	}
+void ClipTimelineItem::threadFinished()
+{
+	delete QObject::sender();
 }

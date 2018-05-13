@@ -9,6 +9,7 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *pla
 	this->setFrameShape(Shape::NoFrame);
 	this->setAttribute(Qt::WA_TranslucentBackground);
 	this->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+	this->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 	this->viewport()->setAutoFillBackground(false);
 
 	this->ccClip = clip;

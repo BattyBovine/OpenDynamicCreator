@@ -10,13 +10,12 @@
 
 #include "TimelineItem.h"
 #include "Classes/ClipContainer.h"
-
-#define CTI_MAX_TILE_LENGTH			256.0f
-#define CTI_RESOLUTION_MULTIPLIER	2
+#include "Classes/WaveformThread.h"
 
 
 class ClipTimelineItem : public TimelineItem
 {
+	Q_OBJECT
 public:
 	ClipTimelineItem(float topspacing) : TimelineItem(topspacing) { this->setZValue(-10); }
 
@@ -27,6 +26,10 @@ public:
 	void setTimelineScale(qreal scale) { this->fTimelineScale=scale; this->updateBoundingRect(); }
 
 	void generateWaveform(std::shared_ptr<ClipContainer>);
+
+private slots:
+	void getWaveformTile(int,int,QPixmap);
+	void threadFinished();
 
 protected:
 	virtual QRectF boundingRect() const { return this->rectBounds; }
@@ -40,7 +43,8 @@ private:
 	qreal fHeight = 0.0f;
 	qreal fTimelineScale = 1.0f;
 	quint8 iWaveformResolution = 1;
-	QList<QPixmap> lWaveformPixmaps;
+	QMap<unsigned int, QList<QPixmap> > mapWaveforms;
+	QList<WaveformThread*> listWaveformThreads;
 };
 
 #endif // CLIPTIMELINEITEM_H

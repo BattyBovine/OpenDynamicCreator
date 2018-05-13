@@ -41,7 +41,8 @@ SOURCES += main.cpp \
     src/Widgets/GraphicsItems/PlayMarkerItem.cpp \
     src/Widgets/GraphicsItems/TimelineItem.cpp \
     src/Widgets/GraphicsItems/ClipTimelineItem.cpp \
-    src/Classes/ClipContainer.cpp
+    src/Classes/ClipContainer.cpp \
+    src/Classes/WaveformThread.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -61,7 +62,8 @@ HEADERS  += version.h \
     src/Widgets/GraphicsItems/PlayMarkerItem.h \
     src/Widgets/GraphicsItems/TimelineItem.h \
     src/Widgets/GraphicsItems/ClipTimelineItem.h \
-    src/Classes/ClipContainer.h
+    src/Classes/ClipContainer.h \
+    src/Classes/WaveformThread.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \
