@@ -12,6 +12,8 @@
 #include "Classes/ClipContainer.h"
 #include "Classes/WaveformThread.h"
 
+typedef QMap<unsigned int,QList<QPixmap> > WaveformMap;
+
 
 class ClipTimelineItem : public TimelineItem
 {
@@ -43,7 +45,8 @@ private:
 	qreal fHeight = 0.0f;
 	qreal fTimelineScale = 1.0f;
 	quint8 iWaveformResolution = 1;
-	QMap<unsigned int, QList<QPixmap> > mapWaveforms;
+	WaveformMap mapWaveforms;
+	WaveformMap mapWaveformBuffer;
 };
 
 #endif // CLIPTIMELINEITEM_H
