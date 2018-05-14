@@ -4,9 +4,10 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 {
 	p->setRenderHint(QPainter::HighQualityAntialiasing);
 	p->setRenderHint(QPainter::SmoothPixmapTransform);
-	QRectF mybounds = this->boundingRect();
-	float pixwidth = mybounds.width() / this->mapWaveforms[this->iWaveformResolution].size();
-	for(int i=0; i<this->mapWaveforms[this->iWaveformResolution].size(); i++) {
+	const QRectF mybounds = this->boundingRect();
+	const int tilecount = this->mapWaveforms[this->iWaveformResolution].size();
+	const float pixwidth = mybounds.width() / tilecount;
+	for(int i=0; i<tilecount; i++) {
 		QRectF itemregion(pixwidth*i, mybounds.y(), pixwidth, mybounds.height());
 		QRectF pixmapbounds(0, 0, WT_MAX_TILE_LENGTH, this->mapWaveforms[this->iWaveformResolution][i].height());
 		p->drawPixmap(itemregion, this->mapWaveforms[this->iWaveformResolution][i], pixmapbounds);

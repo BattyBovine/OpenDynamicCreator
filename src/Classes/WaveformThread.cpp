@@ -8,6 +8,12 @@ WaveformThread::WaveformThread(std::shared_ptr<ClipContainer> clip, float width,
 	this->fScale = scale;
 	this->iResolution = resolution;
 	this->iTileCount = tilecount;
+
+	this->sCache = QString("%1/%2/%3/%4/")
+				   .arg(QDir::tempPath())
+				   .arg(QCoreApplication::applicationName())
+				   .arg(this->ccClip->uuidString())
+				   .arg(this->iResolution);
 }
 
 void WaveformThread::run()
@@ -23,23 +29,18 @@ void WaveformThread::run()
 
 	const float samplesperpixel = (float(samplecount)/(WT_MAX_TILE_LENGTH*this->iTileCount));
 
-	QString outpath = QString("%1/%2/%3/%4/")
-					  .arg(QDir::tempPath())
-					  .arg(QCoreApplication::applicationName())
-					  .arg(this->ccClip->uuidString())
-					  .arg(this->iResolution);
-	QDir path(outpath);
-	path.mkpath(outpath);
+//	QDir path(this->sCache);
+//	path.mkpath(this->sCache);
 
 	QPoint previouspoint(0,zeropoint);
 	for(int tile=0; tile<this->iTileCount; tile++) {
-		QFile out(path.absolutePath()+QString("/%1.bmp").arg(tile));
+//		QFile out(path.absolutePath()+QString("/%1.bmp").arg(tile));
 		QImage waveform;
-		if(out.exists()) {
-			waveform.load(&out,"BMP");
-			emit(tileFinished(this->iResolution,tile,QPixmap::fromImage(waveform,Qt::MonoOnly)));
-			continue;
-		}
+//		if(out.exists()) {
+//			waveform.load(&out,"BMP");
+//			emit(tileFinished(this->iResolution,tile,QPixmap::fromImage(waveform,Qt::MonoOnly)));
+//			continue;
+//		}
 		waveform = QImage(WT_MAX_TILE_LENGTH, this->fHeight, QImage::Format_Mono);
 		QPainter *paint = new QPainter(&waveform);
 		paint->setBrush(QColor(255,255,255));
@@ -101,9 +102,9 @@ void WaveformThread::run()
 			}
 		}
 		delete paint;
-		out.open(QFile::WriteOnly);
-		waveform.save(&out);
-		out.close();
+//		out.open(QFile::WriteOnly);
+//		waveform.save(&out);
+//		out.close();
 		emit(tileFinished(this->iResolution,tile,QPixmap::fromImage(waveform,Qt::MonoOnly)));
 		previouspoint.setX(0);
 	}
