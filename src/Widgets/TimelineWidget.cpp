@@ -2,6 +2,7 @@
 
 TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *playpause, QAction *stop, bool readonly, QWidget *parent) : QGraphicsView(parent)
 {
+	this->setClip(clip);
 	this->setTopSpacing(TW_DEFAULT_TOP_SPACING);
 	this->setMeasureSpacing(TW_DEFAULT_MEASURE_SPACING);
 	this->setReadOnly(readonly);
@@ -12,7 +13,7 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *pla
 	this->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
 	this->viewport()->setAutoFillBackground(false);
 
-	this->ccClip = clip;
+	this->createMeasureMarkers();
 
 	this->gsTimeline = new QGraphicsScene(this);
 	this->gsTimeline->setSceneRect(0,0,this->ccClip->beats().toTimelinePosition(this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit()),100);
@@ -34,6 +35,15 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *pla
 	connect(playpause, SIGNAL(toggled(bool)), this, SLOT(togglePlayPause(bool)));
 	connect(stop, SIGNAL(triggered(bool)), this, SLOT(clipStop()));
 	connect(&this->timerPlayMarker, SIGNAL(timeout()), this, SLOT(movePlayMarkerToClipPos()));
+}
+
+TimelineWidget::~TimelineWidget()
+{
+	foreach(QList<QGraphicsLineItem*> list, this->mapMeasureLines) {
+		foreach(QGraphicsLineItem *l, list) {
+			delete l;
+		}
+	}
 }
 
 
@@ -117,50 +127,77 @@ void TimelineWidget::drawEventMarkers()
 //	}
 }
 
-void TimelineWidget::drawMeasureMarkers()
+void TimelineWidget::createMeasureMarkers()
 {
-	foreach(QGraphicsLineItem *line, this->lMeasureLines) {
-		this->gsTimeline->removeItem(line);
-		delete line;
-	}
-	this->lMeasureLines.clear();
-
 	QPen pen(this->palette().foreground().color());
 	pen.setWidth(0);
-	this->lMeasureLines.append(this->gsTimeline->addLine(0.0f, this->fTopSpacing,
-														 0.0f, this->fTopSpacing+TW_MEASURE_MARKER_LENGTH,
-														 pen));
-	unsigned int measurecount = this->ccClip->beats().measureCount(this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+	QGraphicsLineItem *line = new QGraphicsLineItem(0.0f, this->fTopSpacing,
+													0.0f, this->fTopSpacing+TW_MEASURE_MARKER_LENGTH);
+	line->setPen(pen);
+	this->mapMeasureLines[1].append(line);
+	const quint8 beatspermeasure = this->ccClip->beatsPerMeasure();
+	unsigned int measurecount = this->ccClip->beats().measureCount(beatspermeasure, this->ccClip->beatUnit());
 	for(unsigned int measure=0; measure<measurecount; measure++) {
-		for(int beat=1; beat<=this->ccClip->beatsPerMeasure(); beat++) {
-			float spacing = this->fMeasureSpacing/this->ccClip->beatsPerMeasure();
+		for(int beat=1; beat<=beatspermeasure; beat++) {
+			float spacing = this->fMeasureSpacing/beatspermeasure;
 			float xpos = (this->fMeasureSpacing*measure) + (spacing*beat);
 			float markerlength = (TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA);
-			if(beat!=this->ccClip->beatsPerMeasure()) {
-				this->lMeasureLines.append(this->gsTimeline->addLine(xpos, this->fTopSpacing,
-																	 xpos, this->fTopSpacing+markerlength,
-																	 pen));
+			if(beat!=beatspermeasure) {
+				line = new QGraphicsLineItem(xpos, this->fTopSpacing,
+											 xpos, this->fTopSpacing+markerlength);
+				line->setPen(pen);
+				this->mapMeasureLines[4].append(line);
 			}
 			spacing /= 2.0f;
-			if((spacing*this->fScale)<=TW_SUB_BEAT_MIN_SPACING)
-				continue;
-			this->drawBeatMarkers(xpos-spacing, spacing, this->fScale, markerlength*TW_BEAT_MARKER_DELTA, pen);
+			this->createBeatMarkers(8, xpos-spacing, spacing, this->fScale, markerlength*TW_BEAT_MARKER_DELTA, pen);
 		}
-		this->lMeasureLines.append(this->gsTimeline->addLine(this->fMeasureSpacing*(measure+1), this->fTopSpacing,
-															 this->fMeasureSpacing*(measure+1), this->fTopSpacing+TW_MEASURE_MARKER_LENGTH,
-															 pen));
+		line = new QGraphicsLineItem(this->fMeasureSpacing*(measure+1), this->fTopSpacing,
+									 this->fMeasureSpacing*(measure+1), this->fTopSpacing+TW_MEASURE_MARKER_LENGTH);
+		line->setPen(pen);
+		this->mapMeasureLines[1].append(line);
 	}
 }
-void TimelineWidget::drawBeatMarkers(float pos, float spacing, float scale, float length, QPen &pen)
+void TimelineWidget::createBeatMarkers(int unit, float pos, float spacing, float scale, float length, QPen &pen)
 {
-	this->lMeasureLines.append(this->gsTimeline->addLine(pos, this->fTopSpacing,
-														 pos, this->fTopSpacing+length,
-														 pen));
+	if(unit>=128) return;
+	QGraphicsLineItem *subbeatline = new QGraphicsLineItem(pos, this->fTopSpacing,
+														   pos, this->fTopSpacing+length);
+	subbeatline->setPen(pen);
+	this->mapMeasureLines[unit].append(subbeatline);
 	spacing /= 2.0f;
-	if((spacing*scale)<TW_SUB_BEAT_MIN_SPACING)
-		return;
-	this->drawBeatMarkers(pos-spacing, spacing, scale, length*TW_BEAT_MARKER_DELTA, pen);
-	this->drawBeatMarkers(pos+spacing, spacing, scale, length*TW_BEAT_MARKER_DELTA, pen);
+	this->createBeatMarkers(unit*2, pos-spacing, spacing, scale, length*TW_BEAT_MARKER_DELTA, pen);
+	this->createBeatMarkers(unit*2, pos+spacing, spacing, scale, length*TW_BEAT_MARKER_DELTA, pen);
+}
+void TimelineWidget::drawMeasureMarkers()
+{
+	QList<QGraphicsItem*> activelines = this->gsTimeline->items();
+	if(!activelines.contains(this->mapMeasureLines[1].first())) {
+		foreach(QGraphicsLineItem *measureline, this->mapMeasureLines[1])
+			this->gsTimeline->addItem(measureline);
+	}
+	if(!activelines.contains(this->mapMeasureLines[4].first())) {
+		foreach(QGraphicsLineItem *beatline, this->mapMeasureLines[4])
+			this->gsTimeline->addItem(beatline);
+	}
+
+	float spacing = this->fMeasureSpacing/this->ccClip->beatsPerMeasure();
+	int unit = 8;
+	while(true) {
+		if(unit>=128) break;
+		spacing /= 2.0f;
+		if((spacing*this->fScale)<=TW_SUB_BEAT_MIN_SPACING) {
+			if(activelines.contains(this->mapMeasureLines[unit].first())) {
+				foreach(QGraphicsLineItem *beatline, this->mapMeasureLines[unit])
+					this->gsTimeline->removeItem(beatline);
+			}
+		} else {
+			if(!activelines.contains(this->mapMeasureLines[unit].first())) {
+				foreach(QGraphicsLineItem *beatline, this->mapMeasureLines[unit])
+					this->gsTimeline->addItem(beatline);
+			}
+		}
+		unit*=2;
+	}
 }
 
 

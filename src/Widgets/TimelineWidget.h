@@ -31,9 +31,13 @@ class TimelineWidget : public QGraphicsView
 	Q_OBJECT
 public:
 	explicit TimelineWidget(std::shared_ptr<ClipContainer>, QAction*, QAction*, bool readonly=true, QWidget *parent=0);
+	~TimelineWidget();
+	std::shared_ptr<ClipContainer> clip() { return this->ccClip; }
 	float measureSpacing() { return this->fMeasureSpacing; }
 
 public slots:
+	void setClip(std::shared_ptr<ClipContainer> c) { this->ccClip=c; }
+	void setTopSpacing(float t) { this->fTopSpacing=t; }
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; }
 	void setZoom(float);
 
@@ -56,12 +60,12 @@ protected:
 	virtual void wheelEvent(QWheelEvent*);
 
 private:
-	void setTopSpacing(float t) { this->fTopSpacing=t; }
 	void redrawStageElements();
 
 	void drawEventMarkers();
+	void createMeasureMarkers();
+	void createBeatMarkers(int, float, float, float, float, QPen&);
 	void drawMeasureMarkers();
-	void drawBeatMarkers(float, float, float, float, QPen&);
 
 	float posToSeconds(float pos) const { return pos/(this->fMeasureSpacing/this->ccClip->beatsPerMeasure())*(60.0f/this->ccClip->tempo()); }
 	float secondsToPos(float secs) const { return secs*(this->ccClip->tempo()/60.0f)*(this->fMeasureSpacing/this->ccClip->beatsPerMeasure()); }
@@ -70,7 +74,7 @@ private:
 	std::shared_ptr<ClipContainer> ccClip;
 	PlayMarkerItem *pmiPlayMarker = NULL;
 	ClipTimelineItem *ctiClip = NULL;
-	QList<QGraphicsLineItem*> lMeasureLines;
+	QMap<unsigned int,QList<QGraphicsLineItem*> > mapMeasureLines;
 
 	float fScale = 1.0f;
 	float fTopSpacing = 0.0f;

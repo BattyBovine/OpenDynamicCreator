@@ -44,7 +44,6 @@ private:
 	qreal fTimelineScale = 1.0f;
 	quint8 iWaveformResolution = 1;
 	QMap<unsigned int, QList<QPixmap> > mapWaveforms;
-	QList<WaveformThread*> listWaveformThreads;
 };
 
 #endif // CLIPTIMELINEITEM_H

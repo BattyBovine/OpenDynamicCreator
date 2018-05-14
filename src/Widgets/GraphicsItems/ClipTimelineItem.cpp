@@ -43,7 +43,6 @@ void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 		this->mapWaveforms[this->iWaveformResolution].append(QPixmap());
 	WaveformThread *thread = new WaveformThread(clip, this->fLength, this->fHeight, this->fTimelineScale,
 												this->iWaveformResolution, tilecount);
-	this->listWaveformThreads.insert(this->iWaveformResolution, thread);
 	connect(thread, SIGNAL(tileFinished(int,int,QPixmap)), this, SLOT(getWaveformTile(int,int,QPixmap)));
 	connect(thread, SIGNAL(finished()), this, SLOT(threadFinished()));
 	thread->start();
