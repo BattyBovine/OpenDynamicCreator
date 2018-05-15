@@ -28,3 +28,10 @@ void PreferencesDialog::saveTempFolder(QString d)
 	ui->labelDirectoryDoesNotExist->setVisible(!temp.exists());
 	this->settings.setValue(KEY_TEMP_FOLDER, d);
 }
+
+
+
+void PreferencesDialog::initSettings()
+{
+	this->saveTempFolder(this->getTempFolder());
+}

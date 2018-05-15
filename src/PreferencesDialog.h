@@ -6,6 +6,7 @@
 #include <QDialog>
 #include <QCoreApplication>
 #include <QSettings>
+#include <QMutex>
 #include <QDir>
 
 #define KEY_TEMP_FOLDER	"TempFolder"
@@ -23,6 +24,8 @@ public:
 	explicit PreferencesDialog(QWidget *parent = 0);
 	~PreferencesDialog();
 
+	void initSettings();
+
 	QString getTempFolder() { return this->settings.value(KEY_TEMP_FOLDER, QString("%1/%2").arg(QDir::tempPath()).arg(QCoreApplication::applicationName())).toString(); }
 
 public slots:
@@ -31,6 +34,7 @@ public slots:
 private:
 	Ui::PreferencesDialog *ui;
 	QSettings settings;
+	mutable QMutex mutex;
 
 	QString sOldCache;
 	bool bDeleteOldCache = false;

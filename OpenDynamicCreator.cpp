@@ -17,6 +17,8 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 //	this->selStates = ui->treeStates->selectionModel();
 
 	// Preferences window
+	PreferencesDialog diag;
+	diag.initSettings();	// Fill settings with default entries, if necessary
 	connect(ui->actionPreferences, SIGNAL(triggered(bool)), this, SLOT(openPreferencesDialog()));
 
 	// Menu for right-clicking an empty area of the music tree or a music item
