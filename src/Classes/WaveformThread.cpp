@@ -24,7 +24,7 @@ void WaveformThread::run()
 	const float samplesperpixel = float(samplecount) / (WT_MAX_TILE_LENGTH*this->iTileCount);
 
 	QSettings settings;
-	QString cachepath = settings.value(KEY_TEMP_FOLDER);
+	QString cachepath = settings.value(KEY_TEMP_FOLDER).toString();
 	if(cachepath.isEmpty())
 		return;
 	cachepath.append(QString("/%1/").arg(this->ccClip->uuidString()));
