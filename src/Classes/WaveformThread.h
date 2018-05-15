@@ -1,6 +1,8 @@
 #ifndef WAVEFORMTHREAD_H
 #define WAVEFORMTHREAD_H
 
+#include <QDebug>
+
 #include <memory>
 
 #include <QThread>
@@ -29,7 +31,6 @@ protected:
 
 private:
 	std::shared_ptr<ClipContainer> ccClip;
-	QString sCache;
 	float fWidth = 0.0f;
 	float fHeight = 0.0f;
 	float fScale = 0.0f;

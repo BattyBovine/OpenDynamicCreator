@@ -44,9 +44,8 @@ private:
 	qreal fLength = 0.0f;
 	qreal fHeight = 0.0f;
 	qreal fTimelineScale = 1.0f;
-	quint8 iWaveformResolution = 1;
+	quint8 iWaveformResolution = 0;
 	WaveformMap mapWaveforms;
-	WaveformMap mapWaveformBuffer;
 };
 
 #endif // CLIPTIMELINEITEM_H

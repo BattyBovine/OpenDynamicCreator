@@ -10,7 +10,7 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 		const float pixwidth = mybounds.width() / tilecount;
 		for(int i=0; i<tilecount; i++) {
 			const QPixmap &currentmap = this->mapWaveforms[this->iWaveformResolution][i];
-			const QRectF itemregion(pixwidth*i+1, mybounds.y(), pixwidth, mybounds.height());
+			const QRectF itemregion(pixwidth*i, mybounds.y(), pixwidth, mybounds.height());
 			const QRectF pixmapbounds(0, 0, WT_MAX_TILE_LENGTH, currentmap.height());
 			p->drawPixmap(itemregion, currentmap, pixmapbounds);
 #ifdef QT_DEBUG
@@ -29,22 +29,14 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 
 void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 {
-	const quint8 zoomscale = roundf(this->fTimelineScale);
-	if(this->fHeight<1.0f || zoomscale==this->iWaveformResolution)
+	const quint8 zoomscale = roundf(this->fTimelineScale+0.5f);
+	if(zoomscale==this->iWaveformResolution || this->fHeight<1.0f)
 		return;
 	this->iWaveformResolution = zoomscale;
 
-	float waveformlength;
-	if(this->iWaveformResolution==0)
-		waveformlength = this->fLength;
-	else
-		waveformlength = (this->fLength*this->iWaveformResolution*WT_RESOLUTION_MULTIPLIER);
+	const float waveformlength = this->fLength * (this->iWaveformResolution+1);
 	const int tilecount = ceilf(waveformlength/WT_MAX_TILE_LENGTH);
 
-	this->mapWaveformBuffer[this->iWaveformResolution].clear();
-	this->mapWaveformBuffer[this->iWaveformResolution].reserve(tilecount);
-	for(int i=0; i<tilecount; i++)
-		this->mapWaveformBuffer[this->iWaveformResolution].append(QPixmap());
 	WaveformThread *thread = new WaveformThread(clip, this->fLength, this->fHeight, this->fTimelineScale,
 												this->iWaveformResolution, tilecount);
 	connect(thread, SIGNAL(tileFinished(int,int,QPixmap)), this, SLOT(getWaveformTile(int,int,QPixmap)));
@@ -54,12 +46,14 @@ void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 
 void ClipTimelineItem::getWaveformTile(int resolution, int tile, QPixmap pix)
 {
-	this->mapWaveformBuffer[resolution][tile] = pix;
+	if(this->mapWaveforms[resolution].size()>tile)
+		this->mapWaveforms[resolution].replace(tile, pix);
+	else
+		this->mapWaveforms[resolution].insert(tile, pix);
 }
 
 void ClipTimelineItem::threadFinished()
 {
-	this->mapWaveforms = this->mapWaveformBuffer;
+	QObject::sender()->deleteLater();
 	this->update(this->boundingRect());
-	delete QObject::sender();
 }

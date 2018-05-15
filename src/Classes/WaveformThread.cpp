@@ -8,12 +8,6 @@ WaveformThread::WaveformThread(std::shared_ptr<ClipContainer> clip, float width,
 	this->fScale = scale;
 	this->iResolution = resolution;
 	this->iTileCount = tilecount;
-
-	this->sCache = QString("%1/%2/%3/%4/")
-				   .arg(QDir::tempPath())
-				   .arg(QCoreApplication::applicationName())
-				   .arg(this->ccClip->uuidString())
-				   .arg(this->iResolution);
 }
 
 void WaveformThread::run()
@@ -27,17 +21,28 @@ void WaveformThread::run()
 	const int samplesize = (bytespersample*channels);
 	const int samplecount = (datalength/samplesize);
 
-	const float samplesperpixel = (float(samplecount)/(WT_MAX_TILE_LENGTH*this->iTileCount));
+	const float samplesperpixel = float(samplecount) / (WT_MAX_TILE_LENGTH*this->iTileCount);
 
-//	QDir path(this->sCache);
-//	path.mkpath(this->sCache);
+
+//	QString cachepath = QString("%1/%2/%3/")
+//						.arg(QDir::tempPath())
+//						.arg(QCoreApplication::applicationName())
+//						.arg(this->ccClip->uuidString());
+//	QDir path(cachepath);
+//	path.setFilter(QDir::NoDotAndDotDot);
+//	path.removeRecursively();
+//	cachepath.append(QString("%1/").arg(this->iResolution));
+//	path.setPath(cachepath);
+//	path.mkpath(cachepath);
 
 	QPoint previouspoint(0,zeropoint);
 	for(int tile=0; tile<this->iTileCount; tile++) {
-//		QFile out(path.absolutePath()+QString("/%1.bmp").arg(tile));
 		QImage waveform;
+//		QFile out(path.absolutePath()+QString("/%1.bmp").arg(tile));
 //		if(out.exists()) {
 //			waveform.load(&out,"BMP");
+//			waveform.setColor(0, QColor(255,255,255,0).rgba());
+//			waveform.setColor(1, QColor(0,0,255).rgba());
 //			emit(tileFinished(this->iResolution,tile,QPixmap::fromImage(waveform,Qt::MonoOnly)));
 //			continue;
 //		}
@@ -102,10 +107,12 @@ void WaveformThread::run()
 			}
 		}
 		delete paint;
+		waveform.setColor(0, QColor(0,0,255).rgba());
+		waveform.setColor(1, QColor(255,255,255,0).rgba());
 //		out.open(QFile::WriteOnly);
 //		waveform.save(&out);
 //		out.close();
-		emit(tileFinished(this->iResolution,tile,QPixmap::fromImage(waveform,Qt::MonoOnly)));
+		emit(tileFinished(this->iResolution, tile, QPixmap::fromImage(waveform,Qt::MonoOnly)));
 		previouspoint.setX(0);
 	}
 }
