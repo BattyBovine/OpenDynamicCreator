@@ -23,29 +23,35 @@ void WaveformThread::run()
 
 	const float samplesperpixel = float(samplecount) / (WT_MAX_TILE_LENGTH*this->iTileCount);
 
-
-//	QString cachepath = QString("%1/%2/%3/")
-//						.arg(QDir::tempPath())
-//						.arg(QCoreApplication::applicationName())
-//						.arg(this->ccClip->uuidString());
-//	QDir path(cachepath);
-//	path.setFilter(QDir::NoDotAndDotDot);
-//	path.removeRecursively();
-//	cachepath.append(QString("%1/").arg(this->iResolution));
-//	path.setPath(cachepath);
-//	path.mkpath(cachepath);
+	QSettings settings;
+	QString cachepath = settings.value(KEY_TEMP_FOLDER);
+	if(cachepath.isEmpty())
+		return;
+	cachepath.append(QString("/%1/").arg(this->ccClip->uuidString()));
+	QDir path(cachepath);
+	QFile tempofile(cachepath+(QString("/%1").arg(this->ccClip->tempo())));
+	if(!tempofile.exists()) {
+		path.setFilter(QDir::NoDotAndDotDot);
+		path.removeRecursively();
+		path.mkpath(cachepath);
+		tempofile.open(QFile::WriteOnly);
+		tempofile.close();
+	}
+	cachepath.append(QString("%1/").arg(this->iResolution));
+	path.setPath(cachepath);
+	path.mkpath(cachepath);
 
 	QPoint previouspoint(0,zeropoint);
 	for(int tile=0; tile<this->iTileCount; tile++) {
 		QImage waveform;
-//		QFile out(path.absolutePath()+QString("/%1.bmp").arg(tile));
-//		if(out.exists()) {
-//			waveform.load(&out,"BMP");
-//			waveform.setColor(0, QColor(255,255,255,0).rgba());
-//			waveform.setColor(1, QColor(0,0,255).rgba());
-//			emit(tileFinished(this->iResolution,tile,QPixmap::fromImage(waveform,Qt::MonoOnly)));
-//			continue;
-//		}
+		QFile out(path.absolutePath()+QString("/%1.bmp").arg(tile));
+		if(out.exists()) {
+			waveform.load(&out,"BMP");
+			waveform.setColor(0, QColor(255,255,255,0).rgba());
+			waveform.setColor(1, QColor(0,0,255).rgba());
+			emit(tileFinished(this->iResolution,tile,QPixmap::fromImage(waveform,Qt::MonoOnly)));
+			continue;
+		}
 		waveform = QImage(WT_MAX_TILE_LENGTH, this->fHeight, QImage::Format_Mono);
 		QPainter *paint = new QPainter(&waveform);
 		paint->setBrush(QColor(255,255,255));
@@ -109,9 +115,9 @@ void WaveformThread::run()
 		delete paint;
 		waveform.setColor(0, QColor(0,0,255).rgba());
 		waveform.setColor(1, QColor(255,255,255,0).rgba());
-//		out.open(QFile::WriteOnly);
-//		waveform.save(&out);
-//		out.close();
+		out.open(QFile::WriteOnly);
+		waveform.save(&out);
+		out.close();
 		emit(tileFinished(this->iResolution, tile, QPixmap::fromImage(waveform,Qt::MonoOnly)));
 		previouspoint.setX(0);
 	}

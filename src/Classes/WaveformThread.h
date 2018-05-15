@@ -8,10 +8,12 @@
 #include <QThread>
 #include <QPixmap>
 #include <QPainter>
+#include <QSettings>
 #include <QDir>
 #include <QFile>
 #include <QCoreApplication>
 
+#include "PreferencesDialog.h"
 #include "ClipContainer.h"
 
 #define WT_MAX_TILE_LENGTH			256.0f

@@ -7,7 +7,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 {
 	ui->setupUi(this);
 
-	ui->labelDirectoryDoesNotExist->setVisible(false);
+	ui->labelDirectoryError->setVisible(false);
 	this->sOldCache = this->getTempFolder();
 	ui->lineTempFolder->setText(this->sOldCache);
 	connect(ui->lineTempFolder, SIGNAL(textChanged(QString)), this, SLOT(saveTempFolder(QString)));
@@ -16,16 +16,25 @@ PreferencesDialog::~PreferencesDialog()
 {
 	if(this->bDeleteOldCache) {
 		QDir oldcache(this->sOldCache);
-		qDebug() << oldcache.absolutePath();
+		oldcache.removeRecursively();
 	}
 	delete ui;
 }
 
 void PreferencesDialog::saveTempFolder(QString d)
 {
+	ui->labelDirectoryError->setVisible(false);
 	this->bDeleteOldCache = true;
+	if(d.isEmpty()) {
+		ui->labelDirectoryError->setText(tr("Directory cannot be blank"));
+		ui->labelDirectoryError->setVisible(true);
+		return;
+	}
 	QDir temp(d);
-	ui->labelDirectoryDoesNotExist->setVisible(!temp.exists());
+	if(!temp.exists()) {
+		ui->labelDirectoryError->setText(tr("Directory does not exist; it will be created"));
+		ui->labelDirectoryError->setVisible(true);
+	}
 	this->settings.setValue(KEY_TEMP_FOLDER, d);
 }
 
