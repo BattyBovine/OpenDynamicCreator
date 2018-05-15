@@ -16,6 +16,9 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 //	ui->treeStates->setModel(this->modelStates);
 //	this->selStates = ui->treeStates->selectionModel();
 
+	// Preferences window
+	connect(ui->actionPreferences, SIGNAL(triggered(bool)), this, SLOT(openPreferencesDialog()));
+
 	// Menu for right-clicking an empty area of the music tree or a music item
 	this->menuMusicBlankContext = new QMenu(ui->treeMusic);
 	this->menuMusicBlankContext->addAction(ui->actionAddTrack);
@@ -45,6 +48,20 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 OpenDynamicCreator::~OpenDynamicCreator()
 {
 	delete ui;
+}
+
+
+
+void OpenDynamicCreator::openPreferencesDialog()
+{
+	this->dialogPreferences = new PreferencesDialog(this);
+	connect(this->dialogPreferences,SIGNAL(finished(int)),this,SLOT(closePreferencesDialog(int)));
+	this->dialogPreferences->open();
+
+}
+void OpenDynamicCreator::closePreferencesDialog(int)
+{
+	this->dialogPreferences->deleteLater();
 }
 
 

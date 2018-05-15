@@ -35,15 +35,16 @@ SOURCES += main.cpp \
 	src/ClipGroupEditorWidget.cpp \
 	src/MusicPropertiesWidget.cpp \
 	src/ClipEditorWidget.cpp \
+	src/PreferencesDialog.cpp \
     src/Widgets/MixerWidget.cpp \
     src/Widgets/MixerVolumeSlider.cpp \
     src/Widgets/MixerPanSlider.cpp \
     src/Widgets/GraphicsItems/PlayMarkerItem.cpp \
     src/Widgets/GraphicsItems/TimelineItem.cpp \
-    src/Widgets/GraphicsItems/ClipTimelineItem.cpp \
+	src/Widgets/GraphicsItems/ClipTimelineItem.cpp \
+	src/Widgets/GraphicsItems/InvertedLineItem.cpp \
     src/Classes/ClipContainer.cpp \
-    src/Classes/WaveformThread.cpp \
-    src/Widgets/GraphicsItems/InvertedLineItem.cpp
+	src/Classes/WaveformThread.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -55,6 +56,7 @@ HEADERS  += version.h \
 	src/ClipGroupEditorWidget.h \
 	src/MusicPropertiesWidget.h \
 	src/ClipEditorWidget.h \
+	src/PreferencesDialog.h \
 	src/Widgets/MixerWidget.h \
 	src/Widgets/MixerVolumeSlider.h \
 	src/Widgets/MixerPanSlider.h \
@@ -62,10 +64,10 @@ HEADERS  += version.h \
 	src/Libraries/dr_wav.h \
     src/Widgets/GraphicsItems/PlayMarkerItem.h \
     src/Widgets/GraphicsItems/TimelineItem.h \
-    src/Widgets/GraphicsItems/ClipTimelineItem.h \
+	src/Widgets/GraphicsItems/ClipTimelineItem.h \
+	src/Widgets/GraphicsItems/InvertedLineItem.h \
     src/Classes/ClipContainer.h \
-    src/Classes/WaveformThread.h \
-    src/Widgets/GraphicsItems/InvertedLineItem.h
+	src/Classes/WaveformThread.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \
@@ -73,7 +75,8 @@ FORMS    += \
 	ui/MusicPropertiesWidget.ui \
     ui/StatePropertiesEditor.ui \
     ui/ClipEditorWidget.ui \
-    ui/Widgets/MixerWidget.ui
+    ui/Widgets/MixerWidget.ui \
+    ui/PreferencesDialog.ui
 
 DISTFILES +=
 

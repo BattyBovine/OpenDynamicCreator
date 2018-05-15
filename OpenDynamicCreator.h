@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QFileInfo>
 
+#include "PreferencesDialog.h"
 #include "MusicPropertiesWidget.h"
 #include "ClipGroupEditorWidget.h"
 #include "ClipEditorWidget.h"
@@ -52,6 +53,9 @@ public:
 	~OpenDynamicCreator();
 
 public slots:
+	void openPreferencesDialog();
+	void closePreferencesDialog(int);
+
 	void addTrack();
 	void addClipGroup();
 	void addClip(QModelIndex parent=QModelIndex(), QString file="", QString label="");
@@ -78,6 +82,7 @@ private:
 	void loadClipEditorWidget(QModelIndex);
 	QModelIndex findTrack(QModelIndex);
 
+	PreferencesDialog *dialogPreferences;
 	MusicTreeViewModel *modelMusic;
 	QItemSelectionModel *selMusic;
 	QStandardItemModel *modelStates;
