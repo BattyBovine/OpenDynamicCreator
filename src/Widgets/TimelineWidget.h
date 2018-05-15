@@ -13,6 +13,7 @@
 
 #include "Widgets/GraphicsItems/PlayMarkerItem.h"
 #include "Widgets/GraphicsItems/ClipTimelineItem.h"
+#include "Widgets/GraphicsItems/InvertedLineItem.h"
 #include "Widgets/MusicTreeView.h"
 #include "Classes/MusicEvent.h"
 
@@ -74,7 +75,7 @@ private:
 	std::shared_ptr<ClipContainer> ccClip;
 	PlayMarkerItem *pmiPlayMarker = NULL;
 	ClipTimelineItem *ctiClip = NULL;
-	QMap<unsigned int,QList<QGraphicsLineItem*> > mapMeasureLines;
+	QMap<unsigned int,QList<InvertedLineItem*> > mapMeasureLines;
 
 	float fScale = 1.0f;
 	float fTopSpacing = 0.0f;

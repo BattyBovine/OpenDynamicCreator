@@ -39,8 +39,8 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *pla
 
 TimelineWidget::~TimelineWidget()
 {
-	foreach(QList<QGraphicsLineItem*> list, this->mapMeasureLines) {
-		foreach(QGraphicsLineItem *l, list) {
+	foreach(QList<InvertedLineItem*> list, this->mapMeasureLines) {
+		foreach(InvertedLineItem *l, list) {
 			delete l;
 		}
 	}
@@ -131,9 +131,8 @@ void TimelineWidget::createMeasureMarkers()
 {
 	QPen pen(this->palette().foreground().color());
 	pen.setWidth(0);
-	QGraphicsLineItem *line = new QGraphicsLineItem(0.0f, this->fTopSpacing,
-													0.0f, this->fTopSpacing+TW_MEASURE_MARKER_LENGTH);
-	line->setPen(pen);
+	InvertedLineItem *line = new InvertedLineItem(0.0f, this->fTopSpacing,
+												  0.0f, this->fTopSpacing+TW_MEASURE_MARKER_LENGTH);
 	this->mapMeasureLines[1].append(line);
 	const quint8 beatspermeasure = this->ccClip->beatsPerMeasure();
 	unsigned int measurecount = this->ccClip->beats().measureCount(beatspermeasure, this->ccClip->beatUnit());
@@ -143,26 +142,23 @@ void TimelineWidget::createMeasureMarkers()
 			float xpos = (this->fMeasureSpacing*measure) + (spacing*beat);
 			float markerlength = (TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA);
 			if(beat!=beatspermeasure) {
-				line = new QGraphicsLineItem(xpos, this->fTopSpacing,
-											 xpos, this->fTopSpacing+markerlength);
-				line->setPen(pen);
+				line = new InvertedLineItem(xpos, this->fTopSpacing,
+											xpos, this->fTopSpacing+markerlength);
 				this->mapMeasureLines[4].append(line);
 			}
 			spacing /= 2.0f;
 			this->createBeatMarkers(8, xpos-spacing, spacing, this->fScale, markerlength*TW_BEAT_MARKER_DELTA, pen);
 		}
-		line = new QGraphicsLineItem(this->fMeasureSpacing*(measure+1), this->fTopSpacing,
-									 this->fMeasureSpacing*(measure+1), this->fTopSpacing+TW_MEASURE_MARKER_LENGTH);
-		line->setPen(pen);
+		line = new InvertedLineItem(this->fMeasureSpacing*(measure+1), this->fTopSpacing,
+									this->fMeasureSpacing*(measure+1), this->fTopSpacing+TW_MEASURE_MARKER_LENGTH);
 		this->mapMeasureLines[1].append(line);
 	}
 }
 void TimelineWidget::createBeatMarkers(int unit, float pos, float spacing, float scale, float length, QPen &pen)
 {
 	if(unit>=128) return;
-	QGraphicsLineItem *subbeatline = new QGraphicsLineItem(pos, this->fTopSpacing,
-														   pos, this->fTopSpacing+length);
-	subbeatline->setPen(pen);
+	InvertedLineItem *subbeatline = new InvertedLineItem(pos, this->fTopSpacing,
+														 pos, this->fTopSpacing+length);
 	this->mapMeasureLines[unit].append(subbeatline);
 	spacing /= 2.0f;
 	this->createBeatMarkers(unit*2, pos-spacing, spacing, scale, length*TW_BEAT_MARKER_DELTA, pen);
@@ -172,11 +168,11 @@ void TimelineWidget::drawMeasureMarkers()
 {
 	QList<QGraphicsItem*> activelines = this->gsTimeline->items();
 	if(!activelines.contains(this->mapMeasureLines[1].first())) {
-		foreach(QGraphicsLineItem *measureline, this->mapMeasureLines[1])
+		foreach(InvertedLineItem *measureline, this->mapMeasureLines[1])
 			this->gsTimeline->addItem(measureline);
 	}
 	if(!activelines.contains(this->mapMeasureLines[4].first())) {
-		foreach(QGraphicsLineItem *beatline, this->mapMeasureLines[4])
+		foreach(InvertedLineItem *beatline, this->mapMeasureLines[4])
 			this->gsTimeline->addItem(beatline);
 	}
 
@@ -187,12 +183,12 @@ void TimelineWidget::drawMeasureMarkers()
 		spacing /= 2.0f;
 		if((spacing*this->fScale)<=TW_SUB_BEAT_MIN_SPACING) {
 			if(activelines.contains(this->mapMeasureLines[unit].first())) {
-				foreach(QGraphicsLineItem *beatline, this->mapMeasureLines[unit])
+				foreach(InvertedLineItem *beatline, this->mapMeasureLines[unit])
 					this->gsTimeline->removeItem(beatline);
 			}
 		} else {
 			if(!activelines.contains(this->mapMeasureLines[unit].first())) {
-				foreach(QGraphicsLineItem *beatline, this->mapMeasureLines[unit])
+				foreach(InvertedLineItem *beatline, this->mapMeasureLines[unit])
 					this->gsTimeline->addItem(beatline);
 			}
 		}

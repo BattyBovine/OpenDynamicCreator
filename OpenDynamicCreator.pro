@@ -42,7 +42,8 @@ SOURCES += main.cpp \
     src/Widgets/GraphicsItems/TimelineItem.cpp \
     src/Widgets/GraphicsItems/ClipTimelineItem.cpp \
     src/Classes/ClipContainer.cpp \
-    src/Classes/WaveformThread.cpp
+    src/Classes/WaveformThread.cpp \
+    src/Widgets/GraphicsItems/InvertedLineItem.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -63,7 +64,8 @@ HEADERS  += version.h \
     src/Widgets/GraphicsItems/TimelineItem.h \
     src/Widgets/GraphicsItems/ClipTimelineItem.h \
     src/Classes/ClipContainer.h \
-    src/Classes/WaveformThread.h
+    src/Classes/WaveformThread.h \
+    src/Widgets/GraphicsItems/InvertedLineItem.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \
