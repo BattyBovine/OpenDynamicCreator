@@ -16,12 +16,9 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *pla
 	this->createMeasureMarkers();
 
 	this->gsTimeline = new QGraphicsScene(this);
-	this->gsTimeline->setSceneRect(0,0,this->ccClip->beats().toTimelinePosition(this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit()),100);
 	this->setScene(this->gsTimeline);
 
-	this->ctiClip = new ClipTimelineItem(this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA));
-	this->ctiClip->setTimelinePos(Beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
-	this->ctiClip->setLength(this->ccClip->beats(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+	this->ctiClip = new ClipTimelineItem(clip, this->fMeasureSpacing, this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA));
 	this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	this->gsTimeline->addItem(this->ctiClip);
 
@@ -30,6 +27,7 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *pla
 	this->pmiPlayMarker->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	this->gsTimeline->addItem(this->pmiPlayMarker);
 
+	this->setViewportBounds();
 	this->setZoom(-1000.0f);
 
 	connect(playpause, SIGNAL(toggled(bool)), this, SLOT(togglePlayPause(bool)));
@@ -44,6 +42,8 @@ TimelineWidget::~TimelineWidget()
 			delete l;
 		}
 	}
+	this->pmiPlayMarker->deleteLater();
+	this->ctiClip->deleteLater();
 }
 
 
@@ -75,8 +75,11 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 		this->beatMouseMovePos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit(), this->iBeatUnitSnap);
 		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).beat()) >= Beat::fromUnit(this->iBeatUnitSnap))
 			this->bMoveMode = true;
-		if(this->bMoveMode)
-			this->ctiClip->setTimelinePos(this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+		if(this->bMoveMode) {
+			this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
+			this->ctiClip->setTimelinePos(this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos), this->fMeasureSpacing);
+			this->setViewportBounds();
+		}
 	}
 	QGraphicsView::mouseMoveEvent(e);
 }
@@ -237,10 +240,21 @@ void TimelineWidget::setZoom(float zoomdelta)
 void TimelineWidget::redrawStageElements()
 {
 	this->drawMeasureMarkers();
-	if(this->ctiClip) {
+	if(this->ctiClip)
 		this->ctiClip->setTimelineScale(this->fScale);
-		this->ctiClip->generateWaveform(this->ccClip);
-	}
+}
+
+void TimelineWidget::setViewportBounds()
+{
+	const quint8 beatspermeasure = this->ccClip->beatsPerMeasure();
+	const quint8 beatunit = this->ccClip->beatUnit();
+	Beat startposition = this->ccClip->timelineOffset();
+	int endposition = (this->ccClip->beats()+this->ccClip->timelineOffset()).measureCount(beatspermeasure, beatunit) * this->fMeasureSpacing;
+	endposition -= startposition.toTimelinePosition(this->fMeasureSpacing, beatspermeasure, beatunit);
+	if(startposition>0)
+		startposition.setBeat(0);
+	this->gsTimeline->setSceneRect(startposition.toTimelinePosition(this->fMeasureSpacing, beatspermeasure, beatunit), 0,
+								   endposition, 100);
 }
 
 

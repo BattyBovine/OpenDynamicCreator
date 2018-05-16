@@ -19,15 +19,20 @@ class ClipTimelineItem : public TimelineItem
 {
 	Q_OBJECT
 public:
-	ClipTimelineItem(float topspacing) : TimelineItem(topspacing) { this->setZValue(-10); }
+	ClipTimelineItem(std::shared_ptr<ClipContainer> clip, float measurespacing, float topspacing) : TimelineItem(topspacing) {
+		this->ccClip = clip;
+		TimelineItem::setTimelinePos(clip->timelineOffset(),measurespacing,clip->beatsPerMeasure(),clip->beatUnit());
+		this->updateLength(measurespacing);
+		this->setZValue(-10);
+	}
 
-	virtual void setTimelinePos(Beat p, float s, quint8 b, quint8 u) { TimelineItem::setTimelinePos(p,s,b,u); this->updateBoundingRect(); }
+	virtual void setTimelinePos(Beat p, float s) { TimelineItem::setTimelinePos(p,s,this->ccClip->beatsPerMeasure(),this->ccClip->beatUnit()); this->ccClip->setTimelineOffset(this->timelineBeat()); this->updateBoundingRect(); }
 
-	void setLength(Beat l, float s, quint8 b, quint8 u) { this->fLength=l.toTimelinePosition(s,b,u); this->updateBoundingRect(); }
+	void updateLength(float s) { this->fLength=this->ccClip->beats().toTimelinePosition(s,this->ccClip->beatsPerMeasure(),this->ccClip->beatUnit()); this->updateBoundingRect(); }
 	void setHeight(float h) { this->fHeight=h; this->updateBoundingRect(); }
-	void setTimelineScale(qreal scale) { this->fTimelineScale=scale; this->updateBoundingRect(); }
+	void setTimelineScale(qreal scale) { this->fTimelineScale=scale; this->generateWaveform(); this->updateBoundingRect(); }
 
-	void generateWaveform(std::shared_ptr<ClipContainer>);
+	void generateWaveform();
 
 private slots:
 	void getWaveformTile(int,int,QPixmap);
@@ -40,6 +45,7 @@ protected:
 private:
 	void updateBoundingRect() { this->rectBounds = QRectF(QPointF(0.0f,this->topSpacing()),QSizeF((this->fLength*this->fTimelineScale)-1,(this->fHeight-this->topSpacing())-1)); }
 
+	std::shared_ptr<ClipContainer> ccClip;
 	QRectF rectBounds;
 	qreal fLength = 0.0f;
 	qreal fHeight = 0.0f;

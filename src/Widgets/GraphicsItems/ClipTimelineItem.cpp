@@ -27,7 +27,7 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 #endif
 }
 
-void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
+void ClipTimelineItem::generateWaveform()
 {
 	const quint8 zoomscale = roundf(this->fTimelineScale+0.5f);
 	if(zoomscale==this->iWaveformResolution || this->fHeight<1.0f)
@@ -37,7 +37,7 @@ void ClipTimelineItem::generateWaveform(std::shared_ptr<ClipContainer> clip)
 	const float waveformlength = this->fLength * (this->iWaveformResolution+1);
 	const int tilecount = ceilf(waveformlength/WT_MAX_TILE_LENGTH);
 
-	WaveformThread *thread = new WaveformThread(clip, this->fLength, this->fHeight, this->fTimelineScale,
+	WaveformThread *thread = new WaveformThread(this->ccClip, this->fLength, this->fHeight, this->fTimelineScale,
 												this->iWaveformResolution, tilecount);
 	connect(thread, SIGNAL(tileFinished(int,int,QPixmap)), this, SLOT(getWaveformTile(int,int,QPixmap)));
 	connect(thread, SIGNAL(finished()), this, SLOT(threadFinished()));

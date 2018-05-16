@@ -44,6 +44,7 @@ public:
 		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
 	}
 	void setVolume(float v) { this->fVolume=v; if(this->aoPlayer) this->aoPlayer->setVolume(v); }
+	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }
 
 	QUuid uuid() { return this->uuidUnique; }
 	QString uuidString() { return this->uuidUnique.toString(); }
@@ -64,7 +65,9 @@ public:
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	quint8 beatUnit() { return this->iBeatUnit; }
 	float volume() { return this->fVolume; }
-	float secondsElapsed() { return (this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)); }
+	Beat timelineOffset() { return this->beatTimelineOffset; }
+	float secondsElapsed() { return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
+									 this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit)); }
 
 private:
 	void configurePlayer();
@@ -94,7 +97,7 @@ private:
 	quint8 iBeatsPerMeasure=0;
 	quint8 iBeatUnit=0;
 	qreal fVolume = 1.0f;
-	qreal fPlayOffsetSeconds = 0.0f;
+	Beat beatTimelineOffset;
 
 	enum ClipError {
 		CLIP_OK,

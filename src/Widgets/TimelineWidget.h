@@ -40,6 +40,7 @@ public slots:
 	void setClip(std::shared_ptr<ClipContainer> c) { this->ccClip=c; }
 	void setTopSpacing(float t) { this->fTopSpacing=t; }
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; }
+	void setViewportBounds();
 	void setZoom(float);
 
 	void setReadOnly(bool r) { this->bReadOnly=r; }
