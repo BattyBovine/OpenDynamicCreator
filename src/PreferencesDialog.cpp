@@ -12,6 +12,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 	ui->lineTempFolder->setText(this->sOldCache);
 	connect(ui->lineTempFolder, SIGNAL(textChanged(QString)), this, SLOT(saveTempFolder(QString)));
 	connect(ui->buttonTempFolder, SIGNAL(clicked(bool)), this, SLOT(selectTempFolder()));
+	connect(ui->buttonClearCache, SIGNAL(clicked(bool)), this, SLOT(clearCache()));
 
 	connect(ui->buttonWindowColour, SIGNAL(clicked(bool)), this, SLOT(selectWindowColour()));
 	connect(ui->buttonWaveformColour, SIGNAL(clicked(bool)), this, SLOT(selectWaveformColour()));
@@ -20,7 +21,9 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 }
 PreferencesDialog::~PreferencesDialog()
 {
-	if(this->bDeleteOldCache) {
+	if(ui->lineTempFolder->text().isEmpty()) {
+		ui->lineTempFolder->setText(this->sOldCache);
+	} else if(this->bDeleteOldCache) {
 		QDir oldcache(this->sOldCache);
 		oldcache.removeRecursively();
 	}
@@ -47,6 +50,29 @@ void PreferencesDialog::saveTempFolder(QString d)
 		ui->labelDirectoryError->setVisible(true);
 	}
 	this->settings.setValue(KEY_TEMP_FOLDER, d);
+}
+void PreferencesDialog::clearCache()
+{
+	QString cache = ui->lineTempFolder->text();
+	if(cache.isEmpty())	return;
+	switch(QMessageBox::warning(this, tr("Confirm cache clear"), tr("Are you sure you wish to delete <b>%1</b>?").arg(cache), QMessageBox::Yes, QMessageBox::No)) {
+	case QMessageBox::Yes:
+		QDir cachedir(cache);
+		if(cachedir.exists()) {
+			ui->buttonOK->setEnabled(false);
+			ui->buttonTempFolder->setEnabled(false);
+			ui->buttonClearCache->setEnabled(false);
+			ui->lineTempFolder->setEnabled(false);
+			QApplication::setOverrideCursor(Qt::WaitCursor);
+			QApplication::processEvents();
+			cachedir.removeRecursively();
+			QApplication::restoreOverrideCursor();
+			ui->lineTempFolder->setEnabled(true);
+			ui->buttonClearCache->setEnabled(true);
+			ui->buttonTempFolder->setEnabled(true);
+			ui->buttonOK->setEnabled(true);
+		}
+	}
 }
 
 

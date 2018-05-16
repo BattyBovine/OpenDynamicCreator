@@ -5,10 +5,10 @@
 
 #include <QDialog>
 #include <QCoreApplication>
+#include <QMessageBox>
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QSettings>
-#include <QMutex>
 #include <QDir>
 
 #define KEY_TEMP_FOLDER		"TempFolder"
@@ -34,6 +34,7 @@ public:
 private slots:
 	void selectTempFolder();
 	void saveTempFolder(QString);
+	void clearCache();
 
 	void selectWindowColour() { this->settings.setValue(KEY_WINDOW_COLOUR, QColorDialog::getColor(this->settings.value(KEY_WINDOW_COLOUR).value<QColor>(), this)); }
 	void selectWaveformColour() { this->settings.setValue(KEY_WAVEFORM_COLOUR, QColorDialog::getColor(this->settings.value(KEY_WAVEFORM_COLOUR).value<QColor>(), this)); }
