@@ -41,6 +41,7 @@ void WaveformThread::run()
 	path.setPath(cachepath);
 	path.mkpath(cachepath);
 
+	QColor waveformcolour = settings.value(KEY_WAVEFORM_COLOUR).value<QColor>();
 	QPoint previouspoint(0,zeropoint);
 	for(int tile=0; tile<this->iTileCount; tile++) {
 		QImage waveform;
@@ -48,7 +49,7 @@ void WaveformThread::run()
 		if(out.exists()) {
 			waveform.load(&out,"BMP");
 			waveform.setColor(0, QColor(255,255,255,0).rgba());
-			waveform.setColor(1, QColor(0,0,255).rgba());
+			waveform.setColor(1, waveformcolour.rgba());
 			emit(tileFinished(this->iResolution,tile,QPixmap::fromImage(waveform,Qt::MonoOnly)));
 			continue;
 		}
@@ -57,7 +58,7 @@ void WaveformThread::run()
 		paint->setBrush(QColor(255,255,255));
 		paint->setPen(Qt::NoPen);
 		paint->drawRect(0,0,WT_MAX_TILE_LENGTH,this->fHeight);
-		paint->setPen(QColor(0,0,255));
+		paint->setPen(QColor(0,0,0));
 		for(int x=0; x<WT_MAX_TILE_LENGTH; x++) {
 			quint64 dataposition = roundf(((tile*WT_MAX_TILE_LENGTH)+x)*samplesperpixel)*samplesize;
 			qint32 hivalue=0, lovalue=0;
@@ -102,7 +103,7 @@ void WaveformThread::run()
 		out.open(QFile::WriteOnly);
 		waveform.save(&out);
 		out.close();
-		waveform.setColor(0, QColor(0,0,255).rgba());
+		waveform.setColor(0, waveformcolour.rgba());
 		waveform.setColor(1, QColor(255,255,255,0).rgba());
 		emit(tileFinished(this->iResolution, tile, QPixmap::fromImage(waveform,Qt::MonoOnly)));
 		previouspoint.setX(0);

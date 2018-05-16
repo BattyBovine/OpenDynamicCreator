@@ -6,5 +6,6 @@
         <file alias="note">open-iconic/svg/musical-note.svg</file>
         <file alias="waveform">open-iconic/svg/pulse.svg</file>
         <file alias="mixer">open-iconic/svg/list.svg</file>
+        <file alias="folder">open-iconic/svg/folder.svg</file>
     </qresource>
 </RCC>
