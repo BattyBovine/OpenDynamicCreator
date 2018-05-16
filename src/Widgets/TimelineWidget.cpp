@@ -19,7 +19,7 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *pla
 	this->gsTimeline->setSceneRect(0,0,this->ccClip->beats().toTimelinePosition(this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit()),100);
 	this->setScene(this->gsTimeline);
 
-	this->ctiClip = new ClipTimelineItem(this->fTopSpacing);
+	this->ctiClip = new ClipTimelineItem(this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA));
 	this->ctiClip->setTimelinePos(Beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 	this->ctiClip->setLength(this->ccClip->beats(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 	this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);

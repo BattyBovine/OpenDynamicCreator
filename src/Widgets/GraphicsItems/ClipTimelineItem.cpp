@@ -10,7 +10,7 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 		const float pixwidth = mybounds.width() / tilecount;
 		for(int i=0; i<tilecount; i++) {
 			const QPixmap &currentmap = this->mapWaveforms[this->iWaveformResolution][i];
-			const QRectF itemregion(pixwidth*i, mybounds.y(), pixwidth, mybounds.height());
+			const QRectF itemregion((pixwidth*i)-0.3f, mybounds.y(), pixwidth+0.6f, mybounds.height());
 			const QRectF pixmapbounds(0, 0, WT_MAX_TILE_LENGTH, currentmap.height());
 			p->drawPixmap(itemregion, currentmap, pixmapbounds);
 #ifdef QT_DEBUG
