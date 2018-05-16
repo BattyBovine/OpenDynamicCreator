@@ -42,5 +42,7 @@ void PreferencesDialog::saveTempFolder(QString d)
 
 void PreferencesDialog::initSettings()
 {
-	this->saveTempFolder(this->getTempFolder());
+	QSettings settings;
+	if(!settings.contains(KEY_TEMP_FOLDER))
+		settings.setValue(KEY_TEMP_FOLDER, QString("%1/%2").arg(QDir::tempPath()).arg(QCoreApplication::applicationName()));
 }

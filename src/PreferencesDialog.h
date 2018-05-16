@@ -24,9 +24,9 @@ public:
 	explicit PreferencesDialog(QWidget *parent = 0);
 	~PreferencesDialog();
 
-	void initSettings();
+	static void initSettings();
 
-	QString getTempFolder() { return this->settings.value(KEY_TEMP_FOLDER, QString("%1/%2").arg(QDir::tempPath()).arg(QCoreApplication::applicationName())).toString(); }
+	QString getTempFolder() { return this->settings.value(KEY_TEMP_FOLDER).toString(); }
 
 public slots:
 	void saveTempFolder(QString);
@@ -34,7 +34,6 @@ public slots:
 private:
 	Ui::PreferencesDialog *ui;
 	QSettings settings;
-	mutable QMutex mutex;
 
 	QString sOldCache;
 	bool bDeleteOldCache = false;
