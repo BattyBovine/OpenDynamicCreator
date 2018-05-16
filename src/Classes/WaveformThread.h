@@ -32,6 +32,18 @@ protected:
 	virtual void run();
 
 private:
+	QPoint intToPixel(qint32 val, int x, quint8 bytespersample, float zeropoint) {
+		float pixelvalue;
+		switch(bytespersample) {
+		case 4:	pixelvalue = *(float*)&val; break;	// Interpret 32 bit values as floats
+		case 3:	pixelvalue = (val/float(INT_MAX)); break;
+		case 2:	pixelvalue = (val/float(SHRT_MAX)); break;
+		case 1:	pixelvalue = (val/float(CHAR_MAX)); break;
+		}
+		pixelvalue *= zeropoint;
+		return QPoint(x,zeropoint-roundf(pixelvalue));
+	}
+
 	std::shared_ptr<ClipContainer> ccClip;
 	float fWidth = 0.0f;
 	float fHeight = 0.0f;

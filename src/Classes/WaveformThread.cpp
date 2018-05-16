@@ -86,38 +86,24 @@ void WaveformThread::run()
 						lovalue = convertedvalue;
 				}
 			}
-			float hipixelvalue=0.0f,lopixelvalue=0.0f;
 			if(hivalue!=0) {
-				switch(bytespersample) {
-				case 4:	hipixelvalue = *(float*)&hivalue; break;	// Interpret 32 bit values as floats
-				case 3:	hipixelvalue = (hivalue/float(INT_MAX)); break;
-				case 2:	hipixelvalue = (hivalue/float(SHRT_MAX)); break;
-				case 1:	hipixelvalue = (hivalue/float(CHAR_MAX)); break;
-				}
-				hipixelvalue *= zeropoint;
-				QPoint nextpoint(x,zeropoint-roundf(hipixelvalue));
+				QPoint nextpoint = this->intToPixel(hivalue,x,bytespersample,zeropoint);
 				paint->drawLine(previouspoint,nextpoint);
 				previouspoint=nextpoint;
 			}
 			if(lovalue!=0) {
-				switch(bytespersample) {
-				case 3:	lopixelvalue = *(float*)&lovalue; break;	// Interpret 32 bit values as floats
-				case 4:	lopixelvalue = (lovalue/float(INT_MAX)); break;
-				case 2:	lopixelvalue = (lovalue/float(SHRT_MAX)); break;
-				case 1:	lopixelvalue = (lovalue/float(CHAR_MAX)); break;
-				}
-				lopixelvalue *= zeropoint;
-				QPoint nextpoint(x,zeropoint-roundf(lopixelvalue));
+				QPoint nextpoint = this->intToPixel(lovalue,x,bytespersample,zeropoint);
 				paint->drawLine(previouspoint,nextpoint);
 				previouspoint=nextpoint;
 			}
 		}
 		delete paint;
-		waveform.setColor(0, QColor(0,0,255).rgba());
-		waveform.setColor(1, QColor(255,255,255,0).rgba());
+
 		out.open(QFile::WriteOnly);
 		waveform.save(&out);
 		out.close();
+		waveform.setColor(0, QColor(0,0,255).rgba());
+		waveform.setColor(1, QColor(255,255,255,0).rgba());
 		emit(tileFinished(this->iResolution, tile, QPixmap::fromImage(waveform,Qt::MonoOnly)));
 		previouspoint.setX(0);
 	}
