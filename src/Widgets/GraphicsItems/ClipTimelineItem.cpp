@@ -36,7 +36,8 @@ void ClipTimelineItem::generateWaveform()
 
 	const float waveformlength = this->fLength * (this->iWaveformResolution+1);
 	const int tilecount = ceilf(waveformlength/WT_MAX_TILE_LENGTH);
-
+	while(this->mapWaveforms[this->iWaveformResolution].size() < tilecount)
+		this->mapWaveforms[this->iWaveformResolution].append(QPixmap());
 	WaveformThread *thread = new WaveformThread(this->ccClip, this->fLength, this->fHeight, this->fTimelineScale,
 												this->iWaveformResolution, tilecount);
 	connect(thread, SIGNAL(tileFinished(int,int,QPixmap)), this, SLOT(getWaveformTile(int,int,QPixmap)));
@@ -46,14 +47,11 @@ void ClipTimelineItem::generateWaveform()
 
 void ClipTimelineItem::getWaveformTile(int resolution, int tile, QPixmap pix)
 {
-	if(this->mapWaveforms[resolution].size()>tile)
-		this->mapWaveforms[resolution].replace(tile, pix);
-	else
-		this->mapWaveforms[resolution].insert(tile, pix);
+	this->mapWaveforms[resolution].replace(tile, pix);
+	this->update(this->boundingRect());
 }
 
 void ClipTimelineItem::threadFinished()
 {
 	QObject::sender()->deleteLater();
-	this->update(this->boundingRect());
 }
