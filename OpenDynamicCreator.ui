@@ -145,7 +145,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="icons.qrc">
      <normaloff>:/icons/play</normaloff>
      <normalon>:/icons/pause</normalon>:/icons/play</iconset>
    </property>
@@ -161,7 +161,7 @@
   </action>
   <action name="actionStop">
    <property name="icon">
-    <iconset>
+    <iconset resource="icons.qrc">
      <normaloff>:/icons/stop</normaloff>:/icons/stop</iconset>
    </property>
    <property name="text">
@@ -328,7 +328,9 @@
    <header>Widgets/MusicTreeView.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionAbout</sender>
@@ -479,6 +481,22 @@
    <signal>triggered()</signal>
    <receiver>OpenDynamicCreator</receiver>
    <slot>resetPlayerState()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>525</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>OpenDynamicCreator</receiver>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
