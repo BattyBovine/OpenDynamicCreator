@@ -20,6 +20,15 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 	connect(ui->buttonEventMarkerColour, SIGNAL(clicked(bool)), this, SLOT(selectEventMarkerColour()));
 
 	connect(ui->buttonOK, SIGNAL(clicked(bool)), this, SLOT(close()));
+
+	QThread *cachesizethread = new QThread();
+	CacheSizeWorker *worker = new CacheSizeWorker(ui->lineTempFolder->text());
+	worker->moveToThread(cachesizethread);
+	connect(cachesizethread, SIGNAL(started()), worker, SLOT(start()));
+	connect(worker, SIGNAL(finished(quint64)), this, SLOT(getCacheSize(quint64)));
+	connect(worker, SIGNAL(finished(quint64)), worker, SLOT(deleteLater()));
+	connect(cachesizethread, SIGNAL(finished()), cachesizethread, SLOT(deleteLater()));
+	cachesizethread->start();
 }
 PreferencesDialog::~PreferencesDialog()
 {
@@ -53,28 +62,50 @@ void PreferencesDialog::saveTempFolder(QString d)
 	}
 	this->settings.setValue(KEY_TEMP_FOLDER, d);
 }
+void PreferencesDialog::getCacheSize(quint64 size)
+{
+	float sizekb = size / 1024.0f;
+	float sizemb = sizekb / 1024.0f;
+	float sizegb = sizemb / 1024.0f;
+	if(sizegb>1.0f)
+		ui->labelCacheSize->setText(QString("%1 GB").arg(sizegb));
+	else if(sizemb>1.0f)
+		ui->labelCacheSize->setText(QString("%1 MB").arg(sizemb));
+	else if(sizekb>1.0f)
+		ui->labelCacheSize->setText(QString("%1 kB").arg(sizekb));
+	else
+		ui->labelCacheSize->setText(QString("%1 bytes").arg(size));
+}
 void PreferencesDialog::clearCache()
 {
 	QString cache = ui->lineTempFolder->text();
 	if(cache.isEmpty())	return;
 	switch(QMessageBox::warning(this, tr("Confirm cache clear"), tr("Are you sure you wish to delete <b>%1</b>?").arg(cache), QMessageBox::Yes, QMessageBox::No)) {
 	case QMessageBox::Yes:
-		QDir cachedir(cache);
-		if(cachedir.exists()) {
-			ui->buttonOK->setEnabled(false);
-			ui->buttonTempFolder->setEnabled(false);
-			ui->buttonClearCache->setEnabled(false);
-			ui->lineTempFolder->setEnabled(false);
-			QApplication::setOverrideCursor(Qt::WaitCursor);
-			QApplication::processEvents();
-			cachedir.removeRecursively();
-			QApplication::restoreOverrideCursor();
-			ui->lineTempFolder->setEnabled(true);
-			ui->buttonClearCache->setEnabled(true);
-			ui->buttonTempFolder->setEnabled(true);
-			ui->buttonOK->setEnabled(true);
-		}
+		this->cacheFunctionsEnabled(false);
+		QApplication::setOverrideCursor(Qt::WaitCursor);
+		QThread *cacheclearthread = new QThread();
+		CacheClearWorker *worker = new CacheClearWorker(ui->lineTempFolder->text());
+		worker->moveToThread(cacheclearthread);
+		connect(cacheclearthread, SIGNAL(started()), worker, SLOT(start()));
+		connect(worker, SIGNAL(finished()), this, SLOT(clearCacheResult()));
+		connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+		connect(cacheclearthread, SIGNAL(finished()), cacheclearthread, SLOT(deleteLater()));
+		cacheclearthread->start();
+		break;
 	}
+}
+void PreferencesDialog::clearCacheResult()
+{
+	QApplication::restoreOverrideCursor();
+	this->cacheFunctionsEnabled(true);
+}
+void PreferencesDialog::cacheFunctionsEnabled(bool enable)
+{
+	ui->buttonOK->setEnabled(enable);
+	ui->lineTempFolder->setEnabled(enable);
+	ui->buttonTempFolder->setEnabled(enable);
+	ui->buttonClearCache->setEnabled(enable);
 }
 
 

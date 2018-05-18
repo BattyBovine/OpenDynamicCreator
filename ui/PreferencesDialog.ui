@@ -175,6 +175,13 @@
           </spacer>
          </item>
          <item>
+          <widget class="QLabel" name="labelCacheSize">
+           <property name="text">
+            <string>Getting cache size...</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="buttonClearCache">
            <property name="text">
             <string>Clear Cache</string>
