@@ -11,10 +11,11 @@
 #include <QWheelEvent>
 #include <QTimer>
 
-#include "Widgets/GraphicsItems/PlayMarkerItem.h"
-#include "Widgets/GraphicsItems/ClipTimelineItem.h"
-#include "Widgets/GraphicsItems/InvertedLineItem.h"
-#include "Widgets/MusicTreeView.h"
+#include "GraphicsItems/PlayMarkerItem.h"
+#include "GraphicsItems/EventMarkerItem.h"
+#include "GraphicsItems/ClipTimelineItem.h"
+#include "GraphicsItems/InvertedLineItem.h"
+#include "MusicTreeView.h"
 #include "Classes/MusicEvent.h"
 
 #define TW_MEASURE_MARKER_LENGTH	6.0f
@@ -37,7 +38,7 @@ public:
 	float measureSpacing() { return this->fMeasureSpacing; }
 
 public slots:
-	void setClip(std::shared_ptr<ClipContainer> c) { this->ccClip=c; }
+	void setClip(std::shared_ptr<ClipContainer> c);
 	void setTopSpacing(float t) { this->fTopSpacing=t; }
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; }
 	void setViewportBounds();
@@ -61,10 +62,12 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent*);
 	virtual void wheelEvent(QWheelEvent*);
 
+private slots:
+	void addEventMarker(MusicEvent&);
+
 private:
 	void redrawStageElements();
 
-	void drawEventMarkers();
 	void createMeasureMarkers();
 	void createBeatMarkers(int, float, float, float, float, QPen&);
 	void drawMeasureMarkers();
@@ -76,6 +79,7 @@ private:
 	std::shared_ptr<ClipContainer> ccClip;
 	PlayMarkerItem *pmiPlayMarker = NULL;
 	ClipTimelineItem *ctiClip = NULL;
+	QList<EventMarkerItem*> lEventMarkers;
 	QMap<unsigned int,QList<InvertedLineItem*> > mapMeasureLines;
 
 	float fScale = 1.0f;

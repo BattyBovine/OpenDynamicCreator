@@ -23,7 +23,7 @@ public:
 		this->ccClip = clip;
 		TimelineItem::setTimelinePos(clip->timelineOffset(),measurespacing,clip->beatsPerMeasure(),clip->beatUnit());
 		this->updateLength(measurespacing);
-		this->setZValue(-10);
+		this->setZValue(-10.0f);
 	}
 
 	virtual void setTimelinePos(Beat p, float s) { TimelineItem::setTimelinePos(p,s,this->ccClip->beatsPerMeasure(),this->ccClip->beatUnit()); this->ccClip->setTimelineOffset(this->timelineBeat()); this->updateBoundingRect(); }

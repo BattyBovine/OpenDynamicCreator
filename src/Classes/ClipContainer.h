@@ -69,6 +69,16 @@ public:
 	float secondsElapsed() { return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
 									 this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit)); }
 
+	void addEvent(MusicEvent &e) {
+		this->melEvents.append(e);
+		std::sort(this->melEvents.begin(), this->melEvents.end());
+		emit(eventAdded(e));
+	}
+	MusicEventList &events() { return this->melEvents; }
+
+signals:
+	void eventAdded(MusicEvent&);
+
 private:
 	void configurePlayer();
 	void setTempo(qreal t) { this->fTempo=t; }
@@ -98,6 +108,8 @@ private:
 	quint8 iBeatUnit=0;
 	qreal fVolume = 1.0f;
 	Beat beatTimelineOffset;
+
+	MusicEventList melEvents;
 
 	enum ClipError {
 		CLIP_OK,

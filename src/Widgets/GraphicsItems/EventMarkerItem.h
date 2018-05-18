@@ -1,5 +1,5 @@
-#ifndef PLAYMARKERITEM_H
-#define PLAYMARKERITEM_H
+#ifndef EVENTMARKERITEM_H
+#define EVENTMARKERITEM_H
 
 #include <QGraphicsItem>
 #include <QPainter>
@@ -9,13 +9,13 @@
 #include "PreferencesDialog.h"
 
 
-class PlayMarkerItem : public TimelineItem
+class EventMarkerItem : public TimelineItem
 {
 public:
-	PlayMarkerItem(float topspacing) : TimelineItem(topspacing) { this->setZValue(20.0f); }
+	EventMarkerItem(float topspacing) : TimelineItem(topspacing) { this->setZValue(10.0f); }
 
 protected:
 	void paint(QPainter*,const QStyleOptionGraphicsItem*,QWidget*);
 };
 
-#endif // PLAYMARKERITEM_H
+#endif // EVENTMARKERITEM_H

@@ -29,7 +29,7 @@ void WaveformThread::run()
 		return;
 	cachepath.append(QString("/%1/").arg(this->ccClip->uuidString()));
 	QDir path(cachepath);
-	QFile tempofile(cachepath+(QString("/%1").arg(this->ccClip->tempo())));
+	QFile tempofile(cachepath+(QString("/%1").arg(this->ccClip->tempo()*100.0f)));
 	if(!tempofile.exists()) {
 		path.setFilter(QDir::NoDotAndDotDot);
 		path.removeRecursively();

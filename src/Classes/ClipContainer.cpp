@@ -38,6 +38,7 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->fLengthSeconds = c.fLengthSeconds;
 	this->beatLength = c.beatLength;
 	this->fVolume = c.fVolume;
+	this->melEvents = c.melEvents;
 
 	this->configurePlayer();
 }

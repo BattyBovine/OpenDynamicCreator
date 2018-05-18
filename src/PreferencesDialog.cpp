@@ -16,6 +16,8 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 
 	connect(ui->buttonWindowColour, SIGNAL(clicked(bool)), this, SLOT(selectWindowColour()));
 	connect(ui->buttonWaveformColour, SIGNAL(clicked(bool)), this, SLOT(selectWaveformColour()));
+	connect(ui->buttonPlayMarkerColour, SIGNAL(clicked(bool)), this, SLOT(selectPlayMarkerColour()));
+	connect(ui->buttonEventMarkerColour, SIGNAL(clicked(bool)), this, SLOT(selectEventMarkerColour()));
 
 	connect(ui->buttonOK, SIGNAL(clicked(bool)), this, SLOT(close()));
 }
@@ -86,4 +88,8 @@ void PreferencesDialog::initSettings()
 		settings.setValue(KEY_WINDOW_COLOUR, QColor(Qt::white));
 	if(!settings.contains(KEY_WAVEFORM_COLOUR))
 		settings.setValue(KEY_WAVEFORM_COLOUR, QColor(Qt::blue));
+	if(!settings.contains(KEY_PLAY_MARKER_COLOUR))
+		settings.setValue(KEY_PLAY_MARKER_COLOUR, QColor(Qt::green));
+	if(!settings.contains(KEY_EVENT_MARKER_COLOUR))
+		settings.setValue(KEY_EVENT_MARKER_COLOUR, QColor(Qt::red));
 }

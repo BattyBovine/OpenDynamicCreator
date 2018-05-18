@@ -11,9 +11,11 @@
 #include <QSettings>
 #include <QDir>
 
-#define KEY_TEMP_FOLDER		"TempFolder"
-#define KEY_WINDOW_COLOUR	"WindowColour"
-#define KEY_WAVEFORM_COLOUR	"WaveformColour"
+#define KEY_TEMP_FOLDER			"TempFolder"
+#define KEY_WINDOW_COLOUR		"WindowColour"
+#define KEY_WAVEFORM_COLOUR		"WaveformColour"
+#define KEY_PLAY_MARKER_COLOUR	"PlayMarkerColour"
+#define KEY_EVENT_MARKER_COLOUR	"EventMarkerColour"
 
 
 namespace Ui {
@@ -38,6 +40,8 @@ private slots:
 
 	void selectWindowColour() { this->settings.setValue(KEY_WINDOW_COLOUR, QColorDialog::getColor(this->settings.value(KEY_WINDOW_COLOUR).value<QColor>(), this)); }
 	void selectWaveformColour() { this->settings.setValue(KEY_WAVEFORM_COLOUR, QColorDialog::getColor(this->settings.value(KEY_WAVEFORM_COLOUR).value<QColor>(), this)); }
+	void selectPlayMarkerColour() { this->settings.setValue(KEY_PLAY_MARKER_COLOUR, QColorDialog::getColor(this->settings.value(KEY_PLAY_MARKER_COLOUR).value<QColor>(), this)); }
+	void selectEventMarkerColour() { this->settings.setValue(KEY_EVENT_MARKER_COLOUR, QColorDialog::getColor(this->settings.value(KEY_EVENT_MARKER_COLOUR).value<QColor>(), this)); }
 
 private:
 	Ui::PreferencesDialog *ui;
