@@ -21,14 +21,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 
 	connect(ui->buttonOK, SIGNAL(clicked(bool)), this, SLOT(close()));
 
-	QThread *cachesizethread = new QThread();
-	CacheSizeWorker *worker = new CacheSizeWorker(ui->lineTempFolder->text());
-	worker->moveToThread(cachesizethread);
-	connect(cachesizethread, SIGNAL(started()), worker, SLOT(start()));
-	connect(worker, SIGNAL(finished(quint64)), this, SLOT(getCacheSize(quint64)));
-	connect(worker, SIGNAL(finished(quint64)), worker, SLOT(deleteLater()));
-	connect(cachesizethread, SIGNAL(finished()), cachesizethread, SLOT(deleteLater()));
-	cachesizethread->start();
+	this->getCacheSize();
 }
 PreferencesDialog::~PreferencesDialog()
 {
@@ -43,8 +36,10 @@ PreferencesDialog::~PreferencesDialog()
 
 void PreferencesDialog::selectTempFolder()
 {
-	ui->lineTempFolder->setText(QFileDialog::getExistingDirectory(this, tr("Select folder"),
-																  this->settings.value(KEY_TEMP_FOLDER).toString()));
+	QString newdir = QFileDialog::getExistingDirectory(this, tr("Select folder"),
+													   this->settings.value(KEY_TEMP_FOLDER).toString());
+	if(!newdir.isEmpty())
+		ui->lineTempFolder->setText(newdir);
 }
 void PreferencesDialog::saveTempFolder(QString d)
 {
@@ -62,7 +57,20 @@ void PreferencesDialog::saveTempFolder(QString d)
 	}
 	this->settings.setValue(KEY_TEMP_FOLDER, d);
 }
-void PreferencesDialog::getCacheSize(quint64 size)
+
+void PreferencesDialog::getCacheSize()
+{
+	ui->labelCacheSize->setText(tr("Getting cache size..."));
+	QThread *cachesizethread = new QThread();
+	CacheSizeWorker *worker = new CacheSizeWorker(ui->lineTempFolder->text());
+	worker->moveToThread(cachesizethread);
+	connect(cachesizethread, SIGNAL(started()), worker, SLOT(start()));
+	connect(worker, SIGNAL(finished(quint64)), this, SLOT(retrieveCacheSize(quint64)));
+	connect(worker, SIGNAL(finished(quint64)), worker, SLOT(deleteLater()));
+	connect(cachesizethread, SIGNAL(finished()), cachesizethread, SLOT(deleteLater()));
+	cachesizethread->start();
+}
+void PreferencesDialog::retrieveCacheSize(quint64 size)
 {
 	float sizekb = size / 1024.0f;
 	float sizemb = sizekb / 1024.0f;
@@ -76,6 +84,7 @@ void PreferencesDialog::getCacheSize(quint64 size)
 	else
 		ui->labelCacheSize->setText(QString("%1 bytes").arg(size));
 }
+
 void PreferencesDialog::clearCache()
 {
 	QString cache = ui->lineTempFolder->text();
@@ -99,6 +108,7 @@ void PreferencesDialog::clearCacheResult()
 {
 	QApplication::restoreOverrideCursor();
 	this->cacheFunctionsEnabled(true);
+	this->getCacheSize();
 }
 void PreferencesDialog::cacheFunctionsEnabled(bool enable)
 {

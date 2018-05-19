@@ -50,6 +50,7 @@ int ClipContainer::loadAudioFile(QUrl file)
 	if(!this->loadWav(file) && !this->loadVorbis(file))
 		return CLIP_FORMAT_UNRECOGNIZED;
 	this->configurePlayer();
+	this->bufferPCMData.open(QIODevice::ReadOnly);
 	return CLIP_OK;
 }
 bool ClipContainer::loadWav(QUrl file)
@@ -65,7 +66,7 @@ bool ClipContainer::loadWav(QUrl file)
 	this->iBytesPerSample = wav.bytesPerSample;
 
 	char *pcmbuffer = new char[wav.totalSampleCount*wav.bytesPerSample*wav.channels];
-	size_t bytecount = drwav_read_raw(&wav, wav.totalSampleCount*wav.bytesPerSample, pcmbuffer);
+	quint64 bytecount = drwav_read_raw(&wav, wav.totalSampleCount*wav.bytesPerSample, pcmbuffer);
 	this->bufferPCMData.buffer().clear();
 	this->bufferPCMData.buffer().append(pcmbuffer, bytecount);
 	delete pcmbuffer;
@@ -116,7 +117,7 @@ void ClipContainer::configurePlayer()
 	QAudioFormat format;
 	format.setSampleRate(this->iSampleRate);
 	format.setChannelCount(this->iChannelCount);
-	format.setSampleSize(this->iBytesPerSample*8);
+	format.setSampleSize(this->iBytesPerSample*CHAR_BIT);
 	format.setCodec("audio/pcm");
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::SignedInt);
@@ -158,6 +159,9 @@ void ClipContainer::stop()
 
 void ClipContainer::setPositionSeconds(float seconds)
 {
+	seconds -= this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit);
+	if(seconds<0.0f)
+		seconds = 0.0f;
 	this->bufferPCMData.seek(floorf(seconds*this->iSampleRate)*(this->iBytesPerSample*this->iChannelCount));
 }
 

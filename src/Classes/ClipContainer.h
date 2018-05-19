@@ -45,7 +45,7 @@ public:
 		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
 	}
 	void setVolume(float v) { this->fVolume=v; if(this->aoPlayer) this->aoPlayer->setVolume(v); }
-	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds((b-this->beatTimelineOffset).toSeconds(this->fTempo, this->iBeatUnit)); }
+	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
 	void setPositionSeconds(float);
 
 	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }

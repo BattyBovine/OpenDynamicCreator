@@ -23,7 +23,10 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 INCLUDEPATH += src
 
-LIBS += -logg -lvorbis -lvorbisfile
+win32 {
+	contains(QT_ARCH, i386) { LIBS += -logg -lvorbis -lvorbisfile }
+	contains(QT_ARCH, x86_64) { LIBS += -logg64 -lvorbis64 -lvorbisfile64 }
+}
 
 SOURCES += main.cpp \
 	OpenDynamicCreator.cpp \

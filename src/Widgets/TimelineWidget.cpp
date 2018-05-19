@@ -202,6 +202,7 @@ void TimelineWidget::drawMeasureMarkers()
 void TimelineWidget::togglePlayPause(bool play)
 {
 	if(play) {
+		this->ccClip->setPositionSeconds(this->posToSeconds(this->pmiPlayMarker->timelinePos()));
 		this->timerPlayMarker.start(16);
 		this->ccClip->play();
 	} else {
@@ -227,10 +228,7 @@ void TimelineWidget::setZoom(float zoomdelta)
 						transform.m21(),	transform.m22(),	transform.m23(),
 						transform.m31(),	transform.m32(),	transform.m33());
 	this->setTransform(transform);
-	if(this->pmiPlayMarker)
-		this->centerOn(this->pmiPlayMarker->x(),0.0f);
-	else
-		this->centerOn(0.0f,0.0f);
+	this->centerOn(this->pmiPlayMarker->x(),0.0f);
 	this->fScale = scale;
 	this->redrawStageElements();
 }

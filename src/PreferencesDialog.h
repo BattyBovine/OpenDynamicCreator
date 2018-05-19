@@ -31,11 +31,12 @@ public:
 	static void initSettings();
 
 	QString getTempFolder() { return this->settings.value(KEY_TEMP_FOLDER).toString(); }
+	void getCacheSize();
 
 private slots:
 	void selectTempFolder();
 	void saveTempFolder(QString);
-	void getCacheSize(quint64);
+	void retrieveCacheSize(quint64);
 	void clearCache();
 	void clearCacheResult();
 
