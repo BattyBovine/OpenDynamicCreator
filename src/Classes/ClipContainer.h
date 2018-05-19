@@ -8,6 +8,7 @@
 #include <QAudioOutput>
 #include <QPixmap>
 #include <QPainter>
+#include <QTimer>
 #include <QUuid>
 
 #include <vorbis/vorbisfile.h>
@@ -25,15 +26,15 @@ public:
 	ClipContainer &operator=(const ClipContainer&);
 	void copy(const ClipContainer&);
 
-	int loadAudioFile(QUrl);
-	bool loadWav(QUrl);
-	bool loadVorbis(QUrl);
-
 	void play();
 	void pause();
 	void stop();
 
 	bool isPlaying() { return this->bIsPlaying; }
+
+	int loadAudioFile(QUrl);
+	bool loadWav(QUrl);
+	bool loadVorbis(QUrl);
 
 	void setSampleRate(int s) { this->iSampleRate=s; }
 	void setName(QString n) { this->sName=n; }
@@ -44,6 +45,9 @@ public:
 		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
 	}
 	void setVolume(float v) { this->fVolume=v; if(this->aoPlayer) this->aoPlayer->setVolume(v); }
+	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds((b-this->beatTimelineOffset).toSeconds(this->fTempo, this->iBeatUnit)); }
+	void setPositionSeconds(float);
+
 	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }
 
 	QUuid uuid() { return this->uuidUnique; }
@@ -66,8 +70,7 @@ public:
 	quint8 beatUnit() { return this->iBeatUnit; }
 	float volume() { return this->fVolume; }
 	Beat timelineOffset() { return this->beatTimelineOffset; }
-	float secondsElapsed() { return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
-									 this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit)); }
+	float secondsElapsed();
 
 	void addEvent(MusicEvent &e) {
 		this->melEvents.append(e);

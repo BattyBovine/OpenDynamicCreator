@@ -79,8 +79,11 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).tick()) >= Beat::fromUnit(this->iBeatUnitSnap))
 			this->bMoveMode = true;
 		if(this->bMoveMode) {
-			this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
-			this->ctiClip->setTimelinePos(this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos), this->fMeasureSpacing);
+			Beat offset = this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos);
+			if(offset<=Beat()) {
+				this->ctiClip->setTimelinePos(offset, this->fMeasureSpacing);
+				this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
+			}
 		}
 	}
 	QGraphicsView::mouseMoveEvent(e);

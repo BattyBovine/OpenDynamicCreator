@@ -22,6 +22,7 @@ ClipContainer::~ClipContainer()
 {
 	this->stop();
 	if(this->aoPlayer) this->aoPlayer->deleteLater();
+	this->bufferPCMData.close();
 }
 void ClipContainer::copy(const ClipContainer &c)
 {
@@ -127,27 +128,41 @@ void ClipContainer::configurePlayer()
 			break;
 	}
 
-	if(this->aoPlayer) delete this->aoPlayer;
+	if(this->aoPlayer) this->aoPlayer->deleteLater();
 	this->aoPlayer = new QAudioOutput(device, format);
 	this->aoPlayer->setVolume(this->fVolume);
+	if(!this->bufferPCMData.isOpen())
+		this->bufferPCMData.open(QIODevice::ReadOnly);
 }
 
 void ClipContainer::play()
 {
-	if(!this->bufferPCMData.isOpen())
-		this->bufferPCMData.open(QIODevice::ReadOnly);
-	this->aoPlayer->start(&this->bufferPCMData);
 	this->bIsPlaying = true;
+	this->aoPlayer->start(&this->bufferPCMData);
 }
 
 void ClipContainer::pause()
 {
-	if(this->aoPlayer) this->aoPlayer->stop();
 	this->bIsPlaying = false;
+	if(this->aoPlayer) this->aoPlayer->stop();
 }
 
 void ClipContainer::stop()
 {
 	this->pause();
-	this->bufferPCMData.close();
+	if(this->bufferPCMData.isOpen())
+		this->bufferPCMData.seek(0);
+}
+
+
+
+void ClipContainer::setPositionSeconds(float seconds)
+{
+	this->bufferPCMData.seek(floorf(seconds*this->iSampleRate)*(this->iBytesPerSample*this->iChannelCount));
+}
+
+float ClipContainer::secondsElapsed()
+{
+	return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
+			this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit));
 }

@@ -50,8 +50,6 @@ public slots:
 	void togglePlayPause(bool);
 	void clipStop();
 
-	void movePlayMarkerToClipPos();
-
 signals:
 	void zoomChanged(float);
 
@@ -64,6 +62,7 @@ protected:
 
 private slots:
 	void addEventMarker(MusicEvent&);
+	void movePlayMarkerToClipPos();
 
 private:
 	void redrawStageElements();
