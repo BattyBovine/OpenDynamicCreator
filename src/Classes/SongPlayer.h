@@ -21,7 +21,7 @@ public:
 
 	explicit SongPlayer(QObject *parent=Q_NULLPTR) : QObject(parent) {}
 
-	int buildSong(TrackItem*);
+	int buildSong(BaseMusicItem*);
 
 public slots:
 	void playSong();
@@ -29,13 +29,13 @@ public slots:
 	void stopSong();
 
 private:
-	void searchItemChildren(BaseMusicItem*);
+	int searchItemChildren(BaseMusicItem*);
+	void addNewClip(BaseMusicItem*);
 	void configurePlayer(QUuid);
 
 	QMap<QUuid, std::shared_ptr<ClipContainer> > mapClips;
 	QAudioOutput *aoPlayer = NULL;
 	QUuid uuidActiveClip;
-	bool bIsPlaying = false;
 };
 
 #endif // SONGPLAYER_H

@@ -18,16 +18,13 @@
 class ClipContainer : public QObject
 {
 	Q_OBJECT
+	friend class SongPlayer;
 public:
 	ClipContainer(QUrl file=QUrl());
 	ClipContainer(const ClipContainer&);
 	~ClipContainer();
 	ClipContainer &operator=(const ClipContainer&);
 	void copy(const ClipContainer&);
-
-	void play();
-	void pause();
-	void stop();
 
 	bool isPlaying() { return this->bIsPlaying; }
 
@@ -46,6 +43,7 @@ public:
 	void setVolume(float v) { this->fVolume=v; }
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
 	void setPositionSeconds(float);
+	void setPositionToAbsoluteZero() { this->bufferPCMData.seek(0); }
 
 	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }
 
@@ -88,6 +86,7 @@ private:
 	void setBeatsPerMeasure(quint8 b) { this->iBeatsPerMeasure=b; }
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 	void setBeatLength(Beat b) { this->beatLength=b; }
+	void setIsPlaying(bool p) { this->bIsPlaying=p; }
 
 	QUuid uuidUnique;
 	int iSampleRate = 0;

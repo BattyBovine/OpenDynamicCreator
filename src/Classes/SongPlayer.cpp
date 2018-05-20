@@ -1,45 +1,60 @@
 #include "SongPlayer.h"
 
-int SongPlayer::buildSong(TrackItem *track)
+int SongPlayer::buildSong(BaseMusicItem *selected)
 {
-	if(track->type()!=MIT_TRACK)
-		return Error::SP_NOT_TRACK;
-	this->searchItemChildren(track);
-	return Error::SP_OK;
+	BaseMusicItem *track = selected;
+	while(track->type()!=MIT_TRACK)
+		track = (BaseMusicItem*)track->parent();
+	int errorcode = this->searchItemChildren(track);
+	if(selected->type()==MIT_CLIP)
+		this->uuidActiveClip = ((ClipItem*)selected)->clipContainer()->uuid();
+	return errorcode;
 }
-void SongPlayer::searchItemChildren(BaseMusicItem *item)
+int SongPlayer::searchItemChildren(BaseMusicItem *item)
 {
-	for(int i=0; i<item->rowCount(); i++) {
-		BaseMusicItem *bmi = static_cast<BaseMusicItem*>(item->child(i));
-		if(bmi->type()==MIT_CLIPGROUP) {
-			this->searchItemChildren(bmi);
-		} else if(bmi->type()==MIT_CLIP) {
-			std::shared_ptr<ClipContainer> cc = ((ClipItem*)bmi)->clipContainer();
-			if(this->mapClips.isEmpty())
-				this->uuidActiveClip = cc->uuid();
-			this->mapClips[cc->uuid()] = cc;
+	if(item->type()==MIT_CLIP) {
+		this->addNewClip(item);
+	} else {
+		for(int i=0; i<item->rowCount(); i++) {
+			BaseMusicItem *bmi = static_cast<BaseMusicItem*>(item->child(i));
+			if(bmi->type()==MIT_CLIPGROUP) {
+				this->searchItemChildren(bmi);
+			} else if(bmi->type()==MIT_CLIP) {
+				this->addNewClip(bmi);
+			}
 		}
 	}
+	return Error::SP_OK;
+}
+void SongPlayer::addNewClip(BaseMusicItem *bmi)
+{
+	std::shared_ptr<ClipContainer> cc = ((ClipItem*)bmi)->clipContainer();
+	if(this->mapClips.isEmpty())
+		this->uuidActiveClip = cc->uuid();
+	this->mapClips[cc->uuid()] = cc;
 }
 
 void SongPlayer::playSong()
 {
 	if(this->mapClips.isEmpty())
 		return;
-	if(!this->bIsPlaying) {
+	if(!this->mapClips[uuidActiveClip]->isPlaying()) {
 		this->configurePlayer(this->uuidActiveClip);
-		this->mapClips[uuidActiveClip]->setPositionSeconds(0.0f);
+		this->mapClips[uuidActiveClip]->setPositionToAbsoluteZero();
 	}
+	this->aoPlayer->setVolume(this->mapClips[uuidActiveClip]->volume());
 	this->aoPlayer->start(this->mapClips[uuidActiveClip]->buffer());
-	this->bIsPlaying = true;
+	this->mapClips[uuidActiveClip]->setIsPlaying(true);
 }
 void SongPlayer::pauseSong()
 {
-	this->aoPlayer->stop();
+	if(this->aoPlayer)
+		this->aoPlayer->suspend();
 }
 void SongPlayer::stopSong()
 {
-	this->bIsPlaying = false;
+	if(this->mapClips.size()>0)
+		this->mapClips[uuidActiveClip]->setIsPlaying(false);
 	if(this->aoPlayer) {
 		this->aoPlayer->stop();
 		this->aoPlayer->deleteLater();
@@ -67,4 +82,5 @@ void SongPlayer::configurePlayer(QUuid clip)
 	}
 	if(this->aoPlayer) this->aoPlayer->deleteLater();
 	this->aoPlayer = new QAudioOutput(device, format);
+	this->aoPlayer->setBufferSize(0);
 }

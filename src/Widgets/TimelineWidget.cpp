@@ -32,6 +32,7 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, bool readonl
 	this->setZoom(-1000.0f);
 
 	connect(&this->timerPlayMarker, SIGNAL(timeout()), this, SLOT(movePlayMarkerToClipPos()));
+	this->timerPlayMarker.start(1);
 }
 
 TimelineWidget::~TimelineWidget()
@@ -193,26 +194,6 @@ void TimelineWidget::drawMeasureMarkers()
 		}
 		unit*=2;
 	}
-}
-
-
-
-void TimelineWidget::togglePlayPause(bool play)
-{
-	if(play) {
-		this->ccClip->setPositionSeconds(this->posToSeconds(this->pmiPlayMarker->timelinePos()));
-		this->timerPlayMarker.start(16);
-		this->ccClip->play();
-	} else {
-		this->timerPlayMarker.stop();
-		this->ccClip->pause();
-	}
-}
-
-void TimelineWidget::clipStop()
-{
-	this->timerPlayMarker.stop();
-	this->ccClip->stop();
 }
 
 

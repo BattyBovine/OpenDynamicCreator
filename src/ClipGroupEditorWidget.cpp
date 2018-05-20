@@ -18,7 +18,6 @@ ClipGroupEditorWidget::~ClipGroupEditorWidget()
 void ClipGroupEditorWidget::addClipGroupEditor(std::shared_ptr<ClipContainer> clip)
 {
 	if(clip) {
-		clip->stop();
 		int row = ui->layoutClips->rowCount();
 		MixerWidget *mw = new MixerWidget(clip, true, this);
 		TimelineWidget *tw = new TimelineWidget(clip, true, this);

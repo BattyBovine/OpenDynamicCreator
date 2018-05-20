@@ -306,7 +306,10 @@ void OpenDynamicCreator::playSong(bool play)
 	if(play) {
 		if(!this->spPlayer) {
 			this->spPlayer = new SongPlayer(this);
-			TrackItem *track = static_cast<TrackItem*>(this->modelMusic->itemFromIndex(this->selMusic->currentIndex()));
+			QModelIndex trackindex = this->selMusic->currentIndex();
+			if(!trackindex.isValid())
+				return;
+			TrackItem *track = static_cast<TrackItem*>(this->modelMusic->itemFromIndex(trackindex));
 			this->spPlayer->buildSong(track);
 		}
 		this->spPlayer->playSong();

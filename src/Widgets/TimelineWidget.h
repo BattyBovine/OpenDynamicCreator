@@ -47,9 +47,6 @@ public slots:
 	void setReadOnly(bool r) { this->bReadOnly=r; }
 	void setBeatUnitSnapFromCombo(int s) { this->iBeatUnitSnap=powf(2,s); }
 
-	void togglePlayPause(bool);
-	void clipStop();
-
 signals:
 	void zoomChanged(float);
 

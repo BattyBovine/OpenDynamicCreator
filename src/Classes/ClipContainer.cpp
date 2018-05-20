@@ -20,7 +20,6 @@ ClipContainer &ClipContainer::operator=(const ClipContainer &c)
 }
 ClipContainer::~ClipContainer()
 {
-	this->stop();
 	this->bufferPCMData.close();
 }
 void ClipContainer::copy(const ClipContainer &c)
@@ -43,7 +42,6 @@ void ClipContainer::copy(const ClipContainer &c)
 
 int ClipContainer::loadAudioFile(QUrl file)
 {
-	this->stop();
 	if(!this->loadWav(file) && !this->loadVorbis(file))
 		return CLIP_FORMAT_UNRECOGNIZED;
 	this->bufferPCMData.open(QIODevice::ReadOnly);
@@ -106,23 +104,6 @@ bool ClipContainer::loadVorbis(QUrl file)
 	this->fLengthSeconds = this->bufferPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
 
 	return true;
-}
-
-void ClipContainer::play()
-{
-	this->bIsPlaying = true;
-}
-
-void ClipContainer::pause()
-{
-	this->bIsPlaying = false;
-}
-
-void ClipContainer::stop()
-{
-	this->pause();
-	if(this->bufferPCMData.isOpen())
-		this->bufferPCMData.seek(0);
 }
 
 
