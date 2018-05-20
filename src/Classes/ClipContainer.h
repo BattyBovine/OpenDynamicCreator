@@ -5,7 +5,6 @@
 #include <QUrl>
 #include <QByteArray>
 #include <QBuffer>
-#include <QAudioOutput>
 #include <QPixmap>
 #include <QPainter>
 #include <QTimer>
@@ -44,7 +43,7 @@ public:
 		this->setBeatUnit(u);
 		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
 	}
-	void setVolume(float v) { this->fVolume=v; if(this->aoPlayer) this->aoPlayer->setVolume(v); }
+	void setVolume(float v) { this->fVolume=v; }
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
 	void setPositionSeconds(float);
 
@@ -61,6 +60,7 @@ public:
 	int bytesPerSample() { return this->iBytesPerSample; }
 	qreal length() { return this->fLengthSeconds; }
 	Beat beats() { return this->beatLength; }
+	QBuffer *buffer() { return &this->bufferPCMData; }
 	const char *rawData() { return this->bufferPCMData.data().data(); }
 	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
 
@@ -102,7 +102,6 @@ private:
 
 	QUrl urlFilePath;
 	QBuffer bufferPCMData;
-	QAudioOutput *aoPlayer = NULL;
 	bool bIsPlaying = false;
 
 	QString sName;

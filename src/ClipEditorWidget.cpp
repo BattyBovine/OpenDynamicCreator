@@ -13,12 +13,12 @@ ClipEditorWidget::~ClipEditorWidget()
 	delete ui;
 }
 
-void ClipEditorWidget::setClipEditor(std::shared_ptr<ClipContainer> clip, QAction *playpause, QAction *stop)
+void ClipEditorWidget::setClipEditor(std::shared_ptr<ClipContainer> clip)
 {
 	if(clip) {
 		clip->stop();
 		this->widgetMixer = new MixerWidget(clip, false, this);
-		this->widgetTimeline = new TimelineWidget(clip, playpause, stop, false, this);
+		this->widgetTimeline = new TimelineWidget(clip, false, this);
 		connect(this->widgetMixer, SIGNAL(snapChanged(int)), this->widgetTimeline, SLOT(setBeatUnitSnapFromCombo(int)));
 		ui->layoutClipEditor->addWidget(this->widgetMixer, 0, 0);
 		ui->layoutClipEditor->addWidget(this->widgetTimeline, 0, 1);

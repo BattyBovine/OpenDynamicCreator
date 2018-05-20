@@ -15,13 +15,13 @@ ClipGroupEditorWidget::~ClipGroupEditorWidget()
 
 
 
-void ClipGroupEditorWidget::addClipGroupEditor(std::shared_ptr<ClipContainer> clip, QAction *playpause, QAction *stop)
+void ClipGroupEditorWidget::addClipGroupEditor(std::shared_ptr<ClipContainer> clip)
 {
 	if(clip) {
 		clip->stop();
 		int row = ui->layoutClips->rowCount();
 		MixerWidget *mw = new MixerWidget(clip, true, this);
-		TimelineWidget *tw = new TimelineWidget(clip, playpause, stop, true, this);
+		TimelineWidget *tw = new TimelineWidget(clip, true, this);
 		connect(mw, SIGNAL(snapChanged(int)), tw, SLOT(setBeatUnitSnapFromCombo(int)));
 		ui->layoutClips->addWidget(mw, row, 0);
 		ui->layoutClips->addWidget(tw, row, 1);

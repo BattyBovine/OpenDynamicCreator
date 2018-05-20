@@ -21,7 +21,6 @@ ClipContainer &ClipContainer::operator=(const ClipContainer &c)
 ClipContainer::~ClipContainer()
 {
 	this->stop();
-	if(this->aoPlayer) this->aoPlayer->deleteLater();
 	this->bufferPCMData.close();
 }
 void ClipContainer::copy(const ClipContainer &c)
@@ -40,8 +39,6 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->beatLength = c.beatLength;
 	this->fVolume = c.fVolume;
 	this->melEvents = c.melEvents;
-
-	this->configurePlayer();
 }
 
 int ClipContainer::loadAudioFile(QUrl file)
@@ -49,7 +46,6 @@ int ClipContainer::loadAudioFile(QUrl file)
 	this->stop();
 	if(!this->loadWav(file) && !this->loadVorbis(file))
 		return CLIP_FORMAT_UNRECOGNIZED;
-	this->configurePlayer();
 	this->bufferPCMData.open(QIODevice::ReadOnly);
 	return CLIP_OK;
 }
@@ -112,40 +108,14 @@ bool ClipContainer::loadVorbis(QUrl file)
 	return true;
 }
 
-void ClipContainer::configurePlayer()
-{
-	QAudioFormat format;
-	format.setSampleRate(this->iSampleRate);
-	format.setChannelCount(this->iChannelCount);
-	format.setSampleSize(this->iBytesPerSample*CHAR_BIT);
-	format.setCodec("audio/pcm");
-	format.setByteOrder(QAudioFormat::LittleEndian);
-	format.setSampleType(QAudioFormat::SignedInt);
-
-	QAudioDeviceInfo device;
-	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
-	foreach(device, devices) {
-		if(device.isFormatSupported(format))
-			break;
-	}
-
-	if(this->aoPlayer) this->aoPlayer->deleteLater();
-	this->aoPlayer = new QAudioOutput(device, format);
-	this->aoPlayer->setVolume(this->fVolume);
-	if(!this->bufferPCMData.isOpen())
-		this->bufferPCMData.open(QIODevice::ReadOnly);
-}
-
 void ClipContainer::play()
 {
 	this->bIsPlaying = true;
-	this->aoPlayer->start(&this->bufferPCMData);
 }
 
 void ClipContainer::pause()
 {
 	this->bIsPlaying = false;
-	if(this->aoPlayer) this->aoPlayer->stop();
 }
 
 void ClipContainer::stop()

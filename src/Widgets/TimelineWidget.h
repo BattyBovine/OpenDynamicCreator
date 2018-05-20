@@ -32,7 +32,7 @@ class TimelineWidget : public QGraphicsView
 {
 	Q_OBJECT
 public:
-	explicit TimelineWidget(std::shared_ptr<ClipContainer>, QAction*, QAction*, bool readonly=true, QWidget *parent=0);
+	explicit TimelineWidget(std::shared_ptr<ClipContainer>, bool readonly=true, QWidget *parent=0);
 	~TimelineWidget();
 	std::shared_ptr<ClipContainer> clip() { return this->ccClip; }
 	float measureSpacing() { return this->fMeasureSpacing; }

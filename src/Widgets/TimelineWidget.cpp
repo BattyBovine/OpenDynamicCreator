@@ -1,6 +1,6 @@
 #include "Widgets/TimelineWidget.h"
 
-TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *playpause, QAction *stop, bool readonly, QWidget *parent) : QGraphicsView(parent)
+TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, bool readonly, QWidget *parent) : QGraphicsView(parent)
 {
 	this->gsTimeline = new QGraphicsScene(this);
 	this->setScene(this->gsTimeline);
@@ -31,8 +31,6 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, QAction *pla
 	this->setViewportBounds();
 	this->setZoom(-1000.0f);
 
-	connect(playpause, SIGNAL(toggled(bool)), this, SLOT(togglePlayPause(bool)));
-	connect(stop, SIGNAL(triggered(bool)), this, SLOT(clipStop()));
 	connect(&this->timerPlayMarker, SIGNAL(timeout()), this, SLOT(movePlayMarkerToClipPos()));
 }
 
@@ -80,10 +78,10 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 			this->bMoveMode = true;
 		if(this->bMoveMode) {
 			Beat offset = this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos);
-			if(offset<=Beat()) {
-				this->ctiClip->setTimelinePos(offset, this->fMeasureSpacing);
-				this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
-			}
+			if(offset>Beat())
+				offset = Beat();
+			this->ctiClip->setTimelinePos(offset, this->fMeasureSpacing);
+			this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
 		}
 	}
 	QGraphicsView::mouseMoveEvent(e);

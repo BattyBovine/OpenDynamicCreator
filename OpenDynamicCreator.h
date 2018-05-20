@@ -14,8 +14,10 @@
 #include "MusicPropertiesWidget.h"
 #include "ClipGroupEditorWidget.h"
 #include "ClipEditorWidget.h"
-#include "Widgets/MixerWidget.h"
 
+#include "Classes/SongPlayer.h"
+
+#include "Widgets/MixerWidget.h"
 #include "Widgets/MusicTreeView.h"
 #include "Widgets/StatesTreeView.h"
 
@@ -72,6 +74,8 @@ public slots:
 	void customContextMenuMusic(QPoint);
 	void showAboutDialogue();
 
+	void playSong(bool);
+	void stopSong();
 	void resetPlayerState();
 
 private:
@@ -87,6 +91,8 @@ private:
 	QItemSelectionModel *selMusic;
 	QStandardItemModel *modelStates;
 	QItemSelectionModel *selStates;
+
+	SongPlayer *spPlayer = NULL;
 
 	QMenu *menuMusicBlankContext;
 	QMenu *menuSongAndMixerContext;

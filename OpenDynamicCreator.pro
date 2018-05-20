@@ -48,7 +48,8 @@ SOURCES += main.cpp \
 	src/Widgets/GraphicsItems/InvertedLineItem.cpp \
     src/Classes/ClipContainer.cpp \
 	src/Classes/WaveformThread.cpp \
-    src/Widgets/GraphicsItems/EventMarkerItem.cpp
+    src/Widgets/GraphicsItems/EventMarkerItem.cpp \
+    src/Classes/SongPlayer.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -73,7 +74,8 @@ HEADERS  += version.h \
     src/Classes/ClipContainer.h \
 	src/Classes/WaveformThread.h \
     src/Classes/Beat.h \
-    src/Widgets/GraphicsItems/EventMarkerItem.h
+    src/Widgets/GraphicsItems/EventMarkerItem.h \
+    src/Classes/SongPlayer.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \

@@ -43,6 +43,9 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 	connect(this->modelMusic, SIGNAL(audioClipsDropped(QModelIndex,QStringList)), this, SLOT(addClipList(QModelIndex,QStringList)));
 	connect(this->selMusic, SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(swapEditorWidget(QItemSelection)));
 
+	connect(ui->actionPlayPause, SIGNAL(toggled(bool)), this, SLOT(playSong(bool)));
+	connect(ui->actionStop, SIGNAL(triggered(bool)), this, SLOT(stopSong()));
+
 	ui->statusMain->showMessage(tr("Ready"));
 }
 
@@ -274,7 +277,7 @@ void OpenDynamicCreator::loadClipGroupEditorWidget(QModelIndex i)
 	ClipGroupEditorWidget *cgew = new ClipGroupEditorWidget();
 	int rowcount = clip->rowCount();
 	for(int row=0; row<rowcount; row++)
-		cgew->addClipGroupEditor(static_cast<ClipItem*>(clip->child(row))->clipContainer(), ui->actionPlayPause, ui->actionStop);
+		cgew->addClipGroupEditor(static_cast<ClipItem*>(clip->child(row))->clipContainer());
 	this->setCentralWidget(cgew);
 }
 
@@ -285,7 +288,7 @@ void OpenDynamicCreator::loadClipEditorWidget(QModelIndex i)
 	ClipItem *clip = static_cast<ClipItem*>(this->modelMusic->itemFromIndex(i));
 	if(!clip)	return;
 	ClipEditorWidget *cew = new ClipEditorWidget();
-	cew->setClipEditor(clip->clipContainer(), ui->actionPlayPause, ui->actionStop);
+	cew->setClipEditor(clip->clipContainer());
 	this->setCentralWidget(cew);
 }
 
@@ -294,6 +297,31 @@ QModelIndex OpenDynamicCreator::findTrack(QModelIndex index)
 	while(index.parent().isValid())
 		index = index.parent();
 	return index;
+}
+
+
+
+void OpenDynamicCreator::playSong(bool play)
+{
+	if(play) {
+		if(!this->spPlayer) {
+			this->spPlayer = new SongPlayer(this);
+			TrackItem *track = static_cast<TrackItem*>(this->modelMusic->itemFromIndex(this->selMusic->currentIndex()));
+			this->spPlayer->buildSong(track);
+		}
+		this->spPlayer->playSong();
+	} else {
+		this->spPlayer->pauseSong();
+	}
+}
+
+void OpenDynamicCreator::stopSong()
+{
+	if(this->spPlayer) {
+		this->spPlayer->stopSong();
+		this->spPlayer->deleteLater();
+		this->spPlayer = NULL;
+	}
 }
 
 void OpenDynamicCreator::resetPlayerState()

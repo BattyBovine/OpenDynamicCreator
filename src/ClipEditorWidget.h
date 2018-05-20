@@ -19,7 +19,7 @@ public:
 	explicit ClipEditorWidget(QWidget *parent = 0);
 	~ClipEditorWidget();
 
-	void setClipEditor(std::shared_ptr<ClipContainer>, QAction*, QAction*);
+	void setClipEditor(std::shared_ptr<ClipContainer>);
 
 private:
 	Ui::ClipEditorWidget *ui;
