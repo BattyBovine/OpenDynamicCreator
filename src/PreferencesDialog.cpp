@@ -7,6 +7,10 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
 {
 	ui->setupUi(this);
 
+	this->getOutputDeviceList();
+	ui->comboOutputDevice->setCurrentIndex(this->settings.value(KEY_OUTPUT_DEVICE).toInt());
+	connect(ui->comboOutputDevice, SIGNAL(currentIndexChanged(int)), this, SLOT(saveOutputDevice(int)));
+
 	ui->labelDirectoryError->setVisible(false);
 	this->sOldCache = this->getTempFolder();
 	ui->lineTempFolder->setText(this->sOldCache);
@@ -32,6 +36,13 @@ PreferencesDialog::~PreferencesDialog()
 		oldcache.removeRecursively();
 	}
 	delete ui;
+}
+
+void PreferencesDialog::getOutputDeviceList()
+{
+	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+	foreach(QAudioDeviceInfo device, devices)
+		ui->comboOutputDevice->addItem(device.deviceName());
 }
 
 void PreferencesDialog::selectTempFolder()
@@ -123,8 +134,12 @@ void PreferencesDialog::cacheFunctionsEnabled(bool enable)
 void PreferencesDialog::initSettings()
 {
 	QSettings settings;
+	if(!settings.contains(KEY_OUTPUT_DEVICE))
+		settings.setValue(KEY_OUTPUT_DEVICE, 0);
+
 	if(!settings.contains(KEY_TEMP_FOLDER))
 		settings.setValue(KEY_TEMP_FOLDER, QString("%1/%2").arg(QDir::tempPath()).arg(QCoreApplication::applicationName()));
+
 	if(!settings.contains(KEY_WINDOW_COLOUR))
 		settings.setValue(KEY_WINDOW_COLOUR, QColor(Qt::white));
 	if(!settings.contains(KEY_WAVEFORM_COLOUR))

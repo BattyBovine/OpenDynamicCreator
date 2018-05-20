@@ -477,10 +477,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionStop</sender>
+   <sender>actionExit</sender>
    <signal>triggered()</signal>
    <receiver>OpenDynamicCreator</receiver>
-   <slot>resetPlayerState()</slot>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -493,10 +493,26 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionExit</sender>
-   <signal>triggered()</signal>
+   <sender>actionPlayPause</sender>
+   <signal>toggled(bool)</signal>
    <receiver>OpenDynamicCreator</receiver>
-   <slot>close()</slot>
+   <slot>playSong(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>525</x>
+     <y>297</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionStop</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>OpenDynamicCreator</receiver>
+   <slot>stopSong()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -525,6 +541,7 @@
   <slot>redo()</slot>
   <slot>addState()</slot>
   <slot>addStateSwitch()</slot>
-  <slot>resetPlayerState()</slot>
+  <slot>playSong(bool)</slot>
+  <slot>stopSong()</slot>
  </slots>
 </ui>

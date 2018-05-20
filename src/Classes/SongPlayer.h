@@ -5,7 +5,9 @@
 
 #include <QObject>
 #include <QUuid>
+#include <QSettings>
 
+#include "PreferencesDialog.h"
 #include "ClipContainer.h"
 #include "Widgets/MusicTreeView.h"
 
@@ -16,22 +18,29 @@ class SongPlayer : public QObject
 public:
 	enum Error {
 		SP_OK,
-		SP_NOT_TRACK
+		SP_NO_CLIPS,
+		SP_INVALID_DEVICE
 	};
 
 	explicit SongPlayer(QObject *parent=Q_NULLPTR) : QObject(parent) {}
 
-	int buildSong(BaseMusicItem*);
+	Error buildSong(BaseMusicItem*);
 
 public slots:
-	void playSong();
+	Error playSong();
 	void pauseSong();
 	void stopSong();
 
+private slots:
+	void playerState(QAudio::State);
+
+signals:
+	void finished();
+
 private:
-	int searchItemChildren(BaseMusicItem*);
+	Error searchItemChildren(BaseMusicItem*);
 	void addNewClip(BaseMusicItem*);
-	void configurePlayer(QUuid);
+	Error configurePlayer(QUuid);
 
 	QMap<QUuid, std::shared_ptr<ClipContainer> > mapClips;
 	QAudioOutput *aoPlayer = NULL;

@@ -76,7 +76,6 @@ public slots:
 
 	void playSong(bool);
 	void stopSong();
-	void resetPlayerState();
 
 private:
 	Ui::OpenDynamicCreator *ui;

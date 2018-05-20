@@ -1,27 +1,26 @@
 #include "SongPlayer.h"
 
-int SongPlayer::buildSong(BaseMusicItem *selected)
+SongPlayer::Error SongPlayer::buildSong(BaseMusicItem *selected)
 {
 	BaseMusicItem *track = selected;
 	while(track->type()!=MIT_TRACK)
 		track = (BaseMusicItem*)track->parent();
-	int errorcode = this->searchItemChildren(track);
+	Error errorcode = this->searchItemChildren(track);
 	if(selected->type()==MIT_CLIP)
 		this->uuidActiveClip = ((ClipItem*)selected)->clipContainer()->uuid();
 	return errorcode;
 }
-int SongPlayer::searchItemChildren(BaseMusicItem *item)
+SongPlayer::Error SongPlayer::searchItemChildren(BaseMusicItem *item)
 {
 	if(item->type()==MIT_CLIP) {
 		this->addNewClip(item);
 	} else {
 		for(int i=0; i<item->rowCount(); i++) {
 			BaseMusicItem *bmi = static_cast<BaseMusicItem*>(item->child(i));
-			if(bmi->type()==MIT_CLIPGROUP) {
-				this->searchItemChildren(bmi);
-			} else if(bmi->type()==MIT_CLIP) {
+			if(bmi->type()==MIT_CLIP)
 				this->addNewClip(bmi);
-			}
+			else
+				this->searchItemChildren(bmi);
 		}
 	}
 	return Error::SP_OK;
@@ -34,17 +33,22 @@ void SongPlayer::addNewClip(BaseMusicItem *bmi)
 	this->mapClips[cc->uuid()] = cc;
 }
 
-void SongPlayer::playSong()
+SongPlayer::Error SongPlayer::playSong()
 {
+	Error error = Error::SP_OK;
 	if(this->mapClips.isEmpty())
-		return;
+		return Error::SP_NO_CLIPS;
 	if(!this->mapClips[uuidActiveClip]->isPlaying()) {
-		this->configurePlayer(this->uuidActiveClip);
+		error = this->configurePlayer(this->uuidActiveClip);
+		if(error != Error::SP_OK)
+			return error;
 		this->mapClips[uuidActiveClip]->setPositionToAbsoluteZero();
 	}
 	this->aoPlayer->setVolume(this->mapClips[uuidActiveClip]->volume());
+	connect(this->aoPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
 	this->aoPlayer->start(this->mapClips[uuidActiveClip]->buffer());
 	this->mapClips[uuidActiveClip]->setIsPlaying(true);
+	return error;
 }
 void SongPlayer::pauseSong()
 {
@@ -53,7 +57,7 @@ void SongPlayer::pauseSong()
 }
 void SongPlayer::stopSong()
 {
-	if(this->mapClips.size()>0)
+	if(this->mapClips.contains(uuidActiveClip))
 		this->mapClips[uuidActiveClip]->setIsPlaying(false);
 	if(this->aoPlayer) {
 		this->aoPlayer->stop();
@@ -64,7 +68,7 @@ void SongPlayer::stopSong()
 
 
 
-void SongPlayer::configurePlayer(QUuid clip)
+SongPlayer::Error SongPlayer::configurePlayer(QUuid clip)
 {
 	QAudioFormat format;
 	format.setSampleRate(this->mapClips[clip]->sampleRate());
@@ -74,13 +78,28 @@ void SongPlayer::configurePlayer(QUuid clip)
 	format.setByteOrder(QAudioFormat::LittleEndian);
 	format.setSampleType(QAudioFormat::SignedInt);
 
-	QAudioDeviceInfo device;
+	QSettings settings;
 	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
-	foreach(device, devices) {
-		if(device.isFormatSupported(format))
-			break;
+	int devicesetting = settings.value(KEY_OUTPUT_DEVICE).toInt();
+	if(devices[devicesetting].isFormatSupported(format)) {
+		if(this->aoPlayer) this->aoPlayer->deleteLater();
+		this->aoPlayer = new QAudioOutput(devices[devicesetting], format);
+	} else {
+		return Error::SP_INVALID_DEVICE;
 	}
-	if(this->aoPlayer) this->aoPlayer->deleteLater();
-	this->aoPlayer = new QAudioOutput(device, format);
-	this->aoPlayer->setBufferSize(0);
+	return Error::SP_OK;
+}
+
+void SongPlayer::playerState(QAudio::State s)
+{
+//	QAudioOutput *out = (QAudioOutput*)QObject::sender();
+	switch(s) {
+	case QAudio::IdleState:
+		emit(finished());
+		break;
+//	case QAudio::StoppedState:
+//		if(out->error()!=QAudio::NoError)
+//			qDebug() << out->error();
+//		break;
+	}
 }

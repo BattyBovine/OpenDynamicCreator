@@ -43,9 +43,6 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 	connect(this->modelMusic, SIGNAL(audioClipsDropped(QModelIndex,QStringList)), this, SLOT(addClipList(QModelIndex,QStringList)));
 	connect(this->selMusic, SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(swapEditorWidget(QItemSelection)));
 
-	connect(ui->actionPlayPause, SIGNAL(toggled(bool)), this, SLOT(playSong(bool)));
-	connect(ui->actionStop, SIGNAL(triggered(bool)), this, SLOT(stopSong()));
-
 	ui->statusMain->showMessage(tr("Ready"));
 }
 
@@ -202,7 +199,6 @@ QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 
 void OpenDynamicCreator::swapEditorWidget(QItemSelection i)
 {
-	ui->actionStop->toggle();
 	if(this->selMusic->selectedIndexes().size()!=1) {
 		this->setCentralWidget(new QWidget());
 		return;
@@ -310,9 +306,12 @@ void OpenDynamicCreator::playSong(bool play)
 			if(!trackindex.isValid())
 				return;
 			TrackItem *track = static_cast<TrackItem*>(this->modelMusic->itemFromIndex(trackindex));
-			this->spPlayer->buildSong(track);
+			if(this->spPlayer->buildSong(track) != SongPlayer::Error::SP_OK)
+				this->stopSong();
 		}
-		this->spPlayer->playSong();
+		connect(this->spPlayer, SIGNAL(finished()), this, SLOT(stopSong()));
+		if(this->spPlayer->playSong() != SongPlayer::Error::SP_OK)
+			this->stopSong();
 	} else {
 		this->spPlayer->pauseSong();
 	}
@@ -320,14 +319,10 @@ void OpenDynamicCreator::playSong(bool play)
 
 void OpenDynamicCreator::stopSong()
 {
+	ui->actionPlayPause->setChecked(false);
 	if(this->spPlayer) {
 		this->spPlayer->stopSong();
 		this->spPlayer->deleteLater();
 		this->spPlayer = NULL;
 	}
-}
-
-void OpenDynamicCreator::resetPlayerState()
-{
-	ui->actionPlayPause->setChecked(false);
 }

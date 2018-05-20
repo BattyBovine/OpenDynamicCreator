@@ -8,9 +8,13 @@
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QSettings>
+#include <QAudioDeviceInfo>
 #include <QDir>
 
+#define KEY_OUTPUT_DEVICE		"OutputDevice"
+
 #define KEY_TEMP_FOLDER			"TempFolder"
+
 #define KEY_WINDOW_COLOUR		"WindowColour"
 #define KEY_WAVEFORM_COLOUR		"WaveformColour"
 #define KEY_PLAY_MARKER_COLOUR	"PlayMarkerColour"
@@ -30,10 +34,13 @@ public:
 
 	static void initSettings();
 
+	void getOutputDeviceList();
 	QString getTempFolder() { return this->settings.value(KEY_TEMP_FOLDER).toString(); }
 	void getCacheSize();
 
 private slots:
+	void saveOutputDevice(int d) { this->settings.setValue(KEY_OUTPUT_DEVICE, d); }
+
 	void selectTempFolder();
 	void saveTempFolder(QString);
 	void retrieveCacheSize(quint64);
