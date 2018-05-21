@@ -33,6 +33,7 @@ public slots:
 
 private slots:
 	void playerState(QAudio::State);
+	void setVolume(qreal);
 
 signals:
 	void finished();
@@ -43,7 +44,7 @@ private:
 	Error configurePlayer(QUuid);
 
 	QMap<QUuid, std::shared_ptr<ClipContainer> > mapClips;
-	QAudioOutput *aoPlayer = NULL;
+	QMap<QUuid, QAudioOutput*> mapAudioPlayers;
 	QUuid uuidActiveClip;
 };
 

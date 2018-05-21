@@ -44,25 +44,25 @@ SongPlayer::Error SongPlayer::playSong()
 			return error;
 		this->mapClips[uuidActiveClip]->setPositionToAbsoluteZero();
 	}
-	this->aoPlayer->setVolume(this->mapClips[uuidActiveClip]->volume());
-	connect(this->aoPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
-	this->aoPlayer->start(this->mapClips[uuidActiveClip]->buffer());
+	this->mapAudioPlayers[uuidActiveClip]->setVolume(this->mapClips[uuidActiveClip]->volume());
+	connect(this->mapAudioPlayers[uuidActiveClip], SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
+	this->mapAudioPlayers[uuidActiveClip]->start(this->mapClips[uuidActiveClip]->buffer());
 	this->mapClips[uuidActiveClip]->setIsPlaying(true);
 	return error;
 }
 void SongPlayer::pauseSong()
 {
-	if(this->aoPlayer)
-		this->aoPlayer->suspend();
+	if(this->mapAudioPlayers[uuidActiveClip])
+		this->mapAudioPlayers[uuidActiveClip]->suspend();
 }
 void SongPlayer::stopSong()
 {
 	if(this->mapClips.contains(uuidActiveClip))
 		this->mapClips[uuidActiveClip]->setIsPlaying(false);
-	if(this->aoPlayer) {
-		this->aoPlayer->stop();
-		this->aoPlayer->deleteLater();
-		this->aoPlayer = NULL;
+	if(this->mapAudioPlayers[uuidActiveClip]) {
+		this->mapAudioPlayers[uuidActiveClip]->stop();
+		this->mapAudioPlayers[uuidActiveClip]->deleteLater();
+		this->mapAudioPlayers[uuidActiveClip] = NULL;
 	}
 }
 
@@ -82,8 +82,11 @@ SongPlayer::Error SongPlayer::configurePlayer(QUuid clip)
 	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 	int devicesetting = settings.value(KEY_OUTPUT_DEVICE).toInt();
 	if(devices[devicesetting].isFormatSupported(format)) {
-		if(this->aoPlayer) this->aoPlayer->deleteLater();
-		this->aoPlayer = new QAudioOutput(devices[devicesetting], format);
+		foreach(QUuid uuid, this->mapClips.keys()) {
+			if(this->mapAudioPlayers[uuid]) this->mapAudioPlayers[uuid]->deleteLater();
+			this->mapAudioPlayers[uuid] = new QAudioOutput(devices[devicesetting], format);
+			connect(this->mapClips[uuid].get(), SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
+		}
 	} else {
 		return Error::SP_INVALID_DEVICE;
 	}
@@ -102,4 +105,10 @@ void SongPlayer::playerState(QAudio::State s)
 //			qDebug() << out->error();
 //		break;
 	}
+}
+
+void SongPlayer::setVolume(qreal v)
+{
+	QUuid uuid = static_cast<ClipContainer*>(QObject::sender())->uuid();
+	this->mapAudioPlayers[uuid]->setVolume(v);
 }

@@ -40,7 +40,7 @@ public:
 		this->setBeatUnit(u);
 		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
 	}
-	void setVolume(float v) { this->fVolume=v; }
+	void setVolume(qreal v) { this->fVolume=v; emit(volumeChanged(v)); }
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
 	void setPositionSeconds(float);
 	void setPositionToAbsoluteZero() { this->bufferPCMData.seek(0); }
@@ -66,7 +66,7 @@ public:
 	qreal tempo() { return this->fTempo; }
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	quint8 beatUnit() { return this->iBeatUnit; }
-	float volume() { return this->fVolume; }
+	qreal volume() { return this->fVolume; }
 	Beat timelineOffset() { return this->beatTimelineOffset; }
 	float secondsElapsed();
 
@@ -78,6 +78,7 @@ public:
 	MusicEventList &events() { return this->melEvents; }
 
 signals:
+	void volumeChanged(qreal);
 	void eventAdded(MusicEvent&);
 
 private:
