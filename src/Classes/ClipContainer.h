@@ -3,8 +3,10 @@
 
 #include <QDebug>
 #include <QUrl>
+#include <QAudioOutput>
 #include <QByteArray>
 #include <QBuffer>
+#include <QSettings>
 #include <QPixmap>
 #include <QPainter>
 #include <QTimer>
@@ -12,6 +14,7 @@
 
 #include <vorbis/vorbisfile.h>
 
+#include "PreferencesDialog.h"
 #include "MusicEvent.h"
 
 
@@ -40,10 +43,14 @@ public:
 		this->setBeatUnit(u);
 		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
 	}
-	void setVolume(float v) { this->fVolume=v; }
+	void setVolume(qreal v) { if(this->aoPlayer) this->aoPlayer->setVolume(v); emit(volumeChanged(v)); }
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
 	void setPositionSeconds(float);
 	void setPositionToAbsoluteZero() { this->bufferPCMData.seek(0); }
+
+	void play();
+	void pause();
+	void stop();
 
 	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }
 
@@ -66,7 +73,7 @@ public:
 	qreal tempo() { return this->fTempo; }
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	quint8 beatUnit() { return this->iBeatUnit; }
-	float volume() { return this->fVolume; }
+	qreal volume() { if(this->aoPlayer) return this->aoPlayer->volume(); return NAN; }
 	Beat timelineOffset() { return this->beatTimelineOffset; }
 	float secondsElapsed();
 
@@ -77,8 +84,13 @@ public:
 	}
 	MusicEventList &events() { return this->melEvents; }
 
+private slots:
+	void playerState(QAudio::State);
+
 signals:
+	void volumeChanged(qreal);
 	void eventAdded(MusicEvent&);
+	void finished();
 
 private:
 	void configurePlayer();
@@ -101,13 +113,13 @@ private:
 
 	QUrl urlFilePath;
 	QBuffer bufferPCMData;
+	QAudioOutput *aoPlayer = NULL;
 	bool bIsPlaying = false;
 
 	QString sName;
 	qreal fTempo = 0.0f;
 	quint8 iBeatsPerMeasure=0;
 	quint8 iBeatUnit=0;
-	qreal fVolume = 1.0f;
 	Beat beatTimelineOffset;
 
 	MusicEventList melEvents;

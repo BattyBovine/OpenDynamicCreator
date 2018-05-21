@@ -31,19 +31,14 @@ public slots:
 	void pauseSong();
 	void stopSong();
 
-private slots:
-	void playerState(QAudio::State);
-
 signals:
 	void finished();
 
 private:
 	Error searchItemChildren(BaseMusicItem*);
 	void addNewClip(BaseMusicItem*);
-	Error configurePlayer(QUuid);
 
 	QMap<QUuid, std::shared_ptr<ClipContainer> > mapClips;
-	QAudioOutput *aoPlayer = NULL;
 	QUuid uuidActiveClip;
 };
 

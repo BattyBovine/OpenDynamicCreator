@@ -313,7 +313,8 @@ void OpenDynamicCreator::playSong(bool play)
 		if(this->spPlayer->playSong() != SongPlayer::Error::SP_OK)
 			this->stopSong();
 	} else {
-		this->spPlayer->pauseSong();
+		if(this->spPlayer)
+			this->spPlayer->pauseSong();
 	}
 }
 
