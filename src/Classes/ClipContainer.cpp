@@ -91,13 +91,12 @@ bool ClipContainer::loadVorbis(QUrl file)
 	bool eof = false;
 	while(!eof) {
 		long retval = ov_read(&vorb, pcmbuffer, sizeof(pcmbuffer), 0, 2, 1, &section);
-		if(retval==0) {
+		if(retval==0)
 			eof = true;
-		} else if(retval<0) {
+		else if(retval<0)
 			qDebug() << QString("Error decoding Ogg Vorbis data; attempting to ignore...");
-		} else {
+		else
 			this->bufferPCMData.buffer().append(pcmbuffer, retval);
-		}
 	}
 	ov_clear(&vorb);
 

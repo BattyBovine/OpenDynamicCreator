@@ -27,6 +27,7 @@ public:
 	void copy(const ClipContainer&);
 
 	bool isPlaying() { return this->bIsPlaying; }
+	int size() { return this->lChildClips.size(); }
 
 	int loadAudioFile(QUrl);
 	bool loadWav(QUrl);
@@ -40,12 +41,6 @@ public:
 		this->setBeatUnit(u);
 		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
 	}
-	void setVolume(qreal v) { this->fVolume=v; emit(volumeChanged(v)); }
-	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
-	void setPositionSeconds(float);
-	void setPositionToAbsoluteZero() { this->bufferPCMData.seek(0); }
-
-	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }
 
 	QUuid uuid() { return this->uuidUnique; }
 	QString uuidString() { return this->uuidUnique.toString(); }
@@ -56,11 +51,18 @@ public:
 	int bitrateUpper() { return this->iUpperBitrate; }
 	int bitrateWindow() { return this->iBitrateWindow; }
 	int bytesPerSample() { return this->iBytesPerSample; }
-	qreal length() { return this->fLengthSeconds; }
-	Beat beats() { return this->beatLength; }
 	QBuffer *buffer() { return &this->bufferPCMData; }
 	const char *rawData() { return this->bufferPCMData.data().data(); }
 	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
+
+	void setVolume(qreal v) { this->fVolume=v; emit(volumeChanged(v)); }
+	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
+	void setPositionSeconds(float);
+	void setPositionToAbsoluteZero() { this->bufferPCMData.seek(0); }
+
+	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }
+	qreal length() { return this->fLengthSeconds; }
+	Beat beats() { return this->beatLength; }
 
 	QString name() { return this->sName; }
 	qreal tempo() { return this->fTempo; }
@@ -70,12 +72,12 @@ public:
 	Beat timelineOffset() { return this->beatTimelineOffset; }
 	float secondsElapsed();
 
-	void addEvent(MusicEvent &e) {
+	virtual void addEvent(MusicEvent &e) {
 		this->melEvents.append(e);
 		std::sort(this->melEvents.begin(), this->melEvents.end());
 		emit(eventAdded(e));
 	}
-	MusicEventList &events() { return this->melEvents; }
+	virtual MusicEventList &events() { return this->melEvents; }
 
 signals:
 	void volumeChanged(qreal);
@@ -112,6 +114,8 @@ private:
 	Beat beatTimelineOffset;
 
 	MusicEventList melEvents;
+
+	QList<ClipContainer> lChildClips;
 
 	enum ClipError {
 		CLIP_OK,
