@@ -1,6 +1,8 @@
 #ifndef CLIPCONTAINER_H
 #define CLIPCONTAINER_H
 
+#include <memory>
+
 #include <QDebug>
 #include <QUrl>
 #include <QByteArray>
@@ -72,12 +74,14 @@ public:
 	Beat timelineOffset() { return this->beatTimelineOffset; }
 	float secondsElapsed();
 
-	virtual void addEvent(MusicEvent &e) {
+	void addEvent(MusicEvent &e) {
 		this->melEvents.append(e);
 		std::sort(this->melEvents.begin(), this->melEvents.end());
 		emit(eventAdded(e));
 	}
-	virtual MusicEventList &events() { return this->melEvents; }
+	MusicEventList &events() { return this->melEvents; }
+
+	void addSubClip(std::shared_ptr<ClipContainer> clip) { this->lChildClips.append(clip); }
 
 signals:
 	void volumeChanged(qreal);
@@ -115,7 +119,7 @@ private:
 
 	MusicEventList melEvents;
 
-	QList<ClipContainer> lChildClips;
+	QList<std::shared_ptr<ClipContainer> > lChildClips;
 
 	enum ClipError {
 		CLIP_OK,

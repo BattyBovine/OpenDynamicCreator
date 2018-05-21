@@ -6,8 +6,8 @@ SongPlayer::Error SongPlayer::buildSong(BaseMusicItem *selected)
 	while(track->type()!=MIT_TRACK)
 		track = (BaseMusicItem*)track->parent();
 	Error errorcode = this->searchItemChildren(track);
-	if(selected->type()==MIT_CLIP)
-		this->uuidActiveClip = ((ClipItem*)selected)->clipContainer()->uuid();
+	if(selected->type()!=MIT_TRACK)
+		this->uuidActiveClip = ((BaseMusicItem*)selected)->clipContainer()->uuid();
 	return errorcode;
 }
 SongPlayer::Error SongPlayer::searchItemChildren(BaseMusicItem *item)
@@ -17,9 +17,8 @@ SongPlayer::Error SongPlayer::searchItemChildren(BaseMusicItem *item)
 	} else {
 		for(int i=0; i<item->rowCount(); i++) {
 			BaseMusicItem *bmi = static_cast<BaseMusicItem*>(item->child(i));
-			if(bmi->type()==MIT_CLIP)
-				this->addNewClip(bmi);
-			else
+			this->addNewClip(bmi);
+			if(bmi->type()==MIT_CLIPGROUP)
 				this->searchItemChildren(bmi);
 		}
 	}
