@@ -20,7 +20,6 @@ ClipContainer &ClipContainer::operator=(const ClipContainer &c)
 }
 ClipContainer::~ClipContainer()
 {
-	if(this->aoPlayer) this->aoPlayer->deleteLater();
 	this->bufferPCMData.close();
 }
 void ClipContainer::copy(const ClipContainer &c)
@@ -37,9 +36,8 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->iBytesPerSample = c.iBytesPerSample;
 	this->fLengthSeconds = c.fLengthSeconds;
 	this->beatLength = c.beatLength;
+	this->fVolume = c.fVolume;
 	this->melEvents = c.melEvents;
-
-	this->configurePlayer();
 }
 
 int ClipContainer::loadAudioFile(QUrl file)
@@ -47,7 +45,6 @@ int ClipContainer::loadAudioFile(QUrl file)
 	if(!this->loadWav(file) && !this->loadVorbis(file))
 		return CLIP_FORMAT_UNRECOGNIZED;
 	this->bufferPCMData.open(QIODevice::ReadOnly);
-	this->configurePlayer();
 	return CLIP_OK;
 }
 bool ClipContainer::loadWav(QUrl file)
@@ -94,76 +91,19 @@ bool ClipContainer::loadVorbis(QUrl file)
 	bool eof = false;
 	while(!eof) {
 		long retval = ov_read(&vorb, pcmbuffer, sizeof(pcmbuffer), 0, 2, 1, &section);
-		if(retval==0)
+		if(retval==0) {
 			eof = true;
-		else if(retval<0)
+		} else if(retval<0) {
 			qDebug() << QString("Error decoding Ogg Vorbis data; attempting to ignore...");
-		else
+		} else {
 			this->bufferPCMData.buffer().append(pcmbuffer, retval);
+		}
 	}
 	ov_clear(&vorb);
 
 	this->fLengthSeconds = this->bufferPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
 
 	return true;
-}
-
-void ClipContainer::configurePlayer()
-{
-	QAudioFormat format;
-	format.setSampleRate(this->sampleRate());
-	format.setChannelCount(this->channelCount());
-	format.setSampleSize(this->bytesPerSample()*CHAR_BIT);
-	format.setCodec("audio/pcm");
-	format.setByteOrder(QAudioFormat::LittleEndian);
-	format.setSampleType(QAudioFormat::SignedInt);
-
-	QSettings settings;
-	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
-	int devicesetting = settings.value(KEY_OUTPUT_DEVICE).toInt();
-	if(this->aoPlayer) this->aoPlayer->deleteLater();
-	if(devicesetting<devices.size() && devices[devicesetting].isFormatSupported(format)) {
-		this->aoPlayer = new QAudioOutput(devices[devicesetting], format);
-		connect(this->aoPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
-	} else {
-		this->aoPlayer = NULL;
-	}
-}
-
-void ClipContainer::playerState(QAudio::State s)
-{
-//	QAudioOutput *out = (QAudioOutput*)QObject::sender();
-	switch(s) {
-	case QAudio::IdleState:
-		emit(finished());
-		break;
-//	case QAudio::StoppedState:
-//		if(out->error()!=QAudio::NoError)
-//			qDebug() << out->error();
-//		break;
-	}
-}
-
-
-
-void ClipContainer::play()
-{
-	if(this->aoPlayer) {
-		this->aoPlayer->start(&this->bufferPCMData);
-		this->bIsPlaying = true;
-	}
-}
-void ClipContainer::pause()
-{
-	if(this->aoPlayer)
-		this->aoPlayer->suspend();
-}
-void ClipContainer::stop()
-{
-	if(this->aoPlayer) {
-		this->aoPlayer->stop();
-		this->bIsPlaying = false;
-	}
 }
 
 
