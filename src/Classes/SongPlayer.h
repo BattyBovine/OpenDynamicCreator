@@ -42,7 +42,6 @@ private:
 	void addNewClip(BaseMusicItem*);
 
 	QMap<QUuid, std::shared_ptr<ClipContainer> > mapClips;
-	QMap<QUuid, QAudioOutput*> mapAudioPlayers;
 	QUuid uuidActiveClip;
 };
 

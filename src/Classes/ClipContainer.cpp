@@ -125,7 +125,10 @@ ClipContainer::Error ClipContainer::configurePlayer()
 
 	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
 	this->aoAudioPlayer = new QAudioOutput(devices[devicesetting], format);
+	this->aoAudioPlayer->setVolume(this->volume());
 	connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
+	connect(this, SIGNAL(volumeChanged(qreal)), this, SLOT(setPlayerVolume(qreal)));
+	this->bufferPCMData.open(QIODevice::ReadOnly);
 	return Error::CLIP_OK;
 }
 
@@ -136,13 +139,35 @@ void ClipContainer::setPositionSeconds(float seconds)
 	seconds -= this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit);
 	if(seconds<0.0f)
 		seconds = 0.0f;
-	this->bufferPCMData.seek(floorf(seconds*this->iSampleRate)*(this->iBytesPerSample*this->iChannelCount));
+	if(this->bIsGroupClip)
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->setPositionSeconds(seconds);
+	else
+		this->bufferPCMData.seek(floorf(seconds*this->iSampleRate)*(this->iBytesPerSample*this->iChannelCount));
 }
 
 float ClipContainer::secondsElapsed()
 {
-	return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
-			this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit));
+	if(this->bIsGroupClip) {
+		float elapsed = FLT_MAX;
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips) {
+			if(cc->secondsElapsed()<elapsed)
+				elapsed = cc->secondsElapsed();
+		}
+		return elapsed;
+	} else {
+		return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
+				this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit));
+	}
+}
+
+void ClipContainer::setPositionToAbsoluteZero()
+{
+	if(this->bIsGroupClip)
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->setPositionToAbsoluteZero();
+	else
+		this->bufferPCMData.seek(0);
 }
 
 
@@ -150,8 +175,10 @@ float ClipContainer::secondsElapsed()
 bool ClipContainer::play()
 {
 	if(this->bIsGroupClip) {
-		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips) {
+			cc->setPositionSeconds(this->secondsElapsed());
 			cc->play();
+		}
 	} else {
 		if(!this->aoAudioPlayer)
 			return false;
@@ -202,6 +229,11 @@ void ClipContainer::playerState(QAudio::State s)
 		break;
 	case QAudio::StoppedState:
 		this->bIsPlaying = false;
+		if(this->aoAudioPlayer->error()!=QAudio::NoError)
+			qDebug() << this->aoAudioPlayer->error();
+		break;
+	case QAudio::IdleState:
+		emit(finished());
 		break;
 	}
 }

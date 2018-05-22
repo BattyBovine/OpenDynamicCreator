@@ -30,8 +30,6 @@ void SongPlayer::addNewClip(BaseMusicItem *bmi)
 	if(this->mapClips.isEmpty())
 		this->uuidActiveClip = cc->uuid();
 	this->mapClips[cc->uuid()] = cc;
-	if(!cc->isGroupClip())
-		this->mapAudioPlayers[cc->uuid()] = cc->audioPlayer();
 }
 
 SongPlayer::Error SongPlayer::playSong()
@@ -41,20 +39,16 @@ SongPlayer::Error SongPlayer::playSong()
 		return Error::SP_NO_CLIPS;
 	if(!this->mapClips[uuidActiveClip]->isPlaying())
 		this->mapClips[uuidActiveClip]->setPositionToAbsoluteZero();
-	this->mapAudioPlayers[uuidActiveClip]->setVolume(this->mapClips[uuidActiveClip]->volume());
-	connect(this->mapAudioPlayers[uuidActiveClip], SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
-	this->mapAudioPlayers[uuidActiveClip]->start(this->mapClips[uuidActiveClip]->buffer());
+	this->mapClips[uuidActiveClip]->play();
 	return error;
 }
 void SongPlayer::pauseSong()
 {
-	if(this->mapAudioPlayers[uuidActiveClip])
-		this->mapAudioPlayers[uuidActiveClip]->suspend();
+	this->mapClips[uuidActiveClip]->pause();
 }
 void SongPlayer::stopSong()
 {
-	if(this->mapAudioPlayers[uuidActiveClip])
-		this->mapAudioPlayers[uuidActiveClip]->stop();
+	this->mapClips[uuidActiveClip]->stop();
 }
 
 

@@ -37,7 +37,6 @@ public:
 	void copy(const ClipContainer&);
 
 	bool isPlaying() { return this->bIsPlaying; }
-	int size() { return this->lChildClips.size(); }
 
 	Error loadAudioFile(QUrl);
 	bool loadWav(QUrl);
@@ -70,7 +69,7 @@ public:
 	void setVolume(qreal v) { this->fVolume=v; emit(volumeChanged(v)); }
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
 	void setPositionSeconds(float);
-	void setPositionToAbsoluteZero() { this->bufferPCMData.seek(0); }
+	void setPositionToAbsoluteZero();
 
 	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }
 	qreal length() { return this->fLengthSeconds; }
