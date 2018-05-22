@@ -33,7 +33,6 @@ public slots:
 
 private slots:
 	void playerState(QAudio::State);
-	void setVolume(qreal);
 
 signals:
 	void finished();
@@ -41,10 +40,8 @@ signals:
 private:
 	Error searchItemChildren(BaseMusicItem*);
 	void addNewClip(BaseMusicItem*);
-	Error configurePlayer(QUuid);
 
 	QMap<QUuid, std::shared_ptr<ClipContainer> > mapClips;
-	QMap<QUuid, QAudioOutput*> mapAudioPlayers;
 	QUuid uuidActiveClip;
 };
 

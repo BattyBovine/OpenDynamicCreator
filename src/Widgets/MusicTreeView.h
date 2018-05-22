@@ -31,16 +31,15 @@ enum MusicItemType
 class BaseMusicItem : public QStandardItem
 {
 public:
-	BaseMusicItem(QString t)
-	{
-		this->setText(t);
-	}
-
+	BaseMusicItem(QString t) { this->setText(t); }
 	void cloneBase(BaseMusicItem *bmi) const
 	{
 		for(int i=0; i<this->rowCount(); i++)
 			bmi->appendRow(this->child(i)->clone());
 	}
+	virtual std::shared_ptr<ClipContainer> clipContainer() { return std::make_shared<ClipContainer>(ClipContainer()); }
+protected:
+	std::shared_ptr<ClipContainer> ccClip=NULL;
 };
 
 class TrackItem : public BaseMusicItem
@@ -87,6 +86,8 @@ public:
 		this->cloneBase(cgi);
 		return cgi;
 	}
+
+	virtual std::shared_ptr<ClipContainer> clipContainer();
 };
 
 class ClipItem : public BaseMusicItem
@@ -106,10 +107,7 @@ public:
 	void loadClip(QUrl);
 	void loadClip(QString);
 
-	std::shared_ptr<ClipContainer> clipContainer();
-
-private:
-	std::shared_ptr<ClipContainer> ccClip=NULL;
+	virtual std::shared_ptr<ClipContainer> clipContainer();
 };
 
 

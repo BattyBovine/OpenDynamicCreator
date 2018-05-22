@@ -167,6 +167,20 @@ TrackItem::TrackItem(QString t) : BaseMusicItem(t)
 ClipGroupItem::ClipGroupItem(QString t) : BaseMusicItem(t)
 {
 	this->setIcon(QIcon(":/icons/mixer"));
+	if(!this->ccClip)
+		this->ccClip = std::make_shared<ClipContainer>(ClipContainer());
+}
+
+std::shared_ptr<ClipContainer> ClipGroupItem::clipContainer()
+{
+	TrackItem *track = (TrackItem*)this->parent();
+	while(track->type()!=MIT_TRACK)
+		track = (TrackItem*)track->parent();
+	this->ccClip->setName(this->text());
+	this->ccClip->setTimeInfo(track->tempo(), track->beatsPerMeasure(), track->beatUnit());
+	for(int i=0; i<this->rowCount(); i++)
+		this->ccClip->addSubClip(static_cast<BaseMusicItem*>(this->child(i))->clipContainer());
+	return this->ccClip;
 }
 
 

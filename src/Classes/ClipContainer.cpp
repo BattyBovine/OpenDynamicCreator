@@ -21,6 +21,7 @@ ClipContainer &ClipContainer::operator=(const ClipContainer &c)
 ClipContainer::~ClipContainer()
 {
 	this->bufferPCMData.close();
+	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
 }
 void ClipContainer::copy(const ClipContainer &c)
 {
@@ -38,14 +39,15 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->beatLength = c.beatLength;
 	this->fVolume = c.fVolume;
 	this->melEvents = c.melEvents;
+	this->configurePlayer();
 }
 
-int ClipContainer::loadAudioFile(QUrl file)
+ClipContainer::Error ClipContainer::loadAudioFile(QUrl file)
 {
 	if(!this->loadWav(file) && !this->loadVorbis(file))
 		return CLIP_FORMAT_UNRECOGNIZED;
 	this->bufferPCMData.open(QIODevice::ReadOnly);
-	return CLIP_OK;
+	return this->configurePlayer();
 }
 bool ClipContainer::loadWav(QUrl file)
 {
@@ -91,19 +93,43 @@ bool ClipContainer::loadVorbis(QUrl file)
 	bool eof = false;
 	while(!eof) {
 		long retval = ov_read(&vorb, pcmbuffer, sizeof(pcmbuffer), 0, 2, 1, &section);
-		if(retval==0) {
+		if(retval==0)
 			eof = true;
-		} else if(retval<0) {
+		else if(retval<0)
 			qDebug() << QString("Error decoding Ogg Vorbis data; attempting to ignore...");
-		} else {
+		else
 			this->bufferPCMData.buffer().append(pcmbuffer, retval);
-		}
 	}
 	ov_clear(&vorb);
 
 	this->fLengthSeconds = this->bufferPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
 
 	return true;
+}
+
+ClipContainer::Error ClipContainer::configurePlayer()
+{
+	QAudioFormat format;
+	format.setSampleRate(this->sampleRate());
+	format.setChannelCount(this->channelCount());
+	format.setSampleSize(this->bytesPerSample()*CHAR_BIT);
+	format.setCodec("audio/pcm");
+	format.setByteOrder(QAudioFormat::LittleEndian);
+	format.setSampleType(QAudioFormat::SignedInt);
+
+	QSettings settings;
+	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+	int devicesetting = settings.value(KEY_OUTPUT_DEVICE).toInt();
+	if(!devices[devicesetting].isFormatSupported(format))
+		return Error::CLIP_FORMAT_UNRECOGNIZED;
+
+	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
+	this->aoAudioPlayer = new QAudioOutput(devices[devicesetting], format);
+	this->aoAudioPlayer->setVolume(this->volume());
+	connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
+	connect(this, SIGNAL(volumeChanged(qreal)), this, SLOT(setPlayerVolume(qreal)));
+	this->bufferPCMData.open(QIODevice::ReadOnly);
+	return Error::CLIP_OK;
 }
 
 
@@ -113,11 +139,101 @@ void ClipContainer::setPositionSeconds(float seconds)
 	seconds -= this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit);
 	if(seconds<0.0f)
 		seconds = 0.0f;
-	this->bufferPCMData.seek(floorf(seconds*this->iSampleRate)*(this->iBytesPerSample*this->iChannelCount));
+	if(this->bIsGroupClip)
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->setPositionSeconds(seconds);
+	else
+		this->bufferPCMData.seek(floorf(seconds*this->iSampleRate)*(this->iBytesPerSample*this->iChannelCount));
 }
 
 float ClipContainer::secondsElapsed()
 {
-	return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
-			this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit));
+	if(this->bIsGroupClip) {
+		float elapsed = FLT_MAX;
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips) {
+			if(cc->secondsElapsed()<elapsed)
+				elapsed = cc->secondsElapsed();
+		}
+		return elapsed;
+	} else {
+		return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
+				this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit));
+	}
+}
+
+void ClipContainer::setPositionToAbsoluteZero()
+{
+	if(this->bIsGroupClip)
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->setPositionToAbsoluteZero();
+	else
+		this->bufferPCMData.seek(0);
+}
+
+
+
+bool ClipContainer::play()
+{
+	if(this->bIsGroupClip) {
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips) {
+			cc->setPositionSeconds(this->secondsElapsed());
+			cc->play();
+		}
+	} else {
+		if(!this->aoAudioPlayer)
+			return false;
+		if(!this->bIsPlaying)
+			this->setPositionToAbsoluteZero();
+		this->aoAudioPlayer->setVolume(this->volume());
+		connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
+		this->aoAudioPlayer->start(&this->bufferPCMData);
+	}
+	this->bIsPlaying = true;
+	return true;
+}
+void ClipContainer::pause()
+{
+	if(this->bIsGroupClip) {
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->pause();
+	} else {
+		if(this->aoAudioPlayer)
+			this->aoAudioPlayer->suspend();
+	}
+}
+void ClipContainer::stop()
+{
+	if(this->bIsGroupClip) {
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->stop();
+	} else {
+		if(this->aoAudioPlayer)
+			this->aoAudioPlayer->stop();
+	}
+	this->bIsPlaying = false;
+}
+
+
+
+void ClipContainer::setPlayerVolume(qreal v)
+{
+	if(this->aoAudioPlayer)
+		this->aoAudioPlayer->setVolume(v);
+}
+
+void ClipContainer::playerState(QAudio::State s)
+{
+	switch(s) {
+	case QAudio::ActiveState:
+		this->bIsPlaying = true;
+		break;
+	case QAudio::StoppedState:
+		this->bIsPlaying = false;
+		if(this->aoAudioPlayer->error()!=QAudio::NoError)
+			qDebug() << this->aoAudioPlayer->error();
+		break;
+	case QAudio::IdleState:
+		emit(finished());
+		break;
+	}
 }

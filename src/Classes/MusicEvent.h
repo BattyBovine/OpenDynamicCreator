@@ -48,4 +48,22 @@ private:
 };
 typedef QVector<MusicEvent> MusicEventList;
 
+
+class EventCommand
+{
+public:
+	void setClip(QUuid id) { this->uuidClip=id; }
+	QUuid clip() { return this->uuidClip; }
+private:
+	QUuid uuidClip;
+};
+class JumpToCommand : public EventCommand
+{
+public:
+	void setJumpToEvent(MusicEvent *e) { this->meEvent=e; }
+	MusicEvent *jumpPosition() { return this->meEvent; }
+private:
+	MusicEvent *meEvent=NULL;
+};
+
 #endif // MUSICEVENT_H
