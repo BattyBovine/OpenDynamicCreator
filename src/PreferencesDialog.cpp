@@ -98,10 +98,13 @@ void PreferencesDialog::retrieveCacheSize(quint64 size)
 
 void PreferencesDialog::clearCache()
 {
+	if(this->iWorkerLock>0)
+		return;
 	QString cache = ui->lineTempFolder->text();
 	if(cache.isEmpty())	return;
 	switch(QMessageBox::warning(this, tr("Confirm cache clear"), tr("Are you sure you wish to delete <b>%1</b>?").arg(cache), QMessageBox::Yes, QMessageBox::No)) {
 	case QMessageBox::Yes:
+		this->iWorkerLock++;
 		this->cacheFunctionsEnabled(false);
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 		QThread *cacheclearthread = new QThread();
@@ -119,6 +122,7 @@ void PreferencesDialog::clearCacheResult()
 {
 	QApplication::restoreOverrideCursor();
 	this->cacheFunctionsEnabled(true);
+	this->iWorkerLock--;
 	this->getCacheSize();
 }
 void PreferencesDialog::cacheFunctionsEnabled(bool enable)
@@ -148,4 +152,12 @@ void PreferencesDialog::initSettings()
 		settings.setValue(KEY_PLAY_MARKER_COLOUR, QColor(Qt::green));
 	if(!settings.contains(KEY_EVENT_MARKER_COLOUR))
 		settings.setValue(KEY_EVENT_MARKER_COLOUR, QColor(Qt::red));
+}
+
+
+
+void PreferencesDialog::closeEvent(QCloseEvent *e)
+{
+	if(this->iWorkerLock>0)
+		e->ignore();
 }

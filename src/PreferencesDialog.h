@@ -2,8 +2,10 @@
 #define PREFERENCESDIALOG_H
 
 #include <QDialog>
+#include <QCloseEvent>
 #include <QCoreApplication>
 #include <QThread>
+#include <QMutex>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QColorDialog>
@@ -38,6 +40,9 @@ public:
 	QString getTempFolder() { return this->settings.value(KEY_TEMP_FOLDER).toString(); }
 	void getCacheSize();
 
+protected:
+	virtual void closeEvent(QCloseEvent*);
+
 private slots:
 	void saveOutputDevice(int d) { this->settings.setValue(KEY_OUTPUT_DEVICE, d); }
 
@@ -58,6 +63,7 @@ private:
 	Ui::PreferencesDialog *ui;
 	QSettings settings;
 
+	quint8 iWorkerLock = 0;
 	QString sOldCache;
 	bool bDeleteOldCache = false;
 };
