@@ -21,6 +21,7 @@ ClipContainer &ClipContainer::operator=(const ClipContainer &c)
 ClipContainer::~ClipContainer()
 {
 	this->bufferPCMData.close();
+	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
 }
 void ClipContainer::copy(const ClipContainer &c)
 {
@@ -38,14 +39,15 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->beatLength = c.beatLength;
 	this->fVolume = c.fVolume;
 	this->melEvents = c.melEvents;
+	this->configurePlayer();
 }
 
-int ClipContainer::loadAudioFile(QUrl file)
+ClipContainer::Error ClipContainer::loadAudioFile(QUrl file)
 {
 	if(!this->loadWav(file) && !this->loadVorbis(file))
 		return CLIP_FORMAT_UNRECOGNIZED;
 	this->bufferPCMData.open(QIODevice::ReadOnly);
-	return CLIP_OK;
+	return this->configurePlayer();
 }
 bool ClipContainer::loadWav(QUrl file)
 {
@@ -105,6 +107,28 @@ bool ClipContainer::loadVorbis(QUrl file)
 	return true;
 }
 
+ClipContainer::Error ClipContainer::configurePlayer()
+{
+	QAudioFormat format;
+	format.setSampleRate(this->sampleRate());
+	format.setChannelCount(this->channelCount());
+	format.setSampleSize(this->bytesPerSample()*CHAR_BIT);
+	format.setCodec("audio/pcm");
+	format.setByteOrder(QAudioFormat::LittleEndian);
+	format.setSampleType(QAudioFormat::SignedInt);
+
+	QSettings settings;
+	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
+	int devicesetting = settings.value(KEY_OUTPUT_DEVICE).toInt();
+	if(!devices[devicesetting].isFormatSupported(format))
+		return Error::CLIP_FORMAT_UNRECOGNIZED;
+
+	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
+	this->aoAudioPlayer = new QAudioOutput(devices[devicesetting], format);
+	connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
+	return Error::CLIP_OK;
+}
+
 
 
 void ClipContainer::setPositionSeconds(float seconds)
@@ -119,4 +143,65 @@ float ClipContainer::secondsElapsed()
 {
 	return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
 			this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit));
+}
+
+
+
+bool ClipContainer::play()
+{
+	if(this->bIsGroupClip) {
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->play();
+	} else {
+		if(!this->aoAudioPlayer)
+			return false;
+		if(!this->bIsPlaying)
+			this->setPositionToAbsoluteZero();
+		this->aoAudioPlayer->setVolume(this->volume());
+		connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
+		this->aoAudioPlayer->start(&this->bufferPCMData);
+	}
+	this->bIsPlaying = true;
+	return true;
+}
+void ClipContainer::pause()
+{
+	if(this->bIsGroupClip) {
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->pause();
+	} else {
+		if(this->aoAudioPlayer)
+			this->aoAudioPlayer->suspend();
+	}
+}
+void ClipContainer::stop()
+{
+	if(this->bIsGroupClip) {
+		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+			cc->stop();
+	} else {
+		if(this->aoAudioPlayer)
+			this->aoAudioPlayer->stop();
+	}
+	this->bIsPlaying = false;
+}
+
+
+
+void ClipContainer::setPlayerVolume(qreal v)
+{
+	if(this->aoAudioPlayer)
+		this->aoAudioPlayer->setVolume(v);
+}
+
+void ClipContainer::playerState(QAudio::State s)
+{
+	switch(s) {
+	case QAudio::ActiveState:
+		this->bIsPlaying = true;
+		break;
+	case QAudio::StoppedState:
+		this->bIsPlaying = false;
+		break;
+	}
 }

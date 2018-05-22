@@ -38,6 +38,8 @@ public:
 			bmi->appendRow(this->child(i)->clone());
 	}
 	virtual std::shared_ptr<ClipContainer> clipContainer() { return std::make_shared<ClipContainer>(ClipContainer()); }
+protected:
+	std::shared_ptr<ClipContainer> ccClip=NULL;
 };
 
 class TrackItem : public BaseMusicItem
@@ -106,9 +108,6 @@ public:
 	void loadClip(QString);
 
 	virtual std::shared_ptr<ClipContainer> clipContainer();
-
-private:
-	std::shared_ptr<ClipContainer> ccClip=NULL;
 };
 
 

@@ -4,7 +4,9 @@
 #include <memory>
 
 #include <QDebug>
+#include <QSettings>
 #include <QUrl>
+#include <QAudioOutput>
 #include <QByteArray>
 #include <QBuffer>
 #include <QPixmap>
@@ -14,14 +16,20 @@
 
 #include <vorbis/vorbisfile.h>
 
+#include "PreferencesDialog.h"
 #include "MusicEvent.h"
 
 
 class ClipContainer : public QObject
 {
 	Q_OBJECT
-	friend class SongPlayer;
 public:
+	enum Error {
+		CLIP_OK,
+		CLIP_FILE_READ_ERROR,
+		CLIP_FORMAT_UNRECOGNIZED
+	};
+
 	ClipContainer(QUrl file=QUrl());
 	ClipContainer(const ClipContainer&);
 	~ClipContainer();
@@ -31,7 +39,7 @@ public:
 	bool isPlaying() { return this->bIsPlaying; }
 	int size() { return this->lChildClips.size(); }
 
-	int loadAudioFile(QUrl);
+	Error loadAudioFile(QUrl);
 	bool loadWav(QUrl);
 	bool loadVorbis(QUrl);
 
@@ -53,9 +61,11 @@ public:
 	int bitrateUpper() { return this->iUpperBitrate; }
 	int bitrateWindow() { return this->iBitrateWindow; }
 	int bytesPerSample() { return this->iBytesPerSample; }
+	bool isGroupClip() { return this->bIsGroupClip; }
 	QBuffer *buffer() { return &this->bufferPCMData; }
 	const char *rawData() { return this->bufferPCMData.data().data(); }
 	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
+	QAudioOutput *audioPlayer() { return this->aoAudioPlayer; }
 
 	void setVolume(qreal v) { this->fVolume=v; emit(volumeChanged(v)); }
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
@@ -70,8 +80,8 @@ public:
 	qreal tempo() { return this->fTempo; }
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	quint8 beatUnit() { return this->iBeatUnit; }
-	qreal volume() { return this->fVolume; }
 	Beat timelineOffset() { return this->beatTimelineOffset; }
+	qreal volume() { return this->fVolume; }
 	float secondsElapsed();
 
 	void addEvent(MusicEvent &e) {
@@ -81,19 +91,27 @@ public:
 	}
 	MusicEventList &events() { return this->melEvents; }
 
-	void addSubClip(std::shared_ptr<ClipContainer> clip) { this->lChildClips.append(clip); }
+	void addSubClip(std::shared_ptr<ClipContainer> clip) { this->lChildClips.append(clip); this->bIsGroupClip=true; }
+
+	bool play();
+	void pause();
+	void stop();
+
+private slots:
+	void playerState(QAudio::State);
+	void setPlayerVolume(qreal);
 
 signals:
+	void finished();
 	void volumeChanged(qreal);
 	void eventAdded(MusicEvent&);
 
 private:
-	void configurePlayer();
+	Error configurePlayer();
 	void setTempo(qreal t) { this->fTempo=t; }
 	void setBeatsPerMeasure(quint8 b) { this->iBeatsPerMeasure=b; }
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 	void setBeatLength(Beat b) { this->beatLength=b; }
-	void setIsPlaying(bool p) { this->bIsPlaying=p; }
 
 	QUuid uuidUnique;
 	int iSampleRate = 0;
@@ -111,21 +129,17 @@ private:
 	bool bIsPlaying = false;
 
 	QString sName;
+	QAudioOutput *aoAudioPlayer = NULL;
 	qreal fTempo = 0.0f;
-	quint8 iBeatsPerMeasure=0;
-	quint8 iBeatUnit=0;
+	quint8 iBeatsPerMeasure = 0;
+	quint8 iBeatUnit = 0;
 	qreal fVolume = 1.0f;
 	Beat beatTimelineOffset;
 
 	MusicEventList melEvents;
 
 	QList<std::shared_ptr<ClipContainer> > lChildClips;
-
-	enum ClipError {
-		CLIP_OK,
-		CLIP_FILE_READ_ERROR,
-		CLIP_FORMAT_UNRECOGNIZED
-	};
+	bool bIsGroupClip = false;
 };
 
 #endif // CLIPCONTAINER_H

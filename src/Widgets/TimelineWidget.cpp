@@ -77,7 +77,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 		this->beatMouseMovePos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit(), this->iBeatUnitSnap);
 		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).tick()) >= Beat::fromUnit(this->iBeatUnitSnap))
 			this->bMoveMode = true;
-		if(this->bMoveMode) {
+		if(this->bMoveMode && !this->bReadOnly) {
 			Beat offset = this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos);
 			if(offset>Beat())
 				offset = Beat();
@@ -92,12 +92,13 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 {
 	switch(e->button()) {
 	case Qt::LeftButton:
-		if(!this->bMoveMode)
+		if(!this->bMoveMode && !this->bReadOnly)
 			this->pmiPlayMarker->setTimelinePos(this->beatMouseClickPos, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 		this->setViewportBounds();
 		break;
 	case Qt::RightButton:
-		this->ccClip->addEvent(MusicEvent(this->beatMouseClickPos));
+		if(!this->bReadOnly)
+			this->ccClip->addEvent(MusicEvent(this->beatMouseClickPos));
 		break;
 	}
 	this->bClickMode = this->bMoveMode = false;
@@ -222,10 +223,12 @@ void TimelineWidget::redrawStageElements()
 void TimelineWidget::setClip(std::shared_ptr<ClipContainer> c)
 {
 	this->ccClip=c;
-	MusicEventList &events = c->events();
-	foreach(MusicEvent e, events)
-		this->addEventMarker(e);
-	connect(c.get(), SIGNAL(eventAdded(MusicEvent&)), this, SLOT(addEventMarker(MusicEvent&)));
+	if(!this->bReadOnly) {
+		MusicEventList &events = c->events();
+		foreach(MusicEvent e, events)
+			this->addEventMarker(e);
+		connect(c.get(), SIGNAL(eventAdded(MusicEvent&)), this, SLOT(addEventMarker(MusicEvent&)));
+	}
 }
 
 void TimelineWidget::setViewportBounds()
