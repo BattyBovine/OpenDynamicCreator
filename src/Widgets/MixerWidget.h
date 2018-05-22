@@ -37,9 +37,6 @@ signals:
 	void snapChanged(int);
 
 private:
-	inline float dBToVolume(int d) { return powf(10.0f, 0.05f * d); }
-	inline int volumeTodB(float v) { return roundf(20.0f * log10f(v)); }
-
 	Ui::MixerWidget *ui;
 	std::shared_ptr<ClipContainer> ccClip = NULL;
 };

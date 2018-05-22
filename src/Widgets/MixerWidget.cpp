@@ -40,7 +40,7 @@ void MixerWidget::setGroupMode(bool g)
 
 void MixerWidget::volumedBChanged(int d)
 {
-	this->ccClip->setVolume(this->dBToVolume(d));
+	this->ccClip->setVolume(QAudio::convertVolume(d, QAudio::DecibelVolumeScale, QAudio::LinearVolumeScale));
 }
 void MixerWidget::setVolumedB(int d)
 {
@@ -53,11 +53,11 @@ int MixerWidget::volumedB()
 
 void MixerWidget::setVolumePercent(float v)
 {
-	ui->sliderVolume->setValue(this->volumeTodB(v));
+	ui->sliderVolume->setValue(QAudio::convertVolume(v, QAudio::LinearVolumeScale, QAudio::DecibelVolumeScale));
 }
 float MixerWidget::volumePercent()
 {
-	return this->dBToVolume(ui->sliderVolume->value());
+	return QAudio::convertVolume(ui->sliderVolume->value(), QAudio::DecibelVolumeScale, QAudio::LinearVolumeScale);
 }
 
 void MixerWidget::panChanged(int/* p*/)
