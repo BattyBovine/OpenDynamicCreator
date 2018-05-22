@@ -4,9 +4,10 @@
 #include <Libraries/dr_wav.h>
 #undef DR_WAV_IMPLEMENTATION
 
-ClipContainer::ClipContainer(QUrl file)
+ClipContainer::ClipContainer(QUrl file, ClipContainer *parent)
 {
 	this->uuidUnique = QUuid::createUuid();
+	this->ccParent = parent;
 	this->loadAudioFile(file);
 }
 ClipContainer::ClipContainer(const ClipContainer &c)
@@ -39,6 +40,7 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->beatLength = c.beatLength;
 	this->fVolume = c.fVolume;
 	this->melEvents = c.melEvents;
+	this->ccParent = c.ccParent;
 	this->configurePlayer();
 }
 
@@ -133,6 +135,15 @@ ClipContainer::Error ClipContainer::configurePlayer()
 }
 
 
+
+void ClipContainer::setVolume(qreal v)
+{
+	float adjustedvolume;
+	this->fVolume = adjustedvolume = v;
+	if(this->ccParent)
+		adjustedvolume *= this->ccParent->volume();
+	emit(volumeChanged(adjustedvolume));
+}
 
 void ClipContainer::setPositionSeconds(float seconds)
 {

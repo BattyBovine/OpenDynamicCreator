@@ -50,19 +50,3 @@ void SongPlayer::stopSong()
 {
 	this->mapClips[uuidActiveClip]->stop();
 }
-
-
-
-void SongPlayer::playerState(QAudio::State s)
-{
-//	QAudioOutput *out = (QAudioOutput*)QObject::sender();
-	switch(s) {
-	case QAudio::IdleState:
-		emit(finished());
-		break;
-//	case QAudio::StoppedState:
-//		if(out->error()!=QAudio::NoError)
-//			qDebug() << out->error();
-//		break;
-	}
-}

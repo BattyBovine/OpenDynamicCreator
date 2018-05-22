@@ -31,9 +31,6 @@ public slots:
 	void pauseSong();
 	void stopSong();
 
-private slots:
-	void playerState(QAudio::State);
-
 signals:
 	void finished();
 

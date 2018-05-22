@@ -30,7 +30,7 @@ public:
 		CLIP_FORMAT_UNRECOGNIZED
 	};
 
-	ClipContainer(QUrl file=QUrl());
+	ClipContainer(QUrl file=QUrl(), ClipContainer *parent=NULL);
 	ClipContainer(const ClipContainer&);
 	~ClipContainer();
 	ClipContainer &operator=(const ClipContainer&);
@@ -66,7 +66,7 @@ public:
 	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
 	QAudioOutput *audioPlayer() { return this->aoAudioPlayer; }
 
-	void setVolume(qreal v) { this->fVolume=v; emit(volumeChanged(v)); }
+	void setVolume(qreal);
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
 	void setPositionSeconds(float);
 	void setPositionToAbsoluteZero();
@@ -90,7 +90,7 @@ public:
 	}
 	MusicEventList &events() { return this->melEvents; }
 
-	void addSubClip(std::shared_ptr<ClipContainer> clip) { this->lChildClips.append(clip); this->bIsGroupClip=true; }
+	void addSubClip(std::shared_ptr<ClipContainer> clip) { clip->setParent(this); this->lChildClips.append(clip); this->bIsGroupClip=true; }
 
 	bool play();
 	void pause();
@@ -106,6 +106,7 @@ signals:
 	void eventAdded(MusicEvent&);
 
 private:
+	void setParent(ClipContainer *cc) { this->ccParent=cc; }
 	Error configurePlayer();
 	void setTempo(qreal t) { this->fTempo=t; }
 	void setBeatsPerMeasure(quint8 b) { this->iBeatsPerMeasure=b; }
@@ -137,6 +138,7 @@ private:
 
 	MusicEventList melEvents;
 
+	ClipContainer *ccParent = NULL;
 	QList<std::shared_ptr<ClipContainer> > lChildClips;
 	bool bIsGroupClip = false;
 };
