@@ -111,12 +111,22 @@ void OpenDynamicCreator::addClip(QModelIndex parent, QString file, QString label
 	}
 	selection->appendRow(new ClipItem((label.isEmpty() ? QString("%1 %2").arg(ODC_CLIP_LABEL).arg(clipcount) : label), file));
 }
-
+void OpenDynamicCreator::addClipFileDialog(QModelIndex parent)
+{
+	QList<QUrl> files = QFileDialog::getOpenFileUrls(this, tr("Open clip files"), QUrl(), "Ogg Vorbis (*.ogg);;WAV (*.wav)");
+	foreach(QUrl url, files) {
+		QFileInfo info(url.toLocalFile());
+		if(info.exists())
+			this->addClip(parent, url.toString(), info.baseName());
+	}
+}
 void OpenDynamicCreator::addClipList(QModelIndex parent, QStringList files)
 {
 	foreach(QString file, files) {
-		QFileInfo info(file);
-		this->addClip(parent, file, info.baseName());
+		QUrl url(file);
+		QFileInfo info(url.toLocalFile());
+		if(info.exists())
+			this->addClip(parent, url.toString(), info.baseName());
 	}
 }
 

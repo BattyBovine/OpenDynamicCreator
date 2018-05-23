@@ -368,7 +368,7 @@
    <sender>actionAddClip</sender>
    <signal>triggered()</signal>
    <receiver>OpenDynamicCreator</receiver>
-   <slot>addClip()</slot>
+   <slot>addClipFileDialog()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -543,5 +543,6 @@
   <slot>addStateSwitch()</slot>
   <slot>playSong(bool)</slot>
   <slot>stopSong()</slot>
+  <slot>addClipFileDialog()</slot>
  </slots>
 </ui>

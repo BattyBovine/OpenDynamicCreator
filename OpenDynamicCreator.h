@@ -61,6 +61,7 @@ public slots:
 	void addTrack();
 	void addClipGroup();
 	void addClip(QModelIndex parent=QModelIndex(), QString file="", QString label="");
+	void addClipFileDialog(QModelIndex parent=QModelIndex());
 	void addClipList(QModelIndex,QStringList);
 	void deleteMusicItem();
 	QStandardItem *checkSelectedMusicTreeItem();
