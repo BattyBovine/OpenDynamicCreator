@@ -49,7 +49,8 @@ SOURCES += main.cpp \
     src/Classes/ClipContainer.cpp \
 	src/Classes/WaveformThread.cpp \
     src/Widgets/GraphicsItems/EventMarkerItem.cpp \
-    src/Classes/SongPlayer.cpp
+    src/Classes/SongPlayer.cpp \
+    src/Classes/MusicEvent.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \

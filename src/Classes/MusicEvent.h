@@ -6,6 +6,26 @@
 
 #include "Beat.h"
 
+class ClipContainer;
+
+
+class EventCommand
+{
+public:
+	EventCommand(Beat transitionlength) { this->beatTransitionLength=transitionlength; }
+	virtual void applyEvent(ClipContainer*, float){}
+protected:
+	Beat beatTransitionLength;
+};
+class JumpToPositionCommand : public EventCommand
+{
+public:
+	void setPosition(Beat pos) { this->beatToPosition=pos; }
+	virtual void applyEvent(ClipContainer *cc, float delta=0.0f);
+private:
+	Beat beatToPosition;
+};
+
 
 class MusicEvent : public QObject
 {
@@ -28,6 +48,7 @@ public:
 	void setBeat(Beat &b) { this->beatPos=b; }
 	void setName(QString &n) { this->sName=n; }
 	void setActive(bool a) { this->bActive=a; }
+	void addCommand(EventCommand e) { this->lCommands.append(e); }
 
 	Beat beat() const { return this->beatPos; }
 	QString name() const { return this->sName; }
@@ -45,25 +66,8 @@ private:
 	Beat beatPos;
 	QString sName;
 	bool bActive = true;
+	QList<EventCommand> lCommands;
 };
 typedef QVector<MusicEvent> MusicEventList;
-
-
-class EventCommand
-{
-public:
-	void setClip(QUuid id) { this->uuidClip=id; }
-	QUuid clip() { return this->uuidClip; }
-private:
-	QUuid uuidClip;
-};
-class JumpToCommand : public EventCommand
-{
-public:
-	void setJumpToEvent(MusicEvent *e) { this->meEvent=e; }
-	MusicEvent *jumpPosition() { return this->meEvent; }
-private:
-	MusicEvent *meEvent=NULL;
-};
 
 #endif // MUSICEVENT_H

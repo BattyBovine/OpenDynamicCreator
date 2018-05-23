@@ -7,6 +7,9 @@ MixerWidget::MixerWidget(std::shared_ptr<ClipContainer> clip, bool groupmode, QW
 {
 	ui->setupUi(this);
 
+	ui->btnMute->setVisible(false);
+	ui->btnMute->setVisible(false);
+
 	connect(ui->comboNoteSnap, SIGNAL(currentIndexChanged(int)), this, SLOT(snapComboChanged(int)));
 	connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(volumedBChanged(int)));
 	connect(ui->sliderPan, SIGNAL(valueChanged(int)), this, SLOT(panChanged(int)));
@@ -34,8 +37,6 @@ void MixerWidget::attachClipContainer(std::shared_ptr<ClipContainer> c)
 void MixerWidget::setGroupMode(bool g)
 {
 	ui->labelClipName->setVisible(g);
-	ui->btnMute->setVisible(g);
-	ui->btnSolo->setVisible(g);
 }
 
 void MixerWidget::volumedBChanged(int d)
