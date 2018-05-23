@@ -47,7 +47,7 @@
       <string>Volume</string>
      </property>
      <property name="minimum">
-      <number>-50</number>
+      <number>-60</number>
      </property>
      <property name="maximum">
       <number>0</number>
@@ -62,7 +62,7 @@
       <enum>QSlider::TicksBothSides</enum>
      </property>
      <property name="tickInterval">
-      <number>5</number>
+      <number>6</number>
      </property>
     </widget>
    </item>

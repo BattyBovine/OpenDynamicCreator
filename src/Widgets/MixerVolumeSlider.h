@@ -3,6 +3,8 @@
 
 #include <QSlider>
 #include <QLayout>
+#include <QSpinBox>
+#include <QMouseEvent>
 #include <QToolTip>
 #include <QStyle>
 
@@ -12,8 +14,12 @@ class MixerVolumeSlider : public QSlider
 public:
 	explicit MixerVolumeSlider(QWidget *parent = 0);
 
+protected:
+	virtual void mouseDoubleClickEvent(QMouseEvent*);
+
 private slots:
 	void showTip(int);
+	void setDecibelValue();
 };
 
 #endif // MIXERVOLUMESLIDER_H
