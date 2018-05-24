@@ -197,6 +197,7 @@ bool ClipContainer::play()
 			this->setPositionToAbsoluteZero();
 		this->aoAudioPlayer->setVolume(this->volume());
 		connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
+		this->prepareEvents();
 		this->aoAudioPlayer->start(&this->bufferPCMData);
 	}
 	this->bIsPlaying = true;
@@ -222,6 +223,44 @@ void ClipContainer::stop()
 			this->aoAudioPlayer->stop();
 	}
 	this->bIsPlaying = false;
+}
+
+
+
+void ClipContainer::prepareEvents()
+{
+	if(this->aoAudioPlayer) {
+		for(MusicEventList::Iterator i=this->melEvents.begin(); i!=this->melEvents.end(); i++) {
+			float eventsecs = i->beat().toSeconds(this->tempo(), this->beatUnit());
+			if(eventsecs > this->secondsElapsed()) {
+//				int bufferms = roundf(this->aoAudioPlayer->bufferSize() /
+//									  (this->iSampleRate*this->iBytesPerSample*float(this->iChannelCount)) *
+//									  1000.0f);
+				this->meNextEvent = i;
+				QTimer *timer = new QTimer();
+				connect(timer, SIGNAL(timeout()), this, SLOT(handleEvent()));
+				timer->start(roundf(eventsecs*1000.0f)-bufferms);
+//				this->aoAudioPlayer->setNotifyInterval(roundf(eventsecs*1000.0f));
+				break;
+			}
+		}
+	}
+}
+
+void ClipContainer::handleEvent()
+{
+	if(this->meNextEvent) {
+		emit(eventFired(*this->meNextEvent));
+		this->setPositionSeconds(0.0f);
+		this->meNextEvent++;
+		if(this->meNextEvent!=this->melEvents.end()) {
+			QTimer *timer = new QTimer();
+			connect(timer, SIGNAL(timeout()), this, SLOT(handleEvent()));
+			timer->start(roundf(this->meNextEvent->beat().toSeconds(this->tempo(),this->beatUnit())*1000.0f));
+	//		this->aoAudioPlayer->setNotifyInterval(roundf(this->meNextEvent->beat().toSeconds(this->tempo(),this->beatUnit())*1000.0f));
+		}
+	}
+	QObject::sender()->deleteLater();
 }
 
 

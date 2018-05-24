@@ -53,6 +53,7 @@ public:
 	Beat beat() const { return this->beatPos; }
 	QString name() const { return this->sName; }
 	bool active() const { return this->bActive; }
+	const QList<EventCommand> &commands() { return this->lCommands; }
 
 	bool operator==(const MusicEvent &e) const	{ return (beatPos==e.beatPos); }
 	bool operator!=(const MusicEvent &e) const	{ return !(*this==e); }

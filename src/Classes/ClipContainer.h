@@ -9,6 +9,7 @@
 #include <QAudioOutput>
 #include <QByteArray>
 #include <QBuffer>
+#include <QTimer>
 #include <QPixmap>
 #include <QPainter>
 #include <QTimer>
@@ -89,6 +90,7 @@ public:
 		emit(eventAdded(e));
 	}
 	MusicEventList &events() { return this->melEvents; }
+	void prepareEvents();
 
 	void addSubClip(std::shared_ptr<ClipContainer> clip) { clip->setParent(this); this->lChildClips.append(clip); this->bIsGroupClip=true; }
 
@@ -99,11 +101,13 @@ public:
 private slots:
 	void playerState(QAudio::State);
 	void setPlayerVolume(qreal);
+	void handleEvent();
 
 signals:
 	void finished();
 	void volumeChanged(qreal);
 	void eventAdded(MusicEvent&);
+	void eventFired(MusicEvent&);
 
 private:
 	void setParent(ClipContainer *cc) { this->ccParent=cc; }
@@ -137,6 +141,7 @@ private:
 	Beat beatTimelineOffset;
 
 	MusicEventList melEvents;
+	MusicEventList::Iterator meNextEvent = NULL;
 
 	ClipContainer *ccParent = NULL;
 	QList<std::shared_ptr<ClipContainer> > lChildClips;
