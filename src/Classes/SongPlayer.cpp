@@ -37,24 +37,27 @@ SongPlayer::Error SongPlayer::playSong()
 	Error error = Error::SP_OK;
 	if(this->mapClips.isEmpty())
 		return Error::SP_NO_CLIPS;
+	if(!this->mapClips[uuidActiveClip])
+		return Error::SP_INVALID_ACTIVE_CLIP;
 	if(!this->mapClips[uuidActiveClip]->isPlaying())
 		this->mapClips[uuidActiveClip]->setPositionToAbsoluteZero();
-	connect(this->mapClips[uuidActiveClip].get(), SIGNAL(eventFired(MusicEvent&)), this, SLOT(applyEvent(MusicEvent&)));
+	connect(this->mapClips[uuidActiveClip].get(), SIGNAL(eventFired(MusicEvent*)), this, SLOT(applyEvent(MusicEvent*)));
 	this->mapClips[uuidActiveClip]->play();
 	return error;
 }
 void SongPlayer::pauseSong()
 {
-	this->mapClips[uuidActiveClip]->pause();
+	if(this->mapClips[uuidActiveClip])
+		this->mapClips[uuidActiveClip]->pause();
 }
 void SongPlayer::stopSong()
 {
-	this->mapClips[uuidActiveClip]->stop();
+	if(this->mapClips[uuidActiveClip])
+		this->mapClips[uuidActiveClip]->stop();
 }
-void SongPlayer::applyEvent(MusicEvent &e)
+void SongPlayer::applyEvent(MusicEvent *e)
 {
-	QList<EventCommand*> commands = e.commands();
-	foreach(EventCommand* command, commands) {
+	QList<EventCommand*> commands = e->commands();
+	foreach(EventCommand* command, commands)
 		command->applyEvent(this->mapClips[uuidActiveClip].get());
-	}
 }

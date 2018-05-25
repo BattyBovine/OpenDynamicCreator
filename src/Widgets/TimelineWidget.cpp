@@ -98,8 +98,8 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 		break;
 	case Qt::RightButton:
 		if(!this->bReadOnly) {
-			MusicEvent event(this->beatMouseClickPos);
-			event.addCommand(new ChangeVolumeCommand(-30, Beat()));
+			MusicEvent *event = new MusicEvent(this->beatMouseClickPos);
+			event->addCommand(new ChangeVolumeCommand(-30, Beat()));
 			this->ccClip->addEvent(event);
 		}
 		break;
@@ -122,10 +122,10 @@ void TimelineWidget::wheelEvent(QWheelEvent *e)
 
 
 
-void TimelineWidget::addEventMarker(MusicEvent &e)
+void TimelineWidget::addEventMarker(MusicEvent *e)
 {
 	EventMarkerItem *emi = new EventMarkerItem(this->fTopSpacing);
-	emi->setTimelinePos(e.beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+	emi->setTimelinePos(e->beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 	emi->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	this->gsTimeline->addItem(emi);
 	this->lEventMarkers.append(emi);
@@ -228,9 +228,9 @@ void TimelineWidget::setClip(std::shared_ptr<ClipContainer> c)
 	this->ccClip=c;
 	if(!this->bReadOnly) {
 		MusicEventList &events = c->events();
-		foreach(MusicEvent e, events)
+		foreach(MusicEvent *e, events)
 			this->addEventMarker(e);
-		connect(c.get(), SIGNAL(eventAdded(MusicEvent&)), this, SLOT(addEventMarker(MusicEvent&)));
+		connect(c.get(), SIGNAL(eventAdded(MusicEvent*)), this, SLOT(addEventMarker(MusicEvent*)));
 	}
 }
 

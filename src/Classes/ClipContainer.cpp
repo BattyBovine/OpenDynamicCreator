@@ -22,6 +22,9 @@ ClipContainer &ClipContainer::operator=(const ClipContainer &c)
 ClipContainer::~ClipContainer()
 {
 	this->bufferPCMData.close();
+	this->stop();
+	foreach(MusicEvent *event, this->melEvents)
+		delete event;
 	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
 }
 void ClipContainer::copy(const ClipContainer &c)
@@ -238,7 +241,7 @@ void ClipContainer::configureNextEvent()
 {
 	if(this->aoAudioPlayer) {
 		for(MusicEventList::Iterator i=this->melEvents.begin(); i!=this->melEvents.end(); i++) {
-			float eventsecs = i->beat().toSeconds(this->tempo(), this->beatUnit());
+			float eventsecs = (*i)->beat().toSeconds(this->tempo(), this->beatUnit());
 			if(eventsecs < this->secondsElapsed())
 				continue;
 			int buffersecs = this->aoAudioPlayer->bufferSize() /
@@ -253,11 +256,6 @@ void ClipContainer::handleEvent()
 	if(this->meNextEvent) {
 		emit(eventFired(*this->meNextEvent));
 		this->configureNextEvent();
-//		if(this->meNextEvent!=this->melEvents.end()) {
-//			int buffersecs = this->aoAudioPlayer->bufferSize() /
-//							 float(this->iSampleRate*this->iBytesPerSample*this->iChannelCount);
-//			this->startEventThread(this->meNextEvent->beat().toSeconds(this->tempo(),this->beatUnit())-buffersecs);
-//		}
 	}
 }
 
@@ -295,6 +293,7 @@ void ClipContainer::startEventThread(float secs)
 	this->mewEventWorker->moveToThread(thread);
 	connect(thread, SIGNAL(started()), this->mewEventWorker, SLOT(start()));
 	connect(this->mewEventWorker, SIGNAL(musicEvent()), this, SLOT(handleEvent()));
+	connect(this->mewEventWorker, SIGNAL(finished()), thread, SLOT(quit()));
 	connect(this->mewEventWorker, SIGNAL(finished()), this->mewEventWorker, SLOT(deleteLater()));
 	connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
 	thread->start();

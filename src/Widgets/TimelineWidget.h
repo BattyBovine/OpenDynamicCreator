@@ -58,7 +58,7 @@ protected:
 	virtual void wheelEvent(QWheelEvent*);
 
 private slots:
-	void addEventMarker(MusicEvent&);
+	void addEventMarker(MusicEvent*);
 	void movePlayMarkerToClipPos();
 
 private:

@@ -19,7 +19,8 @@ public:
 	enum Error {
 		SP_OK,
 		SP_NO_CLIPS,
-		SP_INVALID_DEVICE
+		SP_INVALID_DEVICE,
+		SP_INVALID_ACTIVE_CLIP
 	};
 
 	explicit SongPlayer(QObject *parent=Q_NULLPTR) : QObject(parent) {}
@@ -30,7 +31,7 @@ public slots:
 	Error playSong();
 	void pauseSong();
 	void stopSong();
-	void applyEvent(MusicEvent&);
+	void applyEvent(MusicEvent*);
 
 signals:
 	void finished();

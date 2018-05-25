@@ -48,20 +48,6 @@ class MusicEvent : public QObject
 	Q_OBJECT
 public:
 	MusicEvent(Beat &b=Beat()) { this->setBeat(b); this->uuid=QUuid::createUuid(); }
-	MusicEvent(const MusicEvent &e) { this->copy(e); }
-	MusicEvent &operator=(const MusicEvent &e)
-	{
-		this->copy(e);
-		return *this;
-	}
-	void copy(const MusicEvent &e)
-	{
-		this->uuid = e.uuid;
-		this->beatPos = e.beatPos;
-		this->sName = e.sName;
-		this->bActive = e.bActive;
-		this->lCommands = e.lCommands;
-	}
 	~MusicEvent();
 
 	void setBeat(Beat &b) { this->beatPos=b; }
@@ -88,7 +74,7 @@ private:
 	bool bActive = true;
 	QList<EventCommand*> lCommands;
 };
-typedef QVector<MusicEvent> MusicEventList;
+typedef QVector<MusicEvent*> MusicEventList;
 
 
 class MusicEventWorker : public QObject
