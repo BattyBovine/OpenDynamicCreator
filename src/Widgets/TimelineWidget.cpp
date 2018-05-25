@@ -21,6 +21,8 @@ TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, bool readonl
 
 	this->ctiClip = new ClipTimelineItem(clip, this->fMeasureSpacing, this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA));
 	this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+	if(!this->bReadOnly)
+		this->ctiClip->setFlag(QGraphicsItem::ItemIsSelectable);
 	this->gsTimeline->addItem(this->ctiClip);
 
 	this->pmiPlayMarker = new PlayMarkerItem(this->fTopSpacing);
@@ -77,12 +79,20 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 		this->beatMouseMovePos = Beat::fromTimelinePosition(this->mapToScene(e->pos()).x(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit(), this->iBeatUnitSnap);
 		if(abs((this->beatMouseClickPos-this->beatMouseMovePos).tick()) >= Beat::fromUnit(this->iBeatUnitSnap))
 			this->bMoveMode = true;
-		if(this->bMoveMode && !this->bReadOnly) {
-			Beat offset = this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos);
-			if(offset>Beat())
-				offset = Beat();
-			this->ctiClip->setTimelinePos(offset, this->fMeasureSpacing);
-			this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
+		if(this->bMoveMode) {
+			if(this->ctiClip->isSelected()) {
+				Beat offset = this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos);
+				if(offset>Beat())
+					offset = Beat();
+				this->ctiClip->setTimelinePos(offset, this->fMeasureSpacing);
+				this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
+			} else {
+				foreach(EventMarkerItem *emi, this->lEventMarkers) {
+					if(emi->isSelected()) {
+						emi->setTimelinePos(this->beatMouseMovePos, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+					}
+				}
+			}
 		}
 	}
 	QGraphicsView::mouseMoveEvent(e);
@@ -99,7 +109,6 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 	case Qt::RightButton:
 		if(!this->bReadOnly) {
 			MusicEvent *event = new MusicEvent(this->beatMouseClickPos);
-			event->addCommand(new ChangeVolumeCommand(-30, Beat()));
 			this->ccClip->addEvent(event);
 		}
 		break;
@@ -127,6 +136,8 @@ void TimelineWidget::addEventMarker(MusicEvent *e)
 	EventMarkerItem *emi = new EventMarkerItem(this->fTopSpacing);
 	emi->setTimelinePos(e->beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 	emi->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+	if(!this->bReadOnly)
+		emi->setFlag(QGraphicsItem::ItemIsSelectable);
 	this->gsTimeline->addItem(emi);
 	this->lEventMarkers.append(emi);
 }

@@ -202,8 +202,8 @@ bool ClipContainer::play()
 			this->setPositionToAbsoluteZero();
 		this->aoAudioPlayer->setVolume(this->volume());
 		connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
-		this->aoAudioPlayer->start(&this->bufferPCMData);
 		this->configureNextEvent();
+		this->aoAudioPlayer->start(&this->bufferPCMData);
 	}
 	this->bIsPlaying = true;
 	return true;
