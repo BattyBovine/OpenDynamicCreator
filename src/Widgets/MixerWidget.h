@@ -33,6 +33,8 @@ private slots:
 	void volumedBChanged(int);
 	void panChanged(int);
 
+	void setVolumeSlider(qreal);
+
 signals:
 	void snapChanged(int);
 

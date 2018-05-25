@@ -90,7 +90,6 @@ public:
 		emit(eventAdded(e));
 	}
 	MusicEventList &events() { return this->melEvents; }
-	void prepareEvents();
 
 	void addSubClip(std::shared_ptr<ClipContainer> clip) { clip->setParent(this); this->lChildClips.append(clip); this->bIsGroupClip=true; }
 
@@ -102,6 +101,7 @@ private slots:
 	void playerState(QAudio::State);
 	void setPlayerVolume(qreal);
 	void handleEvent();
+	void configureNextEvent();
 
 signals:
 	void finished();
@@ -117,6 +117,8 @@ private:
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 	void setBeatLength(Beat b) { this->beatLength=b; }
 
+	void startEventThread(float);
+
 	QUuid uuidUnique;
 	int iSampleRate = 0;
 	quint8 iChannelCount = 0;
@@ -131,6 +133,7 @@ private:
 	QUrl urlFilePath;
 	QBuffer bufferPCMData;
 	bool bIsPlaying = false;
+	MusicEventWorker *mewEventWorker = NULL;
 
 	QString sName;
 	QAudioOutput *aoAudioPlayer = NULL;

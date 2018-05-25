@@ -30,6 +30,7 @@ public slots:
 	Error playSong();
 	void pauseSong();
 	void stopSong();
+	void applyEvent(MusicEvent&);
 
 signals:
 	void finished();

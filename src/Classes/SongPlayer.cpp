@@ -39,6 +39,7 @@ SongPlayer::Error SongPlayer::playSong()
 		return Error::SP_NO_CLIPS;
 	if(!this->mapClips[uuidActiveClip]->isPlaying())
 		this->mapClips[uuidActiveClip]->setPositionToAbsoluteZero();
+	connect(this->mapClips[uuidActiveClip].get(), SIGNAL(eventFired(MusicEvent&)), this, SLOT(applyEvent(MusicEvent&)));
 	this->mapClips[uuidActiveClip]->play();
 	return error;
 }
@@ -49,4 +50,11 @@ void SongPlayer::pauseSong()
 void SongPlayer::stopSong()
 {
 	this->mapClips[uuidActiveClip]->stop();
+}
+void SongPlayer::applyEvent(MusicEvent &e)
+{
+	QList<EventCommand*> commands = e.commands();
+	foreach(EventCommand* command, commands) {
+		command->applyEvent(this->mapClips[uuidActiveClip].get());
+	}
 }

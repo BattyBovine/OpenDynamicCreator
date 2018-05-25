@@ -97,8 +97,11 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 		this->setViewportBounds();
 		break;
 	case Qt::RightButton:
-		if(!this->bReadOnly)
-			this->ccClip->addEvent(MusicEvent(this->beatMouseClickPos));
+		if(!this->bReadOnly) {
+			MusicEvent event(this->beatMouseClickPos);
+			event.addCommand(new ChangeVolumeCommand(-30, Beat()));
+			this->ccClip->addEvent(event);
+		}
 		break;
 	}
 	this->bClickMode = this->bMoveMode = false;

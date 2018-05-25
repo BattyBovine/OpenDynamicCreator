@@ -8,7 +8,8 @@ MixerWidget::MixerWidget(std::shared_ptr<ClipContainer> clip, bool groupmode, QW
 	ui->setupUi(this);
 
 	ui->btnMute->setVisible(false);
-	ui->btnMute->setVisible(false);
+	ui->btnSolo->setVisible(false);
+	ui->sliderPan->setVisible(false);
 
 	connect(ui->comboNoteSnap, SIGNAL(currentIndexChanged(int)), this, SLOT(snapComboChanged(int)));
 	connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(volumedBChanged(int)));
@@ -32,6 +33,7 @@ void MixerWidget::attachClipContainer(std::shared_ptr<ClipContainer> c)
 //	this->setPan(this->ccClip->pan());
 	ui->labelClipName->setText(this->ccClip->name());
 	ui->labelClipName->setToolTip(this->ccClip->name());
+//	connect(this->ccClip.get(), SIGNAL(volumeChanged(qreal)), this, SLOT(setVolumeSlider(qreal)));
 }
 
 void MixerWidget::setGroupMode(bool g)
@@ -41,7 +43,7 @@ void MixerWidget::setGroupMode(bool g)
 
 void MixerWidget::volumedBChanged(int d)
 {
-	if(d==ui->sliderVolume->minimum())
+	if(d<=ui->sliderVolume->minimum())
 		this->ccClip->setVolume(0.0f);
 	else
 		this->ccClip->setVolume(QAudio::convertVolume(d, QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale));
@@ -61,10 +63,15 @@ void MixerWidget::setVolumePercent(float v)
 }
 float MixerWidget::volumePercent()
 {
-	if(ui->sliderVolume->value()==ui->sliderVolume->minimum())
+	if(ui->sliderVolume->value()<=ui->sliderVolume->minimum())
 		return 0.0f;
 	else
 		return QAudio::convertVolume(ui->sliderVolume->value(), QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale);
+}
+
+void MixerWidget::setVolumeSlider(qreal v)
+{
+	ui->sliderVolume->setValue(QAudio::convertVolume(v, QAudio::LogarithmicVolumeScale, QAudio::DecibelVolumeScale));
 }
 
 void MixerWidget::panChanged(int/* p*/)
