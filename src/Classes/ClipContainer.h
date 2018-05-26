@@ -83,7 +83,7 @@ public:
 	qreal volume() { return this->fVolume; }
 	float secondsElapsed();
 
-	void addEvent(MusicEvent *e) {
+	void addEvent(std::shared_ptr<MusicEvent> e) {
 		this->melEvents.append(e);
 		std::sort(this->melEvents.begin(), this->melEvents.end());
 		emit(eventAdded(e));
@@ -110,7 +110,7 @@ private slots:
 signals:
 	void finished();
 	void volumeChanged(qreal);
-	void eventAdded(MusicEvent*);
+	void eventAdded(std::shared_ptr<MusicEvent>);
 	void eventFired(MusicEvent*);
 
 private:

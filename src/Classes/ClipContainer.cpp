@@ -23,8 +23,6 @@ ClipContainer::~ClipContainer()
 {
 	this->bufferPCMData.close();
 	this->stop();
-	foreach(MusicEvent *event, this->melEvents)
-		delete event;
 	if(this->mewEventWorker) this->mewEventWorker->deleteLater();
 	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
 }
@@ -254,7 +252,7 @@ void ClipContainer::configureNextEvent()
 void ClipContainer::handleEvent()
 {
 	if(this->meNextEvent) {
-		emit(eventFired(*this->meNextEvent));
+		emit(eventFired(this->meNextEvent->get()));
 		this->configureNextEvent();
 	}
 }

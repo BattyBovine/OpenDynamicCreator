@@ -80,7 +80,7 @@ private:
 	bool bActive = true;
 	QList<EventCommand*> lCommands;
 };
-typedef QVector<MusicEvent*> MusicEventList;
+typedef QVector<std::shared_ptr<MusicEvent> > MusicEventList;
 
 
 class MusicEventWorker : public QThread
