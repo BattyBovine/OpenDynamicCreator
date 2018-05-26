@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <QObject>
+#include <QThread>
 #include <QUuid>
 #include <QBuffer>
 #include <QAudio>
@@ -11,22 +12,27 @@
 #include "Beat.h"
 
 class ClipContainer;
+class MusicEvent;
 
 
 class EventCommand
 {
+	friend class MusicEvent;
 public:
-	EventCommand(Beat transitionlength=Beat()) { this->beatTransitionLength=transitionlength; }
+	EventCommand(Beat transitionlength=Beat(), MusicEvent *parent=NULL) { this->beatTransitionLength=transitionlength; this->setParent(parent); }
 	virtual void applyEvent(ClipContainer*){}
 protected:
+	void setParent(MusicEvent *p) { this->meParent=p; }
+	Beat parentPosition();
+	MusicEvent *meParent;
 	Beat beatTransitionLength;
 };
-class JumpToPositionCommand : public EventCommand
+class JumpBackCommand : public EventCommand
 {
 public:
-	JumpToPositionCommand(Beat pos) { this->setPosition(pos); }
+	JumpBackCommand(Beat pos) { this->setPosition(pos); }
 	void setPosition(Beat pos) { this->beatToPosition=pos; }
-	virtual void applyEvent(ClipContainer*);
+	void applyEvent(ClipContainer*) override;
 private:
 	Beat beatToPosition;
 };
@@ -37,7 +43,7 @@ public:
 	ChangeVolumeCommand(qreal v, Beat transitionlength=Beat()) : EventCommand(transitionlength) { this->setVolume(v); }
 	ChangeVolumeCommand(int d, Beat transitionlength=Beat()) : EventCommand(transitionlength) { this->setVolume(QAudio::convertVolume(d, QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale)); }
 	void setVolume(qreal v) { this->fVolume=v; }
-	virtual void applyEvent(ClipContainer*);
+	void applyEvent(ClipContainer*) override;
 private:
 	qreal fVolume = 0.0f;
 };
@@ -47,13 +53,13 @@ class MusicEvent : public QObject
 {
 	Q_OBJECT
 public:
-	MusicEvent(Beat &b=Beat()) { this->setBeat(b); this->uuid=QUuid::createUuid(); }
+	MusicEvent(Beat &b=Beat()) { this->setPosition(b); this->uuid=QUuid::createUuid(); }
 	~MusicEvent();
 
-	void setBeat(Beat &b) { this->beatPos=b; }
+	void setPosition(Beat &b) { this->beatPos=b; }
 	void setName(QString &n) { this->sName=n; }
 	void setActive(bool a) { this->bActive=a; }
-	void addCommand(EventCommand *e) { this->lCommands.append(e); }
+	void addCommand(EventCommand *e) { e->setParent(this); this->lCommands.append(e); }
 
 	Beat beat() const { return this->beatPos; }
 	QString name() const { return this->sName; }
@@ -74,34 +80,42 @@ private:
 	bool bActive = true;
 	QList<EventCommand*> lCommands;
 };
-typedef QVector<MusicEvent*> MusicEventList;
+typedef QVector<std::shared_ptr<MusicEvent> > MusicEventList;
 
 
-class MusicEventWorker : public QObject
+class MusicEventWorker : public QThread
 {
 	Q_OBJECT
 public:
-	MusicEventWorker(QBuffer *buf){ this->bufferData=buf; }
+	MusicEventWorker(QObject *parent=Q_NULLPTR) : QThread(parent){}
+	void setBuffer(QBuffer *buf) { this->bufferData=buf; }
 	void setEventTime(quint64 ms, int samplerate, quint8 bytespersample, quint8 channels) { this->setEventTime(ms/1000.0f,samplerate,bytespersample,channels); }
-	void setEventTime(float secs, int samplerate, quint8 bytespersample, quint8 channels) { this->iPosition = roundf(secs * samplerate) * (bytespersample*channels); }
+	void setEventTime(float secs, int samplerate, quint8 bytespersample, quint8 channels) { this->iPosTarget = roundf(secs * samplerate) * (bytespersample*channels); }
 public slots:
-	void start() {
+	void run() override {
 		if(!this->bufferData || !this->bufferData->isOpen()) {
 			emit(invalidBuffer());
 			return;
 		}
-		while(this->bufferData->isOpen() && this->bufferData->pos()<this->iPosition)
+		while(this->bufferData->isOpen() &&
+			  !this->bStopped &&
+			  ((quint64)this->bufferData->pos() < this->iPosTarget)) {
 			continue;
-		emit(musicEvent());
+		}
+		if(!this->bStopped)
+			emit(musicEvent());
 	}
-	void kill() { emit(finished()); }
+	void stop() {
+		this->bStopped = true;
+	}
 signals:
 	void musicEvent();
 	void invalidBuffer();
-	void finished();
+	void stopped();
 private:
 	QBuffer *bufferData = NULL;
-	qint64 iPosition = 0;
+	quint64 iPosTarget = 0;
+	bool bStopped = false;
 };
 
 #endif // MUSICEVENT_H

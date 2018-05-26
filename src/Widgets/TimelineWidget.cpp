@@ -82,15 +82,12 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 		if(this->bMoveMode) {
 			if(this->ctiClip->isSelected()) {
 				Beat offset = this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos);
-				if(offset>Beat())
-					offset = Beat();
 				this->ctiClip->setTimelinePos(offset, this->fMeasureSpacing);
 				this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
 			} else {
 				foreach(EventMarkerItem *emi, this->lEventMarkers) {
-					if(emi->isSelected()) {
+					if(emi->isSelected())
 						emi->setTimelinePos(this->beatMouseMovePos, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
-					}
 				}
 			}
 		}
@@ -108,7 +105,8 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 		break;
 	case Qt::RightButton:
 		if(!this->bReadOnly) {
-			MusicEvent *event = new MusicEvent(this->beatMouseClickPos);
+			std::shared_ptr<MusicEvent> event = std::make_shared<MusicEvent>(this->beatMouseClickPos);
+			event->addCommand(new JumpBackCommand(Beat::wholeNote()));
 			this->ccClip->addEvent(event);
 		}
 		break;
@@ -131,9 +129,9 @@ void TimelineWidget::wheelEvent(QWheelEvent *e)
 
 
 
-void TimelineWidget::addEventMarker(MusicEvent *e)
+void TimelineWidget::addEventMarker(std::shared_ptr<MusicEvent> e)
 {
-	EventMarkerItem *emi = new EventMarkerItem(this->fTopSpacing);
+	EventMarkerItem *emi = new EventMarkerItem(e, this->fTopSpacing);
 	emi->setTimelinePos(e->beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 	emi->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	if(!this->bReadOnly)
@@ -239,9 +237,9 @@ void TimelineWidget::setClip(std::shared_ptr<ClipContainer> c)
 	this->ccClip=c;
 	if(!this->bReadOnly) {
 		MusicEventList &events = c->events();
-		foreach(MusicEvent *e, events)
+		foreach(std::shared_ptr<MusicEvent> e, events)
 			this->addEventMarker(e);
-		connect(c.get(), SIGNAL(eventAdded(MusicEvent*)), this, SLOT(addEventMarker(MusicEvent*)));
+		connect(c.get(), SIGNAL(eventAdded(std::shared_ptr<MusicEvent>)), this, SLOT(addEventMarker(std::shared_ptr<MusicEvent>)));
 	}
 }
 

@@ -23,8 +23,7 @@ ClipContainer::~ClipContainer()
 {
 	this->bufferPCMData.close();
 	this->stop();
-	foreach(MusicEvent *event, this->melEvents)
-		delete event;
+	if(this->mewEventWorker) this->mewEventWorker->deleteLater();
 	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
 }
 void ClipContainer::copy(const ClipContainer &c)
@@ -217,6 +216,7 @@ void ClipContainer::pause()
 		if(this->aoAudioPlayer)
 			this->aoAudioPlayer->suspend();
 	}
+	this->stopEventThread();
 }
 void ClipContainer::stop()
 {
@@ -227,10 +227,7 @@ void ClipContainer::stop()
 		if(this->aoAudioPlayer)
 			this->aoAudioPlayer->stop();
 	}
-	if(this->mewEventWorker) {
-		this->mewEventWorker->kill();
-		this->mewEventWorker = NULL;
-	}
+	this->stopEventThread();
 	this->meNextEvent = NULL;
 	this->bIsPlaying = false;
 }
@@ -241,20 +238,21 @@ void ClipContainer::configureNextEvent()
 {
 	if(this->aoAudioPlayer) {
 		for(MusicEventList::Iterator i=this->melEvents.begin(); i!=this->melEvents.end(); i++) {
-			float eventsecs = (*i)->beat().toSeconds(this->tempo(), this->beatUnit());
+			float eventsecs = ((*i)->beat()-this->beatTimelineOffset).toSeconds(this->tempo(), this->beatUnit());
 			if(eventsecs < this->secondsElapsed())
 				continue;
 			int buffersecs = this->aoAudioPlayer->bufferSize() /
 							 float(this->iSampleRate*this->iBytesPerSample*this->iChannelCount);
 			this->meNextEvent = i;
-			this->startEventThread(eventsecs-buffersecs);
+			this->setNextEvent(eventsecs-buffersecs);
+			break;
 		}
 	}
 }
 void ClipContainer::handleEvent()
 {
 	if(this->meNextEvent) {
-		emit(eventFired(*this->meNextEvent));
+		emit(eventFired(this->meNextEvent->get()));
 		this->configureNextEvent();
 	}
 }
@@ -284,17 +282,25 @@ void ClipContainer::playerState(QAudio::State s)
 	}
 }
 
-void ClipContainer::startEventThread(float secs)
+void ClipContainer::setNextEvent(float secs)
 {
-	QThread *thread = new QThread(this);
-	if(this->mewEventWorker) this->mewEventWorker->deleteLater();
-	this->mewEventWorker = new MusicEventWorker(&this->bufferPCMData);
+	this->stopEventThread();
+	this->mewEventWorker = new MusicEventWorker(this);
+	this->mewEventWorker->setBuffer(&this->bufferPCMData);
 	this->mewEventWorker->setEventTime(secs, this->iSampleRate, this->iBytesPerSample, this->iChannelCount);
-	this->mewEventWorker->moveToThread(thread);
-	connect(thread, SIGNAL(started()), this->mewEventWorker, SLOT(start()));
 	connect(this->mewEventWorker, SIGNAL(musicEvent()), this, SLOT(handleEvent()));
-	connect(this->mewEventWorker, SIGNAL(finished()), thread, SLOT(quit()));
 	connect(this->mewEventWorker, SIGNAL(finished()), this->mewEventWorker, SLOT(deleteLater()));
-	connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-	thread->start();
+#ifdef QT_DEBUG
+	connect(this->mewEventWorker, SIGNAL(started()), this, SLOT(threadStarted()));
+	connect(this->mewEventWorker, SIGNAL(finished()), this, SLOT(threadKilled()));
+#endif
+	this->mewEventWorker->start(QThread::LowestPriority);
+}
+void ClipContainer::stopEventThread()
+{
+	if(this->mewEventWorker) {
+		if(this->mewEventWorker->isRunning())
+			this->mewEventWorker->stop();
+		this->mewEventWorker = NULL;
+	}
 }

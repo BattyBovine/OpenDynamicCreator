@@ -12,7 +12,6 @@
 #include <QTimer>
 #include <QPixmap>
 #include <QPainter>
-#include <QTimer>
 #include <QUuid>
 
 #include <vorbis/vorbisfile.h>
@@ -84,7 +83,7 @@ public:
 	qreal volume() { return this->fVolume; }
 	float secondsElapsed();
 
-	void addEvent(MusicEvent *e) {
+	void addEvent(std::shared_ptr<MusicEvent> e) {
 		this->melEvents.append(e);
 		std::sort(this->melEvents.begin(), this->melEvents.end());
 		emit(eventAdded(e));
@@ -102,11 +101,16 @@ private slots:
 	void setPlayerVolume(qreal);
 	void handleEvent();
 	void configureNextEvent();
+	void stopEventThread();
+#ifdef QT_DEBUG
+	void threadStarted() { qDebug() << QString("Thread 0x%1 started").arg(QString::number((quint64)QObject::sender(), 16)); }
+	void threadKilled() { qDebug() << QString("Thread 0x%1 killed").arg(QString::number((quint64)QObject::sender(), 16)); }
+#endif
 
 signals:
 	void finished();
 	void volumeChanged(qreal);
-	void eventAdded(MusicEvent*);
+	void eventAdded(std::shared_ptr<MusicEvent>);
 	void eventFired(MusicEvent*);
 
 private:
@@ -117,7 +121,7 @@ private:
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 	void setBeatLength(Beat b) { this->beatLength=b; }
 
-	void startEventThread(float);
+	void setNextEvent(float);
 
 	QUuid uuidUnique;
 	int iSampleRate = 0;
