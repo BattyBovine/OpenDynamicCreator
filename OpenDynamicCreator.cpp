@@ -210,7 +210,7 @@ QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 void OpenDynamicCreator::swapEditorWidget(QItemSelection i)
 {
 	if(this->selMusic->selectedIndexes().size()!=1) {
-		this->setCentralWidget(new QWidget());
+//		this->setCentralWidget(new QWidget());
 		return;
 	}
 	QModelIndexList selected = i.indexes();
@@ -323,7 +323,8 @@ void OpenDynamicCreator::playSong(bool play)
 		if(this->spPlayer->playSong() != SongPlayer::Error::SP_OK)
 			this->stopSong();
 	} else {
-		this->spPlayer->pauseSong();
+		if(this->spPlayer)
+			this->spPlayer->pauseSong();
 	}
 }
 
