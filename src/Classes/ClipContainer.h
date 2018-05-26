@@ -12,7 +12,6 @@
 #include <QTimer>
 #include <QPixmap>
 #include <QPainter>
-#include <QTimer>
 #include <QUuid>
 
 #include <vorbis/vorbisfile.h>
@@ -102,6 +101,11 @@ private slots:
 	void setPlayerVolume(qreal);
 	void handleEvent();
 	void configureNextEvent();
+	void stopEventThread();
+#ifdef QT_DEBUG
+	void threadStarted() { qDebug() << QString("Thread 0x%1 started").arg(QString::number((quint64)QObject::sender(), 16)); }
+	void threadKilled() { qDebug() << QString("Thread 0x%1 killed").arg(QString::number((quint64)QObject::sender(), 16)); }
+#endif
 
 signals:
 	void finished();
@@ -117,7 +121,7 @@ private:
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 	void setBeatLength(Beat b) { this->beatLength=b; }
 
-	void startEventThread(float);
+	void setNextEvent(float);
 
 	QUuid uuidUnique;
 	int iSampleRate = 0;
