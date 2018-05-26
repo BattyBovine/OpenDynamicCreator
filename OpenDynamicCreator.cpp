@@ -7,6 +7,12 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 {
 	ui->setupUi(this);
 
+	QSettings settings;
+	if(settings.contains(ODC_WINDOW_GEOMETRY))
+		this->restoreGeometry(settings.value(ODC_WINDOW_GEOMETRY).toByteArray());
+	if(settings.contains(ODC_WINDOW_STATE))
+		this->restoreState(settings.value(ODC_WINDOW_STATE).toByteArray());
+
 	// Set up music tree
 	this->modelMusic = new MusicTreeViewModel();
 	ui->treeMusic->setModel(this->modelMusic);
@@ -49,6 +55,14 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 OpenDynamicCreator::~OpenDynamicCreator()
 {
 	delete ui;
+}
+
+void OpenDynamicCreator::closeEvent(QCloseEvent *e)
+{
+	QSettings settings;
+	settings.setValue("WindowState", this->saveState());
+	settings.setValue("WindowGeometry", this->saveGeometry());
+	QMainWindow::closeEvent(e);
 }
 
 

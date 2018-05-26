@@ -42,6 +42,10 @@
 #define ODC_TITLE_ADD_STATE_INVALID_SELECTION	tr("Invalid selection")
 #define ODC_TEXT_ADD_STATE_INVALID_SELECTION	tr("You have somehow selected something that has no valid data.")
 
+#define ODC_WINDOW_STATE	"WindowState"
+#define ODC_WINDOW_GEOMETRY	"WindowGeometry"
+
+
 namespace Ui {
 class OpenDynamicCreator;
 }
@@ -77,6 +81,9 @@ public slots:
 
 	void playSong(bool);
 	void stopSong();
+
+protected:
+	void closeEvent(QCloseEvent*) override;
 
 private:
 	Ui::OpenDynamicCreator *ui;
