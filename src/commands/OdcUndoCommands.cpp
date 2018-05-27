@@ -17,7 +17,7 @@ void OdcAddItemCommand::redo()
 
 
 
-OdcAddStateSwitchCommand::OdcAddStateSwitchCommand(StateSwitchItem *t, QTreeView *v, QStandardItemModel *m, QItemSelectionModel *s, QUndoCommand *parent) : QUndoCommand(parent)
+OdcAddStateSwitchCommand::OdcAddStateSwitchCommand(EventItem *t, QTreeView *v, QStandardItemModel *m, QItemSelectionModel *s, QUndoCommand *parent) : QUndoCommand(parent)
 {
 	this->stateswitch = t;
 	this->view = v;

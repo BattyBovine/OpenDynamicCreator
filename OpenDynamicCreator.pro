@@ -32,7 +32,6 @@ SOURCES += main.cpp \
 	OpenDynamicCreator.cpp \
 	src/StatePropertiesEditor.cpp \
 	src/Widgets/MusicTreeView.cpp \
-	src/Widgets/StatesTreeView.cpp \
 	src/Widgets/TimelineWidget.cpp \
 	src/Commands/OdcUndoCommands.cpp \
 	src/ClipGroupEditorWidget.cpp \
@@ -50,13 +49,14 @@ SOURCES += main.cpp \
 	src/Classes/WaveformThread.cpp \
     src/Widgets/GraphicsItems/EventMarkerItem.cpp \
     src/Classes/SongPlayer.cpp \
-    src/Classes/MusicEvent.cpp
+    src/Classes/MusicEvent.cpp \
+    src/EventEditorWidget.cpp \
+    src/Widgets/EventTreeView.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
 	src/StatePropertiesEditor.h \
 	src/Widgets/MusicTreeView.h \
-	src/Widgets/StatesTreeView.h \
 	src/Widgets/TimelineWidget.h \
 	src/Commands/OdcUndoCommands.h \
 	src/ClipGroupEditorWidget.h \
@@ -76,7 +76,9 @@ HEADERS  += version.h \
 	src/Classes/WaveformThread.h \
     src/Classes/Beat.h \
     src/Widgets/GraphicsItems/EventMarkerItem.h \
-    src/Classes/SongPlayer.h
+    src/Classes/SongPlayer.h \
+    src/EventEditorWidget.h \
+    src/Widgets/EventTreeView.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \
@@ -85,7 +87,8 @@ FORMS    += \
     ui/StatePropertiesEditor.ui \
     ui/ClipEditorWidget.ui \
     ui/Widgets/MixerWidget.ui \
-    ui/PreferencesDialog.ui
+    ui/PreferencesDialog.ui \
+    ui/EventEditorWidget.ui
 
 DISTFILES +=
 

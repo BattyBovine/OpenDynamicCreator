@@ -4,7 +4,7 @@
 #include <QUndoCommand>
 
 #include "Widgets/MusicTreeView.h"
-#include "Widgets/StatesTreeView.h"
+#include "Widgets/EventTreeView.h"
 
 class OdcAddItemCommand : public QUndoCommand
 {
@@ -25,7 +25,7 @@ private:
 class OdcAddStateSwitchCommand : public QUndoCommand
 {
 public:
-	OdcAddStateSwitchCommand(StateSwitchItem*, QTreeView*, QStandardItemModel*, QItemSelectionModel*, QUndoCommand *parent=Q_NULLPTR);
+	OdcAddStateSwitchCommand(EventItem*, QTreeView*, QStandardItemModel*, QItemSelectionModel*, QUndoCommand *parent=Q_NULLPTR);
 	void undo();
 	void redo();
 private:

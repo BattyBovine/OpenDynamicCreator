@@ -60,7 +60,7 @@
      <string>Window</string>
     </property>
     <addaction name="actionMusicWindow"/>
-    <addaction name="actionStatesWindow"/>
+    <addaction name="actionEventsWindow"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -71,20 +71,22 @@
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
+   <widget class="QMenu" name="menuEvents">
+    <property name="title">
+     <string>Events</string>
+    </property>
+    <addaction name="actionAddEvent"/>
+    <addaction name="actionAddEventCommand"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTracks"/>
+   <addaction name="menuEvents"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusMain"/>
   <widget class="QDockWidget" name="dockMusic">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
    <property name="allowedAreas">
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
@@ -94,7 +96,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
+   <widget class="QWidget" name="dockMusicContents">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="MusicTreeView" name="treeMusic">
@@ -129,7 +131,7 @@
   </widget>
   <widget class="QToolBar" name="toolbarPlayback">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Toolbar</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -139,6 +141,25 @@
    </attribute>
    <addaction name="actionPlayPause"/>
    <addaction name="actionStop"/>
+  </widget>
+  <widget class="QDockWidget" name="dockEvents">
+   <property name="windowTitle">
+    <string>Events</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockEventsContents">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="EventTreeView" name="treeEvents">
+       <property name="headerHidden">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionPlayPause">
    <property name="checkable">
@@ -256,9 +277,9 @@
     <string>Ctrl+F1</string>
    </property>
   </action>
-  <action name="actionStatesWindow">
+  <action name="actionEventsWindow">
    <property name="text">
-    <string>States</string>
+    <string>Events</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+F2</string>
@@ -304,14 +325,20 @@
     <string>Ctrl+Shift+Z</string>
    </property>
   </action>
-  <action name="actionAddState">
+  <action name="actionAddEvent">
    <property name="text">
-    <string>Add State</string>
+    <string>Add Event</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Event</string>
    </property>
   </action>
-  <action name="actionAddStateSwitch">
+  <action name="actionAddEventCommand">
    <property name="text">
-    <string>Add State Switch</string>
+    <string>Add Event Command</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Event Command</string>
    </property>
   </action>
   <action name="actionPreferences">
@@ -326,6 +353,11 @@
    <class>MusicTreeView</class>
    <extends>QTreeView</extends>
    <header>Widgets/MusicTreeView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>EventTreeView</class>
+   <extends>QTreeView</extends>
+   <header>Widgets/EventTreeView.h</header>
   </customwidget>
  </customwidgets>
  <resources>
@@ -445,10 +477,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionAddState</sender>
+   <sender>actionAddEvent</sender>
    <signal>triggered()</signal>
    <receiver>OpenDynamicCreator</receiver>
-   <slot>addState()</slot>
+   <slot>addEventCommand()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -461,10 +493,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionAddStateSwitch</sender>
+   <sender>actionAddEventCommand</sender>
    <signal>triggered()</signal>
    <receiver>OpenDynamicCreator</receiver>
-   <slot>addStateSwitch()</slot>
+   <slot>addEvent()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -524,6 +556,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionEventsWindow</sender>
+   <signal>triggered()</signal>
+   <receiver>dockEvents</receiver>
+   <slot>showNormal()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>913</x>
+     <y>314</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setExtraConditionValueVisible(int)</slot>
@@ -539,8 +587,8 @@
   <slot>deleteMusicItem()</slot>
   <slot>undo()</slot>
   <slot>redo()</slot>
-  <slot>addState()</slot>
-  <slot>addStateSwitch()</slot>
+  <slot>addEvent()</slot>
+  <slot>addEventCommand()</slot>
   <slot>playSong(bool)</slot>
   <slot>stopSong()</slot>
   <slot>addClipFileDialog()</slot>

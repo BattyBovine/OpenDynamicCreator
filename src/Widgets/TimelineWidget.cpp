@@ -106,7 +106,7 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 	case Qt::RightButton:
 		if(!this->bReadOnly) {
 			std::shared_ptr<MusicEvent> event = std::make_shared<MusicEvent>(this->beatMouseClickPos);
-			event->addCommand(new JumpBackCommand(Beat::wholeNote()));
+			event->addCommand(new JumpBackCommand(Beat::measures(8, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit())));
 			this->ccClip->addEvent(event);
 		}
 		break;

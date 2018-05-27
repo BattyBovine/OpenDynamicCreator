@@ -19,14 +19,14 @@
 
 #include "Widgets/MixerWidget.h"
 #include "Widgets/MusicTreeView.h"
-#include "Widgets/StatesTreeView.h"
+#include "Widgets/EventTreeView.h"
 
 #define ODC_MUSIC_LABEL			tr("Song")
 #define ODC_CLIP_GROUP_LABEL	tr("Mixer")
 #define ODC_CLIP_LABEL			tr("Clip")
 
-#define ODC_STATE_SWITCH_LABEL	tr("Switch")
-#define ODC_STATE_LABEL			tr("State")
+#define ODC_EVENT_LABEL			tr("Event")
+#define ODC_EVENT_COMMAND_LABEL	tr("Command")
 
 #define ODC_TITLE_ADD_CLIP_NO_MUSIC				tr("No tracks")
 #define ODC_TEXT_ADD_CLIP_NO_MUSIC				tr("Please create a music track first.")
@@ -35,12 +35,12 @@
 #define ODC_TITLE_ADD_CLIP_INVALID_SELECTION	tr("Invalid selection")
 #define ODC_TEXT_ADD_CLIP_INVALID_SELECTION		tr("You have somehow selected something that has no valid data.")
 
-#define ODC_TITLE_ADD_STATE_NO_SWITCH			tr("No switches")
-#define ODC_TEXT_ADD_STATE_NO_SWITCH			tr("Please create a state switch first.")
-#define ODC_TITLE_ADD_STATE_NO_SELECTION		tr("Nothing selected")
-#define ODC_TEXT_ADD_STATE_NO_SELECTION			tr("Please select a switch first.")
-#define ODC_TITLE_ADD_STATE_INVALID_SELECTION	tr("Invalid selection")
-#define ODC_TEXT_ADD_STATE_INVALID_SELECTION	tr("You have somehow selected something that has no valid data.")
+#define ODC_TITLE_ADD_EVENT_NO_EVENT			tr("No events")
+#define ODC_TEXT_ADD_EVENT_NO_EVENT				tr("Please create an event first.")
+#define ODC_TITLE_ADD_EVENT_NO_SELECTION		tr("Nothing selected")
+#define ODC_TEXT_ADD_EVENT_NO_SELECTION			tr("Please select an event first.")
+#define ODC_TITLE_ADD_EVENT_INVALID_SELECTION	tr("Invalid selection")
+#define ODC_TEXT_ADD_EVENT_INVALID_SELECTION	tr("You have somehow selected something that has no valid data.")
 
 #define ODC_WINDOW_STATE	"WindowState"
 #define ODC_WINDOW_GEOMETRY	"WindowGeometry"
@@ -70,10 +70,10 @@ public slots:
 	void deleteMusicItem();
 	QStandardItem *checkSelectedMusicTreeItem();
 
-	void addStateSwitch();
-	void addState();
-	void deleteStateItem();
-	QStandardItem *checkSelectedStateTreeItem();
+	void addEvent();
+	void addEventCommand();
+	void deleteEvent();
+	QStandardItem *checkSelectedEventTreeItem();
 
 	void swapEditorWidget(QItemSelection);
 	void customContextMenuMusic(QPoint);
@@ -96,8 +96,8 @@ private:
 	PreferencesDialog *dialogPreferences;
 	MusicTreeViewModel *modelMusic;
 	QItemSelectionModel *selMusic;
-	QStandardItemModel *modelStates;
-	QItemSelectionModel *selStates;
+	QStandardItemModel *modelEvents;
+	QItemSelectionModel *selEvents;
 
 	SongPlayer *spPlayer = NULL;
 

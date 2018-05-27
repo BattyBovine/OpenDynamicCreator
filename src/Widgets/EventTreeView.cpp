@@ -1,6 +1,6 @@
-#include "Widgets/StatesTreeView.h"
+#include "EventTreeView.h"
 
-void StatesTreeView::keyPressEvent(QKeyEvent *e)
+void EventTreeView::keyPressEvent(QKeyEvent *e)
 {
 	switch(e->key()) {
 	case Qt::Key_Delete:
@@ -9,7 +9,7 @@ void StatesTreeView::keyPressEvent(QKeyEvent *e)
 	}
 }
 
-void StatesTreeView::deleteSelectedItems()
+void EventTreeView::deleteSelectedItems()
 {
 	QModelIndexList selectedindices = this->selectedIndexes();
 	if(selectedindices.size()>0) {
@@ -18,7 +18,7 @@ void StatesTreeView::deleteSelectedItems()
 			QStandardItem *selection = model->itemFromIndex(selectedindices[0]);
 			if(selection) {
                 if(QMessageBox::warning(this,"","Are you sure you want to delete this?", QMessageBox::Yes|QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
-                    if(selection->type()==StateItemType::SIT_STATESWITCH)
+					if(selection->type()==EventItemType::EI_EVENT)
                         model->removeRow(selectedindices[0].row());
                     else
                         selection->parent()->removeRow(selectedindices[0].row());
@@ -30,7 +30,7 @@ void StatesTreeView::deleteSelectedItems()
 
 
 
-QMimeData *StatesTreeViewModel::mimeData(const QModelIndexList &indices) const
+QMimeData *EventTreeViewModel::mimeData(const QModelIndexList &indices) const
 {
 	QMimeData *mime = QStandardItemModel::mimeData(indices);
 	QByteArray mimebytes;
@@ -46,7 +46,7 @@ QMimeData *StatesTreeViewModel::mimeData(const QModelIndexList &indices) const
 	return mime;
 }
 
-bool StatesTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, int row, int, const QModelIndex &parent)
+bool EventTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, int row, int, const QModelIndex &parent)
 {
 	QStandardItem *parentitem = this->itemFromIndex(parent);
 	if(parentitem && data->hasFormat("Qt/StateItemType")) {
@@ -60,7 +60,7 @@ bool StatesTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, in
 		for(quint32 i=0; i<itemcount; i++) {
 			QStandardItem *item = items[i];
 			switch(item->type()) {
-			case StateItemType::SIT_STATESWITCH:
+			case EventItemType::EI_EVENT:
 				if(parentitem==this->invisibleRootItem()) {
 					if(row>=0)
 						parentitem->insertRow(row, item->clone());
@@ -68,8 +68,8 @@ bool StatesTreeViewModel::dropMimeData(const QMimeData *data, Qt::DropAction, in
 						parentitem->appendRow(item->clone());
 				}
 				break;
-			case StateItemType::SIT_STATE:
-				if(parentitem->type()!=StateItemType::SIT_STATESWITCH)
+			case EventItemType::EI_COMMAND:
+				if(parentitem->type()!=EventItemType::EI_EVENT)
 					return false;
 				if(row>=0)
 					parentitem->insertRow(row, item->clone());

@@ -17,10 +17,10 @@ OpenDynamicCreator::OpenDynamicCreator(QWidget *parent) :
 	this->modelMusic = new MusicTreeViewModel();
 	ui->treeMusic->setModel(this->modelMusic);
 	this->selMusic = ui->treeMusic->selectionModel();
-	// Set up state tree
-//	this->modelStates = new StatesTreeViewModel();
-//	ui->treeStates->setModel(this->modelStates);
-//	this->selStates = ui->treeStates->selectionModel();
+	// Set up event tree
+	this->modelEvents = new EventTreeViewModel();
+	ui->treeEvents->setModel(this->modelEvents);
+	this->selEvents = ui->treeEvents->selectionModel();
 
 	// Preferences window
 	PreferencesDialog::initSettings();	// Fill settings with default entries, if necessary
@@ -154,16 +154,16 @@ void OpenDynamicCreator::deleteMusicItem()
 QStandardItem *OpenDynamicCreator::checkSelectedMusicTreeItem()
 {
 	if(this->modelMusic->rowCount()==0) {
-//		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_NO_MUSIC, ODC_TEXT_ADD_CLIP_NO_MUSIC);
+		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_NO_MUSIC, ODC_TEXT_ADD_CLIP_NO_MUSIC);
 		return NULL;
 	}
 	if(!this->selMusic->hasSelection()) {
-//		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_NO_SELECTION, ODC_TEXT_ADD_CLIP_NO_SELECTION);
+		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_NO_SELECTION, ODC_TEXT_ADD_CLIP_NO_SELECTION);
 		return NULL;
 	}
 	QStandardItem *selection = this->modelMusic->itemFromIndex(this->selMusic->selectedRows()[0]);
 	if(selection==NULL) {
-//		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_INVALID_SELECTION, ODC_TEXT_ADD_CLIP_INVALID_SELECTION);
+		QMessageBox::warning(this, ODC_TITLE_ADD_CLIP_INVALID_SELECTION, ODC_TEXT_ADD_CLIP_INVALID_SELECTION);
 		return NULL;
 	}
 	return selection;
@@ -171,49 +171,50 @@ QStandardItem *OpenDynamicCreator::checkSelectedMusicTreeItem()
 
 
 
-void OpenDynamicCreator::addStateSwitch()
+void OpenDynamicCreator::addEvent()
 {
-//	StateSwitchItem *ss = new StateSwitchItem(QString("%1 %2").arg(ODC_STATE_SWITCH_LABEL).arg(this->modelStates->rowCount()+1));
-//	this->modelStates->invisibleRootItem()->appendRow(ss);
-//	this->selStates->select(this->modelStates->indexFromItem(ss), QItemSelectionModel::ClearAndSelect);
-//	ui->treeStates->setExpanded(this->modelStates->indexFromItem(ss), true);
-}
-
-void OpenDynamicCreator::addState()
-{
-	QStandardItem *selection = this->checkSelectedStateTreeItem();
+	QStandardItem *selection = this->checkSelectedEventTreeItem();
 	if(!selection)	return;
-	if(selection->type()!=StateItemType::SIT_STATESWITCH)
+	if(selection->type()!=EventItemType::EI_EVENT)
 		Q_ASSERT(selection=selection->parent());
 	int statecount=1, rowcount = selection->rowCount();
 	for(uint16_t i=0; i<rowcount; i++) {
 		QStandardItem *item = selection->child(i);
-		if(item->type()==StateItemType::SIT_STATE)
+		if(item->type()==EventItemType::EI_COMMAND)
 			statecount++;
 	}
-	selection->appendRow(new StateItem(QString("%1 %2").arg(ODC_STATE_LABEL).arg(statecount)));
+	selection->appendRow(new EventCommandItem(QString("%1 %2").arg(ODC_EVENT_COMMAND_LABEL).arg(statecount)));
 }
 
-void OpenDynamicCreator::deleteStateItem()
+void OpenDynamicCreator::addEventCommand()
 {
-//	QStandardItem *selection = this->checkSelectedStateTreeItem();
-//	if(!selection)	return;
-//	ui->treeStates->deleteSelectedItems();
+	EventItem *ei = new EventItem(QString("%1 %2").arg(ODC_EVENT_LABEL).arg(this->modelEvents->rowCount()+1));
+	this->modelEvents->invisibleRootItem()->appendRow(ei);
+	this->selEvents->select(this->modelEvents->indexFromItem(ei), QItemSelectionModel::ClearAndSelect);
+	ui->treeEvents->setExpanded(this->modelEvents->indexFromItem(ei), true);
 }
 
-QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
+void OpenDynamicCreator::deleteEvent()
 {
-	if(this->modelStates->rowCount()==0) {
-		QMessageBox::warning(this, ODC_TITLE_ADD_STATE_NO_SWITCH, ODC_TEXT_ADD_STATE_NO_SWITCH);
+	QStandardItem *selection = this->checkSelectedEventTreeItem();
+	if(!selection)
+		return;
+	ui->treeEvents->deleteSelectedItems();
+}
+
+QStandardItem *OpenDynamicCreator::checkSelectedEventTreeItem()
+{
+	if(this->modelEvents->rowCount()==0) {
+		QMessageBox::warning(this, ODC_TITLE_ADD_EVENT_NO_EVENT, ODC_TEXT_ADD_EVENT_NO_EVENT);
 		return NULL;
 	}
-	if(!this->selStates->hasSelection()) {
-		QMessageBox::warning(this, ODC_TITLE_ADD_STATE_NO_SELECTION, ODC_TEXT_ADD_STATE_NO_SELECTION);
+	if(!this->selEvents->hasSelection()) {
+		QMessageBox::warning(this, ODC_TITLE_ADD_EVENT_NO_SELECTION, ODC_TEXT_ADD_EVENT_NO_SELECTION);
 		return NULL;
 	}
-	QStandardItem *selection = this->modelStates->itemFromIndex(this->selStates->selectedRows()[0]);
+	QStandardItem *selection = this->modelEvents->itemFromIndex(this->selEvents->selectedRows()[0]);
 	if(selection==NULL) {
-		QMessageBox::warning(this, ODC_TITLE_ADD_STATE_INVALID_SELECTION, ODC_TEXT_ADD_STATE_INVALID_SELECTION);
+		QMessageBox::warning(this, ODC_TITLE_ADD_EVENT_INVALID_SELECTION, ODC_TEXT_ADD_EVENT_INVALID_SELECTION);
 		return NULL;
 	}
 	return selection;
@@ -221,17 +222,23 @@ QStandardItem *OpenDynamicCreator::checkSelectedStateTreeItem()
 
 
 
-void OpenDynamicCreator::swapEditorWidget(QItemSelection i)
+void OpenDynamicCreator::swapEditorWidget(QItemSelection newitem)
 {
 	if(this->selMusic->selectedIndexes().size()!=1) {
-//		this->setCentralWidget(new QWidget());
+		this->setCentralWidget(new QWidget());
 		return;
 	}
-	QModelIndexList selected = i.indexes();
-	foreach(QModelIndex index, selected) {
-		QStandardItem *item = this->modelMusic->itemFromIndex(index);
-		if(!item)
-			continue;
+	QModelIndex index = this->selMusic->currentIndex();
+	if(!index.isValid()) {
+		foreach(QModelIndex i, newitem.indexes()) {
+			if(i.isValid()) {
+				index = i;
+				break;
+			}
+		}
+	}
+	QStandardItem *item = this->modelMusic->itemFromIndex(index);
+	if(item) {
 		switch(item->type()) {
 		case MusicItemType::MIT_TRACK:
 			this->loadTrackEditorWidget(index);
@@ -243,7 +250,6 @@ void OpenDynamicCreator::swapEditorWidget(QItemSelection i)
 			this->loadClipEditorWidget(index);
 			break;
 		}
-		return;
 	}
 }
 
