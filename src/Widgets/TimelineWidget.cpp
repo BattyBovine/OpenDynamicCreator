@@ -105,9 +105,9 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 		break;
 	case Qt::RightButton:
 		if(!this->bReadOnly) {
-			std::shared_ptr<MusicEvent> event = std::make_shared<MusicEvent>(this->beatMouseClickPos);
+			MusicEventPtr event = std::make_shared<MusicEvent>(MusicEvent());
 			event->addCommand(new JumpBackCommand(Beat::measures(8, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit())));
-			this->ccClip->addEvent(event);
+			this->ccClip->addEvent(event, this->beatMouseClickPos);
 		}
 		break;
 	}
@@ -129,10 +129,10 @@ void TimelineWidget::wheelEvent(QWheelEvent *e)
 
 
 
-void TimelineWidget::addEventMarker(std::shared_ptr<MusicEvent> e)
+void TimelineWidget::addEventMarker(StaticMusicEventPtr sme)
 {
-	EventMarkerItem *emi = new EventMarkerItem(e, this->fTopSpacing);
-	emi->setTimelinePos(e->beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+	EventMarkerItem *emi = new EventMarkerItem(sme, this->fTopSpacing);
+	emi->setTimelinePos(sme->beat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 	emi->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	if(!this->bReadOnly)
 		emi->setFlag(QGraphicsItem::ItemIsSelectable);
@@ -236,10 +236,10 @@ void TimelineWidget::setClip(std::shared_ptr<ClipContainer> c)
 {
 	this->ccClip=c;
 	if(!this->bReadOnly) {
-		MusicEventList &events = c->events();
-		foreach(std::shared_ptr<MusicEvent> e, events)
+		StaticMusicEventList &events = c->events();
+		foreach(StaticMusicEventPtr e, events)
 			this->addEventMarker(e);
-		connect(c.get(), SIGNAL(eventAdded(std::shared_ptr<MusicEvent>)), this, SLOT(addEventMarker(std::shared_ptr<MusicEvent>)));
+		connect(c.get(), SIGNAL(eventAdded(StaticMusicEventPtr)), this, SLOT(addEventMarker(StaticMusicEventPtr)));
 	}
 }
 

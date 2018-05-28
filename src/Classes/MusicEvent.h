@@ -20,10 +20,9 @@ class EventCommand
 	friend class MusicEvent;
 public:
 	EventCommand(Beat transitionlength=Beat(), MusicEvent *parent=NULL) { this->beatTransitionLength=transitionlength; this->setParent(parent); }
-	virtual void applyEvent(ClipContainer*){}
+	virtual void applyEvent(ClipContainer*,Beat){}
 protected:
 	void setParent(MusicEvent *p) { this->meParent=p; }
-	Beat parentPosition();
 	MusicEvent *meParent;
 	Beat beatTransitionLength;
 };
@@ -32,7 +31,7 @@ class JumpBackCommand : public EventCommand
 public:
 	JumpBackCommand(Beat pos) { this->setPosition(pos); }
 	void setPosition(Beat pos) { this->beatToPosition=pos; }
-	void applyEvent(ClipContainer*) override;
+	void applyEvent(ClipContainer*,Beat) override;
 private:
 	Beat beatToPosition;
 };
@@ -43,44 +42,57 @@ public:
 	ChangeVolumeCommand(qreal v, Beat transitionlength=Beat()) : EventCommand(transitionlength) { this->setVolume(v); }
 	ChangeVolumeCommand(int d, Beat transitionlength=Beat()) : EventCommand(transitionlength) { this->setVolume(QAudio::convertVolume(d, QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale)); }
 	void setVolume(qreal v) { this->fVolume=v; }
-	void applyEvent(ClipContainer*) override;
+	void applyEvent(ClipContainer*,Beat) override;
 private:
 	qreal fVolume = 0.0f;
 };
 
 
-class MusicEvent : public QObject
+class MusicEvent
 {
-	Q_OBJECT
 public:
-	MusicEvent(Beat &b=Beat()) { this->setPosition(b); this->uuid=QUuid::createUuid(); }
+	MusicEvent() { this->uuid=QUuid::createUuid(); }
 	~MusicEvent();
 
-	void setPosition(Beat &b) { this->beatPos=b; }
 	void setName(QString &n) { this->sName=n; }
 	void setActive(bool a) { this->bActive=a; }
 	void addCommand(EventCommand *e) { e->setParent(this); this->lCommands.append(e); }
 
-	Beat beat() const { return this->beatPos; }
 	QString name() const { return this->sName; }
 	bool active() const { return this->bActive; }
 	const QList<EventCommand*> &commands() { return this->lCommands; }
 
-	bool operator==(const MusicEvent &e) const	{ return (beatPos==e.beatPos); }
-	bool operator!=(const MusicEvent &e) const	{ return !(*this==e); }
-	bool operator<(const MusicEvent &e) const	{ return (beatPos<e.beatPos); }
-	bool operator<=(const MusicEvent &e) const	{ return (beatPos<=e.beatPos); }
-	bool operator>(const MusicEvent &e) const	{ return (beatPos>e.beatPos); }
-	bool operator>=(const MusicEvent &e) const	{ return (beatPos>=e.beatPos); }
-
 private:
 	QUuid uuid;
-	Beat beatPos;
 	QString sName;
 	bool bActive = true;
 	QList<EventCommand*> lCommands;
 };
-typedef QVector<std::shared_ptr<MusicEvent> > MusicEventList;
+typedef std::shared_ptr<MusicEvent> MusicEventPtr;
+
+class StaticMusicEvent
+{
+public:
+	StaticMusicEvent(){}
+	StaticMusicEvent(MusicEventPtr me, Beat pos=Beat()) { this->setEvent(me); this->setBeat(pos); }
+	void setEvent(MusicEventPtr me) { this->meEvent=me; }
+	void setBeat(Beat pos) { this->beatPos=pos; }
+
+	MusicEventPtr musicEvent() { return this->meEvent; }
+	Beat beat() { return this->beatPos; }
+
+	bool operator==(const StaticMusicEvent &e) const	{ return (beatPos==e.beatPos); }
+	bool operator!=(const StaticMusicEvent &e) const	{ return !(*this==e); }
+	bool operator<(const StaticMusicEvent &e) const		{ return (beatPos<e.beatPos); }
+	bool operator<=(const StaticMusicEvent &e) const	{ return (beatPos<=e.beatPos); }
+	bool operator>(const StaticMusicEvent &e) const		{ return (beatPos>e.beatPos); }
+	bool operator>=(const StaticMusicEvent &e) const	{ return (beatPos>=e.beatPos); }
+private:
+	MusicEventPtr meEvent = NULL;
+	Beat beatPos;
+};
+typedef std::shared_ptr<StaticMusicEvent> StaticMusicEventPtr;
+typedef QVector<StaticMusicEventPtr> StaticMusicEventList;
 
 
 class MusicEventWorker : public QThread

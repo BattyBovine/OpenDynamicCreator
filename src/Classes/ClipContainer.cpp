@@ -41,7 +41,7 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->fLengthSeconds = c.fLengthSeconds;
 	this->beatLength = c.beatLength;
 	this->fVolume = c.fVolume;
-	this->melEvents = c.melEvents;
+	this->smelEvents = c.smelEvents;
 	this->ccParent = c.ccParent;
 	this->configurePlayer();
 }
@@ -228,7 +228,7 @@ void ClipContainer::stop()
 			this->aoAudioPlayer->stop();
 	}
 	this->stopEventThread();
-	this->meNextEvent = NULL;
+	this->smeNextEvent = NULL;
 	this->bIsPlaying = false;
 }
 
@@ -237,13 +237,13 @@ void ClipContainer::stop()
 void ClipContainer::configureNextEvent()
 {
 	if(this->aoAudioPlayer) {
-		for(MusicEventList::Iterator i=this->melEvents.begin(); i!=this->melEvents.end(); i++) {
-			float eventsecs = ((*i)->beat()-this->beatTimelineOffset).toSeconds(this->tempo(), this->beatUnit());
+		for(StaticMusicEventList::Iterator i=this->smelEvents.begin(); i!=this->smelEvents.end(); i++) {
+			float eventsecs = (i->get()->beat()-this->beatTimelineOffset).toSeconds(this->tempo(), this->beatUnit());
 			if(eventsecs < this->secondsElapsed())
 				continue;
 			int buffersecs = this->aoAudioPlayer->bufferSize() /
 							 float(this->iSampleRate*this->iBytesPerSample*this->iChannelCount);
-			this->meNextEvent = i;
+			this->smeNextEvent = i;
 			this->setNextEvent(eventsecs-buffersecs);
 			break;
 		}
@@ -251,8 +251,8 @@ void ClipContainer::configureNextEvent()
 }
 void ClipContainer::handleEvent()
 {
-	if(this->meNextEvent) {
-		emit(eventFired(this->meNextEvent->get()));
+	if(this->smeNextEvent) {
+		emit(eventFired(*this->smeNextEvent));
 		this->configureNextEvent();
 	}
 }
@@ -290,10 +290,6 @@ void ClipContainer::setNextEvent(float secs)
 	this->mewEventWorker->setEventTime(secs, this->iSampleRate, this->iBytesPerSample, this->iChannelCount);
 	connect(this->mewEventWorker, SIGNAL(musicEvent()), this, SLOT(handleEvent()));
 	connect(this->mewEventWorker, SIGNAL(finished()), this->mewEventWorker, SLOT(deleteLater()));
-#ifdef QT_DEBUG
-	connect(this->mewEventWorker, SIGNAL(started()), this, SLOT(threadStarted()));
-	connect(this->mewEventWorker, SIGNAL(finished()), this, SLOT(threadKilled()));
-#endif
 	this->mewEventWorker->start(QThread::LowestPriority);
 }
 void ClipContainer::stopEventThread()

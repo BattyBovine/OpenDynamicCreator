@@ -7,19 +7,15 @@ MusicEvent::~MusicEvent()
 		delete command;
 }
 
-Beat EventCommand::parentPosition()
+
+
+void JumpBackCommand::applyEvent(ClipContainer *cc, Beat eventpos)
 {
-	return this->meParent->beat();
+	cc->setPositionBeats(eventpos-this->beatToPosition);
 }
 
-
-
-void JumpBackCommand::applyEvent(ClipContainer *cc)
+void ChangeVolumeCommand::applyEvent(ClipContainer *cc, Beat eventpos)
 {
-	cc->setPositionBeats(this->parentPosition()-this->beatToPosition);
-}
-
-void ChangeVolumeCommand::applyEvent(ClipContainer *cc)
-{
+	Q_UNUSED(eventpos);
 	cc->setVolume(this->fVolume);
 }

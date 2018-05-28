@@ -83,12 +83,13 @@ public:
 	qreal volume() { return this->fVolume; }
 	float secondsElapsed();
 
-	void addEvent(std::shared_ptr<MusicEvent> e) {
-		this->melEvents.append(e);
-		std::sort(this->melEvents.begin(), this->melEvents.end());
-		emit(eventAdded(e));
+	void addEvent(MusicEventPtr e, Beat pos) {
+		StaticMusicEventPtr sme = std::make_shared<StaticMusicEvent>(StaticMusicEvent(e,pos));
+		this->smelEvents.append(sme);
+		std::sort(this->smelEvents.begin(), this->smelEvents.end());
+		emit(eventAdded(sme));
 	}
-	MusicEventList &events() { return this->melEvents; }
+	StaticMusicEventList &events() { return this->smelEvents; }
 
 	void addSubClip(std::shared_ptr<ClipContainer> clip) { clip->setParent(this); this->lChildClips.append(clip); this->bIsGroupClip=true; }
 
@@ -102,16 +103,12 @@ private slots:
 	void handleEvent();
 	void configureNextEvent();
 	void stopEventThread();
-#ifdef QT_DEBUG
-	void threadStarted() { qDebug() << QString("Thread 0x%1 started").arg(QString::number((quint64)QObject::sender(), 16)); }
-	void threadKilled() { qDebug() << QString("Thread 0x%1 killed").arg(QString::number((quint64)QObject::sender(), 16)); }
-#endif
 
 signals:
 	void finished();
 	void volumeChanged(qreal);
-	void eventAdded(std::shared_ptr<MusicEvent>);
-	void eventFired(MusicEvent*);
+	void eventAdded(StaticMusicEventPtr);
+	void eventFired(StaticMusicEventPtr);
 
 private:
 	void setParent(ClipContainer *cc) { this->ccParent=cc; }
@@ -147,8 +144,8 @@ private:
 	qreal fVolume = 1.0f;
 	Beat beatTimelineOffset;
 
-	MusicEventList melEvents;
-	MusicEventList::Iterator meNextEvent = NULL;
+	StaticMusicEventList smelEvents;
+	StaticMusicEventList::Iterator smeNextEvent = NULL;
 
 	ClipContainer *ccParent = NULL;
 	QList<std::shared_ptr<ClipContainer> > lChildClips;

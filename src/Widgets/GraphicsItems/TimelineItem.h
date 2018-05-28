@@ -16,12 +16,15 @@ public:
 	TimelineItem(float topspacing);
 
 	virtual void setTopSpacing(float s) { this->fTopSpacing=s; }
-	virtual void setTimelinePos(Beat p, float s, quint8 b, quint8 u) { this->beatPosition=p; this->setTimelinePos(p.toTimelinePosition(s,b,u)); }
+	virtual void setTimelinePos(Beat p, float s, quint8 b, quint8 u) { this->beatPosition=p; this->setTimelinePos(p.toTimelinePosition(s,b,u)); emit(moved(p)); }
 	virtual void setTimelinePos(float p) { this->setPos(p,0.0f); }
 
 	float topSpacing() { return this->fTopSpacing; }
 	Beat timelineBeat() { return this->beatPosition; }
 	float timelinePos() { return this->pos().x(); }
+
+signals:
+	void moved(Beat&);
 
 protected:
 	virtual QRectF boundingRect() const { return this->rectBounds; }
