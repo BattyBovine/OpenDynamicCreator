@@ -93,6 +93,7 @@ private:
 	void loadClipEditorWidget(QModelIndex);
 	QModelIndex findTrack(QModelIndex);
 
+	QWidget *widgetActiveCentral = NULL;
 	PreferencesDialog *dialogPreferences;
 	MusicTreeViewModel *modelMusic;
 	QItemSelectionModel *selMusic;
