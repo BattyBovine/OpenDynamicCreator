@@ -40,7 +40,7 @@ private:
 	Error searchItemChildren(BaseMusicItem*);
 	void addNewClip(BaseMusicItem*);
 
-	QMap<QUuid, std::shared_ptr<ClipContainer> > mapClips;
+	QMap<QUuid, ClipContainerPtr> mapClips;
 	QUuid uuidActiveClip;
 };
 

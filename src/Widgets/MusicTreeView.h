@@ -37,9 +37,9 @@ public:
 		for(int i=0; i<this->rowCount(); i++)
 			bmi->appendRow(this->child(i)->clone());
 	}
-	virtual std::shared_ptr<ClipContainer> clipContainer() { return std::make_shared<ClipContainer>(ClipContainer()); }
+	virtual ClipContainerPtr clipContainer() { return std::make_shared<ClipContainer>(ClipContainer()); }
 protected:
-	std::shared_ptr<ClipContainer> ccClip=NULL;
+	ClipContainerPtr ccClip=NULL;
 };
 
 class TrackItem : public BaseMusicItem
@@ -87,7 +87,7 @@ public:
 		return cgi;
 	}
 
-	virtual std::shared_ptr<ClipContainer> clipContainer();
+	virtual ClipContainerPtr clipContainer() override;
 };
 
 class ClipItem : public BaseMusicItem
@@ -107,7 +107,7 @@ public:
 	void loadClip(QUrl);
 	void loadClip(QString);
 
-	virtual std::shared_ptr<ClipContainer> clipContainer();
+	virtual ClipContainerPtr clipContainer() override;
 };
 
 

@@ -32,13 +32,13 @@ class TimelineWidget : public QGraphicsView
 {
 	Q_OBJECT
 public:
-	explicit TimelineWidget(std::shared_ptr<ClipContainer>, bool readonly=true, QWidget *parent=0);
+	explicit TimelineWidget(ClipContainerPtr, bool readonly=true, QWidget *parent=0);
 	~TimelineWidget();
-	std::shared_ptr<ClipContainer> clip() { return this->ccClip; }
+	ClipContainerPtr clip() { return this->ccClip; }
 	float measureSpacing() { return this->fMeasureSpacing; }
 
 public slots:
-	void setClip(std::shared_ptr<ClipContainer> c);
+	void setClip(ClipContainerPtr c);
 	void setTopSpacing(float t) { this->fTopSpacing=t; }
 	void setMeasureSpacing(float m) { this->fMeasureSpacing=m; }
 	void setViewportBounds();
@@ -72,7 +72,7 @@ private:
 	float secondsToPos(float secs) const { return secs*(this->ccClip->tempo()/60.0f)*(this->fMeasureSpacing/this->ccClip->beatsPerMeasure()); }
 
 	QGraphicsScene *gsTimeline = NULL;
-	std::shared_ptr<ClipContainer> ccClip;
+	ClipContainerPtr ccClip;
 	PlayMarkerItem *pmiPlayMarker = NULL;
 	ClipTimelineItem *ctiClip = NULL;
 	QList<EventMarkerItem*> lEventMarkers;

@@ -26,7 +26,7 @@ SongPlayer::Error SongPlayer::searchItemChildren(BaseMusicItem *item)
 }
 void SongPlayer::addNewClip(BaseMusicItem *bmi)
 {
-	std::shared_ptr<ClipContainer> cc = ((ClipItem*)bmi)->clipContainer();
+	ClipContainerPtr cc = ((ClipItem*)bmi)->clipContainer();
 	if(this->mapClips.isEmpty())
 		this->uuidActiveClip = cc->uuid();
 	this->mapClips[cc->uuid()] = cc;

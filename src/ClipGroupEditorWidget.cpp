@@ -15,7 +15,7 @@ ClipGroupEditorWidget::~ClipGroupEditorWidget()
 
 
 
-void ClipGroupEditorWidget::addClipGroupEditor(std::shared_ptr<ClipContainer> clip)
+void ClipGroupEditorWidget::addClipGroupEditor(ClipContainerPtr clip)
 {
 	if(clip) {
 		int row = ui->layoutClips->rowCount();

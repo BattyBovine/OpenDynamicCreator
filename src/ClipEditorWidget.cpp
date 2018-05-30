@@ -13,7 +13,7 @@ ClipEditorWidget::~ClipEditorWidget()
 	delete ui;
 }
 
-void ClipEditorWidget::setClipEditor(std::shared_ptr<ClipContainer> clip)
+void ClipEditorWidget::setClipEditor(ClipContainerPtr clip)
 {
 	if(clip) {
 		this->widgetMixer = new MixerWidget(clip, false, this);

@@ -19,7 +19,7 @@ public:
 	explicit ClipGroupEditorWidget(QWidget *parent = 0);
 	~ClipGroupEditorWidget();
 
-	void addClipGroupEditor(std::shared_ptr<ClipContainer>);
+	void addClipGroupEditor(ClipContainerPtr);
 
 private:
 	Ui::ClipGroupEditorWidget *ui;

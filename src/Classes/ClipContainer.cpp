@@ -155,7 +155,7 @@ void ClipContainer::setPositionSeconds(float seconds)
 	if(seconds<0.0f)
 		seconds = 0.0f;
 	if(this->bIsGroupClip)
-		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+		foreach(ClipContainerPtr cc, this->lChildClips)
 			cc->setPositionSeconds(seconds);
 	else
 		this->bufferPCMData.seek(floorf(seconds*this->iSampleRate)*(this->iBytesPerSample*this->iChannelCount));
@@ -165,7 +165,7 @@ float ClipContainer::secondsElapsed()
 {
 	if(this->bIsGroupClip) {
 		float elapsed = FLT_MAX;
-		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips) {
+		foreach(ClipContainerPtr cc, this->lChildClips) {
 			if(cc->secondsElapsed()<elapsed)
 				elapsed = cc->secondsElapsed();
 		}
@@ -179,7 +179,7 @@ float ClipContainer::secondsElapsed()
 void ClipContainer::setPositionToAbsoluteZero()
 {
 	if(this->bIsGroupClip)
-		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+		foreach(ClipContainerPtr cc, this->lChildClips)
 			cc->setPositionToAbsoluteZero();
 	else
 		this->bufferPCMData.seek(0);
@@ -190,7 +190,7 @@ void ClipContainer::setPositionToAbsoluteZero()
 bool ClipContainer::play()
 {
 	if(this->bIsGroupClip) {
-		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips) {
+		foreach(ClipContainerPtr cc, this->lChildClips) {
 			cc->setPositionSeconds(this->secondsElapsed());
 			cc->play();
 		}
@@ -210,7 +210,7 @@ bool ClipContainer::play()
 void ClipContainer::pause()
 {
 	if(this->bIsGroupClip) {
-		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+		foreach(ClipContainerPtr cc, this->lChildClips)
 			cc->pause();
 	} else {
 		if(this->aoAudioPlayer)
@@ -221,7 +221,7 @@ void ClipContainer::pause()
 void ClipContainer::stop()
 {
 	if(this->bIsGroupClip) {
-		foreach(std::shared_ptr<ClipContainer> cc, this->lChildClips)
+		foreach(ClipContainerPtr cc, this->lChildClips)
 			cc->stop();
 	} else {
 		if(this->aoAudioPlayer)

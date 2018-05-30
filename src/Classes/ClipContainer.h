@@ -20,6 +20,9 @@
 #include "MusicEvent.h"
 
 
+class ClipContainer;
+typedef std::shared_ptr<ClipContainer> ClipContainerPtr;
+
 class ClipContainer : public QObject
 {
 	Q_OBJECT
@@ -91,7 +94,7 @@ public:
 	}
 	StaticMusicEventList &events() { return this->smelEvents; }
 
-	void addSubClip(std::shared_ptr<ClipContainer> clip) { clip->setParent(this); this->lChildClips.append(clip); this->bIsGroupClip=true; }
+	void addSubClip(ClipContainerPtr clip) { clip->setParent(this); this->lChildClips.append(clip); this->bIsGroupClip=true; }
 
 	bool play();
 	void pause();
@@ -148,7 +151,7 @@ private:
 	StaticMusicEventList::Iterator smeNextEvent = NULL;
 
 	ClipContainer *ccParent = NULL;
-	QList<std::shared_ptr<ClipContainer> > lChildClips;
+	QList<ClipContainerPtr> lChildClips;
 	bool bIsGroupClip = false;
 };
 

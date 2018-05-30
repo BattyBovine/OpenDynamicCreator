@@ -19,7 +19,7 @@ class ClipTimelineItem : public TimelineItem
 {
 	Q_OBJECT
 public:
-	ClipTimelineItem(std::shared_ptr<ClipContainer> clip, float measurespacing, float topspacing) : TimelineItem(topspacing) {
+	ClipTimelineItem(ClipContainerPtr clip, float measurespacing, float topspacing) : TimelineItem(topspacing) {
 		this->ccClip = clip;
 		TimelineItem::setTimelinePos(clip->timelineOffset(),measurespacing,clip->beatsPerMeasure(),clip->beatUnit());
 		this->updateLength(measurespacing);
@@ -45,7 +45,7 @@ protected:
 private:
 	void updateBoundingRect() { this->rectBounds = QRectF(QPointF(0.0f,this->topSpacing()),QSizeF((this->fLength*this->fTimelineScale)-1,(this->fHeight-this->topSpacing())-1)); }
 
-	std::shared_ptr<ClipContainer> ccClip;
+	ClipContainerPtr ccClip;
 	QRectF rectBounds;
 	qreal fLength = 0.0f;
 	qreal fHeight = 0.0f;

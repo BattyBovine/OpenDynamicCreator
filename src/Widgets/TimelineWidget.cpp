@@ -1,6 +1,6 @@
 #include "Widgets/TimelineWidget.h"
 
-TimelineWidget::TimelineWidget(std::shared_ptr<ClipContainer> clip, bool readonly, QWidget *parent) : QGraphicsView(parent)
+TimelineWidget::TimelineWidget(ClipContainerPtr clip, bool readonly, QWidget *parent) : QGraphicsView(parent)
 {
 	this->gsTimeline = new QGraphicsScene(this);
 	this->setScene(this->gsTimeline);
@@ -84,11 +84,10 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 				Beat offset = this->beatClipItemStart+(this->beatMouseMovePos-this->beatMouseClickPos);
 				this->ctiClip->setTimelinePos(offset, this->fMeasureSpacing);
 				this->ccClip->setTimelineOffset(this->ctiClip->timelineBeat());
-			} else {
-				foreach(EventMarkerItem *emi, this->lEventMarkers) {
-					if(emi->isSelected())
-						emi->setTimelinePos(this->beatMouseMovePos, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
-				}
+			}
+			foreach(EventMarkerItem *emi, this->lEventMarkers) {
+				if(emi->isSelected())
+					emi->setTimelinePos(this->beatMouseMovePos, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 			}
 		}
 	}
@@ -232,7 +231,7 @@ void TimelineWidget::redrawStageElements()
 		this->ctiClip->setTimelineScale(this->fScale);
 }
 
-void TimelineWidget::setClip(std::shared_ptr<ClipContainer> c)
+void TimelineWidget::setClip(ClipContainerPtr c)
 {
 	this->ccClip=c;
 	if(!this->bReadOnly) {

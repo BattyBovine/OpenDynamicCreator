@@ -14,7 +14,7 @@ class MixerWidget : public QWidget
 	Q_OBJECT
 
 public:
-	explicit MixerWidget(std::shared_ptr<ClipContainer>, bool groupmode=false, QWidget *parent=0);
+	explicit MixerWidget(ClipContainerPtr, bool groupmode=false, QWidget *parent=0);
 	~MixerWidget();
 
 	int volumedB();
@@ -22,7 +22,7 @@ public:
 	int pan();
 
 public slots:
-	void attachClipContainer(std::shared_ptr<ClipContainer>);
+	void attachClipContainer(ClipContainerPtr);
 	void setGroupMode(bool);
 	void setVolumedB(int);
 	void setVolumePercent(float);
@@ -40,7 +40,7 @@ signals:
 
 private:
 	Ui::MixerWidget *ui;
-	std::shared_ptr<ClipContainer> ccClip = NULL;
+	ClipContainerPtr ccClip = NULL;
 };
 
 #endif // MIXERWIDGET_H

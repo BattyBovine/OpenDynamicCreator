@@ -23,7 +23,7 @@ class WaveformThread : public QThread
 {
 	Q_OBJECT
 public:
-	WaveformThread(std::shared_ptr<ClipContainer>,float,float,float,int,int);
+	WaveformThread(ClipContainerPtr,float,float,float,int,int);
 
 signals:
 	void tileFinished(int,int,QPixmap);
@@ -44,7 +44,7 @@ private:
 		return QPoint(x,zeropoint-roundf(pixelvalue));
 	}
 
-	std::shared_ptr<ClipContainer> ccClip;
+	ClipContainerPtr ccClip;
 	float fWidth = 0.0f;
 	float fHeight = 0.0f;
 	float fScale = 0.0f;

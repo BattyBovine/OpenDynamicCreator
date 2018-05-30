@@ -1,6 +1,6 @@
 #include "WaveformThread.h"
 
-WaveformThread::WaveformThread(std::shared_ptr<ClipContainer> clip, float width, float height, float scale, int resolution, int tilecount)
+WaveformThread::WaveformThread(ClipContainerPtr clip, float width, float height, float scale, int resolution, int tilecount)
 {
 	this->ccClip = clip;
 	this->fWidth = width;

@@ -171,7 +171,7 @@ ClipGroupItem::ClipGroupItem(QString t) : BaseMusicItem(t)
 		this->ccClip = std::make_shared<ClipContainer>(ClipContainer());
 }
 
-std::shared_ptr<ClipContainer> ClipGroupItem::clipContainer()
+ClipContainerPtr ClipGroupItem::clipContainer()
 {
 	TrackItem *track = (TrackItem*)this->parent();
 	while(track->type()!=MIT_TRACK)
@@ -209,7 +209,7 @@ void ClipItem::loadClip(QString c)
 	this->loadClip(QUrl(c));
 }
 
-std::shared_ptr<ClipContainer> ClipItem::clipContainer()
+ClipContainerPtr ClipItem::clipContainer()
 {
 	TrackItem *track = (TrackItem*)this->parent();
 	while(track->type()!=MIT_TRACK)

@@ -1,7 +1,7 @@
 #include "Widgets/MixerWidget.h"
 #include "ui_MixerWidget.h"
 
-MixerWidget::MixerWidget(std::shared_ptr<ClipContainer> clip, bool groupmode, QWidget *parent) :
+MixerWidget::MixerWidget(ClipContainerPtr clip, bool groupmode, QWidget *parent) :
 	QWidget(parent),
 	ui(new Ui::MixerWidget)
 {
@@ -26,7 +26,7 @@ MixerWidget::~MixerWidget()
 
 
 
-void MixerWidget::attachClipContainer(std::shared_ptr<ClipContainer> c)
+void MixerWidget::attachClipContainer(ClipContainerPtr c)
 {
 	this->ccClip = c;
 	this->setVolumePercent(this->ccClip->volume());
