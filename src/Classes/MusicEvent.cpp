@@ -1,5 +1,6 @@
 #include "MusicEvent.h"
 #include "ClipContainer.h"
+#include "EventCommand.h"
 
 MusicEvent::~MusicEvent()
 {
@@ -7,15 +8,8 @@ MusicEvent::~MusicEvent()
 		delete command;
 }
 
-
-
-void JumpBackCommand::applyEvent(ClipContainer *cc, Beat eventpos)
+void MusicEvent::addCommand(EventCommand *e)
 {
-	cc->setPositionBeats(eventpos-this->beatToPosition);
-}
-
-void ChangeVolumeCommand::applyEvent(ClipContainer *cc, Beat eventpos)
-{
-	Q_UNUSED(eventpos);
-	cc->setVolume(this->fVolume);
+	e->setParent(this);
+	this->lCommands.append(e);
 }

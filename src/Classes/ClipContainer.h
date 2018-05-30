@@ -1,9 +1,11 @@
 #ifndef CLIPCONTAINER_H
 #define CLIPCONTAINER_H
 
-#include <memory>
-
 #include <QDebug>
+
+#include <memory>
+#include <vorbis/vorbisfile.h>
+
 #include <QSettings>
 #include <QUrl>
 #include <QAudioOutput>
@@ -14,12 +16,11 @@
 #include <QPainter>
 #include <QUuid>
 
-#include <vorbis/vorbisfile.h>
-
 #include "PreferencesDialog.h"
-#include "MusicEvent.h"
+#include "StaticMusicEvent.h"
 
 
+class MusicEventWorker;
 class ClipContainer;
 typedef std::shared_ptr<ClipContainer> ClipContainerPtr;
 
@@ -103,7 +104,7 @@ public:
 private slots:
 	void playerState(QAudio::State);
 	void setPlayerVolume(qreal);
-	void handleEvent();
+	void handleEvent(MusicEvent*);
 	void configureNextEvent();
 	void stopEventThread();
 
@@ -111,7 +112,7 @@ signals:
 	void finished();
 	void volumeChanged(qreal);
 	void eventAdded(StaticMusicEventPtr);
-	void eventFired(StaticMusicEventPtr);
+	void eventFired(MusicEvent*);
 
 private:
 	void setParent(ClipContainer *cc) { this->ccParent=cc; }
@@ -121,7 +122,7 @@ private:
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 	void setBeatLength(Beat b) { this->beatLength=b; }
 
-	void setNextEvent(float);
+	void startEventThread();
 
 	QUuid uuidUnique;
 	int iSampleRate = 0;

@@ -31,7 +31,7 @@ public slots:
 	Error playSong();
 	void pauseSong();
 	void stopSong();
-	void applyEvent(StaticMusicEventPtr);
+	void applyEvent(MusicEvent*);
 
 signals:
 	void finished();

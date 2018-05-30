@@ -41,7 +41,7 @@ SongPlayer::Error SongPlayer::playSong()
 		return Error::SP_INVALID_ACTIVE_CLIP;
 	if(!this->mapClips[uuidActiveClip]->isPlaying())
 		this->mapClips[uuidActiveClip]->setPositionToAbsoluteZero();
-	connect(this->mapClips[uuidActiveClip].get(), SIGNAL(eventFired(StaticMusicEventPtr)), this, SLOT(applyEvent(StaticMusicEventPtr)));
+	connect(this->mapClips[uuidActiveClip].get(), SIGNAL(eventFired(MusicEvent*)), this, SLOT(applyEvent(MusicEvent*)));
 	this->mapClips[uuidActiveClip]->play();
 	return error;
 }
@@ -55,9 +55,9 @@ void SongPlayer::stopSong()
 	if(this->mapClips[uuidActiveClip])
 		this->mapClips[uuidActiveClip]->stop();
 }
-void SongPlayer::applyEvent(StaticMusicEventPtr sme)
+void SongPlayer::applyEvent(MusicEvent *me)
 {
-	QList<EventCommand*> commands = sme->musicEvent()->commands();
+	QList<EventCommand*> commands = me->commands();
 	foreach(EventCommand* command, commands)
-		command->applyEvent(this->mapClips[uuidActiveClip].get(), sme->beat());
+		command->applyEvent(this->mapClips[uuidActiveClip].get());
 }

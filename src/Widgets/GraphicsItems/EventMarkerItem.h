@@ -7,6 +7,7 @@
 
 #include "TimelineItem.h"
 #include "PreferencesDialog.h"
+#include "Classes/StaticMusicEvent.h"
 
 
 class EventMarkerItem : public TimelineItem

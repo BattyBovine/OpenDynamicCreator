@@ -51,7 +51,9 @@ SOURCES += main.cpp \
     src/Classes/SongPlayer.cpp \
     src/Classes/MusicEvent.cpp \
     src/EventEditorWidget.cpp \
-    src/Widgets/EventTreeView.cpp
+    src/Widgets/EventTreeView.cpp \
+    src/Classes/EventCommand.cpp \
+    src/Classes/MusicEventWorker.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \
@@ -78,7 +80,10 @@ HEADERS  += version.h \
     src/Widgets/GraphicsItems/EventMarkerItem.h \
     src/Classes/SongPlayer.h \
     src/EventEditorWidget.h \
-    src/Widgets/EventTreeView.h
+    src/Widgets/EventTreeView.h \
+    src/Classes/StaticMusicEvent.h \
+    src/Classes/EventCommand.h \
+    src/Classes/MusicEventWorker.h
 
 FORMS    += \
 	OpenDynamicCreator.ui \

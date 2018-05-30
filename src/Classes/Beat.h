@@ -1,6 +1,8 @@
 #ifndef BEAT_H
 #define BEAT_H
 
+#include <QtGlobal>
+
 class Beat
 {
 #define WHOLE_NOTE_TICKS 256.0f

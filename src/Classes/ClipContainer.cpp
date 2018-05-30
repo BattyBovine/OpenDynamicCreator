@@ -1,4 +1,5 @@
-#include "Classes/ClipContainer.h"
+#include "ClipContainer.h"
+#include "MusicEventWorker.h"
 
 #define DR_WAV_IMPLEMENTATION
 #include <Libraries/dr_wav.h>
@@ -241,18 +242,16 @@ void ClipContainer::configureNextEvent()
 			float eventsecs = (i->get()->beat()-this->beatTimelineOffset).toSeconds(this->tempo(), this->beatUnit());
 			if(eventsecs < this->secondsElapsed())
 				continue;
-			int buffersecs = this->aoAudioPlayer->bufferSize() /
-							 float(this->iSampleRate*this->iBytesPerSample*this->iChannelCount);
 			this->smeNextEvent = i;
-			this->setNextEvent(eventsecs-buffersecs);
+			this->startEventThread();
 			break;
 		}
 	}
 }
-void ClipContainer::handleEvent()
+void ClipContainer::handleEvent(MusicEvent *me)
 {
 	if(this->smeNextEvent) {
-		emit(eventFired(*this->smeNextEvent));
+		emit(eventFired(me));
 		this->configureNextEvent();
 	}
 }
@@ -282,13 +281,13 @@ void ClipContainer::playerState(QAudio::State s)
 	}
 }
 
-void ClipContainer::setNextEvent(float secs)
+void ClipContainer::startEventThread()
 {
-	this->stopEventThread();
 	this->mewEventWorker = new MusicEventWorker(this);
 	this->mewEventWorker->setBuffer(&this->bufferPCMData);
-	this->mewEventWorker->setEventTime(secs, this->iSampleRate, this->iBytesPerSample, this->iChannelCount);
-	connect(this->mewEventWorker, SIGNAL(musicEvent()), this, SLOT(handleEvent()));
+	this->mewEventWorker->setClip(this);
+	this->mewEventWorker->setEventList(this->smelEvents);
+	connect(this->mewEventWorker, SIGNAL(musicEvent(MusicEvent*)), this, SLOT(handleEvent(MusicEvent*)));
 	connect(this->mewEventWorker, SIGNAL(finished()), this->mewEventWorker, SLOT(deleteLater()));
 	this->mewEventWorker->start(QThread::LowestPriority);
 }
