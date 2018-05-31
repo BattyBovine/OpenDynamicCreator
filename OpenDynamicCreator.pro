@@ -52,8 +52,7 @@ SOURCES += main.cpp \
     src/Classes/MusicEvent.cpp \
     src/EventEditorWidget.cpp \
     src/Widgets/EventTreeView.cpp \
-    src/Classes/EventCommand.cpp \
-    src/Classes/MusicEventWorker.cpp
+    src/Classes/EventCommand.cpp
 
 HEADERS  += version.h \
 	OpenDynamicCreator.h \

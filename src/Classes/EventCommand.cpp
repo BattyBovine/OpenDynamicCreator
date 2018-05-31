@@ -11,6 +11,7 @@ void JumpToMarkerCommand::applyEvent(ClipContainer *cc)
 	cc->setPositionBeats(this->smeToPosition->beat());
 }
 
+
 void ChangeVolumeCommand::applyEvent(ClipContainer *cc)
 {
 	cc->setVolume(this->fVolume);

@@ -102,10 +102,10 @@ public:
 	void stop();
 
 private slots:
+	void handleEvent(MusicEvent *me) { this->setNextEvent(); emit(eventFired(me)); }
 	void playerState(QAudio::State);
 	void setPlayerVolume(qreal);
-	void handleEvent(MusicEvent*);
-	void configureNextEvent();
+	void setNextEvent();
 	void stopEventThread();
 
 signals:
@@ -148,11 +148,9 @@ private:
 	qreal fVolume = 1.0f;
 	Beat beatTimelineOffset;
 
-	StaticMusicEventList smelEvents;
-	StaticMusicEventList::Iterator smeNextEvent = NULL;
-
 	ClipContainer *ccParent = NULL;
 	QList<ClipContainerPtr> lChildClips;
+	StaticMusicEventList smelEvents;
 	bool bIsGroupClip = false;
 };
 
