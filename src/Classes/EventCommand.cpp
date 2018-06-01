@@ -8,7 +8,7 @@ JumpToMarkerCommand::JumpToMarkerCommand(StaticMusicEventPtr sme)
 }
 void JumpToMarkerCommand::applyEvent(ClipContainer *cc)
 {
-	cc->setPositionBeats(this->smeToPosition->beat());
+	cc->setPositionBeats(this->smeToPosition->beat()+cc->timelineOffset());
 }
 
 
