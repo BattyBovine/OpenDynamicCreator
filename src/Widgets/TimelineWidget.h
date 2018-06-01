@@ -76,7 +76,7 @@ private:
 	ClipContainerPtr ccClip;
 	PlayMarkerItem *pmiPlayMarker = NULL;
 	ClipTimelineItem *ctiClip = NULL;
-	TimelineItem *tiEventMarkerParent = NULL;
+	TimelineItem *tiEventMarkerParent;
 	QList<EventMarkerItem*> lEventMarkers;
 	QMap<unsigned int,QList<InvertedLineItem*> > mapMeasureLines;
 

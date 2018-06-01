@@ -242,6 +242,7 @@ void TimelineWidget::setClip(ClipContainerPtr c)
 	this->gsTimeline->addItem(this->ctiClip);
 
 	this->tiEventMarkerParent = new TimelineItem(this->fTopSpacing);
+	this->tiEventMarkerParent->setTimelinePos(this->ctiClip->timelineBeat(), this->fMeasureSpacing, c->beatsPerMeasure(), c->beatUnit());
 	connect(this->ctiClip, SIGNAL(moved(Beat&)), this, SLOT(moveEventMarkers(Beat&)));
 	if(!this->bReadOnly) {
 		StaticMusicEventList &events = c->events();
