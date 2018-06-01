@@ -19,12 +19,6 @@ TimelineWidget::TimelineWidget(ClipContainerPtr clip, bool readonly, QWidget *pa
 
 	this->createMeasureMarkers();
 
-	this->ctiClip = new ClipTimelineItem(clip, this->fMeasureSpacing, this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA));
-	this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
-	if(!this->bReadOnly)
-		this->ctiClip->setFlag(QGraphicsItem::ItemIsSelectable);
-	this->gsTimeline->addItem(this->ctiClip);
-
 	this->pmiPlayMarker = new PlayMarkerItem(this->fTopSpacing);
 	this->pmiPlayMarker->setTimelinePos(0.0f);
 	this->pmiPlayMarker->setFlag(QGraphicsItem::ItemIgnoresTransformations);
@@ -87,7 +81,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *e)
 			}
 			foreach(EventMarkerItem *emi, this->lEventMarkers) {
 				if(emi->isSelected())
-					emi->setTimelinePos(this->beatMouseMovePos, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+					emi->setTimelinePos(this->beatMouseMovePos-this->tiEventMarkerParent->timelineBeat(), this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 			}
 		}
 	}
@@ -107,7 +101,7 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 			MusicEventPtr event = std::make_shared<MusicEvent>(MusicEvent());
 			if(this->ccClip->events().size()>0)
 				event->addCommand(new JumpToMarkerCommand(this->ccClip->events().first()));
-			this->ccClip->addEvent(event, this->beatMouseClickPos);
+			this->ccClip->addEvent(event, this->beatMouseClickPos-this->tiEventMarkerParent->timelineBeat());
 		}
 		break;
 	}
@@ -136,8 +130,14 @@ void TimelineWidget::addEventMarker(StaticMusicEventPtr sme)
 	emi->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	if(!this->bReadOnly)
 		emi->setFlag(QGraphicsItem::ItemIsSelectable);
-	this->gsTimeline->addItem(emi);
+//	this->gsTimeline->addItem(emi);
+	emi->setParentItem(this->tiEventMarkerParent);
 	this->lEventMarkers.append(emi);
+}
+
+void TimelineWidget::moveEventMarkers(Beat &b)
+{
+	this->tiEventMarkerParent->setTimelinePos(b, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
 }
 
 void TimelineWidget::createMeasureMarkers()
@@ -235,12 +235,21 @@ void TimelineWidget::redrawStageElements()
 void TimelineWidget::setClip(ClipContainerPtr c)
 {
 	this->ccClip=c;
+	this->ctiClip = new ClipTimelineItem(c, this->fMeasureSpacing, this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA));
+	this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+	if(!this->bReadOnly)
+		this->ctiClip->setFlag(QGraphicsItem::ItemIsSelectable);
+	this->gsTimeline->addItem(this->ctiClip);
+
+	this->tiEventMarkerParent = new TimelineItem(this->fTopSpacing);
+	connect(this->ctiClip, SIGNAL(moved(Beat&)), this, SLOT(moveEventMarkers(Beat&)));
 	if(!this->bReadOnly) {
 		StaticMusicEventList &events = c->events();
 		foreach(StaticMusicEventPtr e, events)
 			this->addEventMarker(e);
 		connect(c.get(), SIGNAL(eventAdded(StaticMusicEventPtr)), this, SLOT(addEventMarker(StaticMusicEventPtr)));
 	}
+	this->gsTimeline->addItem(this->tiEventMarkerParent);
 }
 
 void TimelineWidget::setViewportBounds()

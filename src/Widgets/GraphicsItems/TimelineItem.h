@@ -27,6 +27,7 @@ signals:
 	void moved(Beat&);
 
 protected:
+	void paint(QPainter*,const QStyleOptionGraphicsItem*,QWidget*){}
 	virtual QRectF boundingRect() const { return this->rectBounds; }
 
 private:

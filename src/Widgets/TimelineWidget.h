@@ -59,6 +59,7 @@ protected:
 
 private slots:
 	void addEventMarker(StaticMusicEventPtr);
+	void moveEventMarkers(Beat&);
 	void movePlayMarkerToClipPos();
 
 private:
@@ -75,6 +76,7 @@ private:
 	ClipContainerPtr ccClip;
 	PlayMarkerItem *pmiPlayMarker = NULL;
 	ClipTimelineItem *ctiClip = NULL;
+	TimelineItem *tiEventMarkerParent = NULL;
 	QList<EventMarkerItem*> lEventMarkers;
 	QMap<unsigned int,QList<InvertedLineItem*> > mapMeasureLines;
 
