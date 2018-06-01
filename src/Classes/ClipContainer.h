@@ -102,7 +102,7 @@ public:
 	void stop();
 
 private slots:
-	void handleEvent(MusicEvent *me) { this->setNextEvent(); emit(eventFired(me)); }
+	void handleEvent(MusicEvent *me) { emit(eventFired(me)); this->setNextEvent(); }
 	void playerState(QAudio::State);
 	void setPlayerVolume(qreal);
 	void setNextEvent();
