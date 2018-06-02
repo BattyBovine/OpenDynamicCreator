@@ -130,7 +130,6 @@ void TimelineWidget::addEventMarker(StaticMusicEventPtr sme)
 	emi->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	if(!this->bReadOnly)
 		emi->setFlag(QGraphicsItem::ItemIsSelectable);
-//	this->gsTimeline->addItem(emi);
 	emi->setParentItem(this->tiEventMarkerParent);
 	this->lEventMarkers.append(emi);
 }

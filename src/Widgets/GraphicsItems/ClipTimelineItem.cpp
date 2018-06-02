@@ -5,26 +5,30 @@ void ClipTimelineItem::paint(QPainter *p, const QStyleOptionGraphicsItem*, QWidg
 	p->setRenderHint(QPainter::HighQualityAntialiasing);
 	p->setRenderHint(QPainter::SmoothPixmapTransform);
 	const QRectF mybounds = this->boundingRect();
+#ifndef QT_DEBUG
+	p->setPen(Qt::NoPen);
+	p->setBrush(QColor(0, 0, 255, 64));
+	p->drawRect(mybounds);
+#endif
 	const int tilecount = this->mapWaveforms[this->iWaveformResolution].size();
 	if(tilecount>0) {
-		const float pixwidth = mybounds.width() / tilecount;
+		const float pixwidth = (mybounds.width()-1) / tilecount;
 		for(int i=0; i<tilecount; i++) {
 			const QPixmap &currentmap = this->mapWaveforms[this->iWaveformResolution][i];
 			const QRectF itemregion(pixwidth*i, mybounds.y(), pixwidth+0.75f, mybounds.height());
 			const QRectF pixmapbounds(0, 0, WT_MAX_TILE_LENGTH, currentmap.height());
 			p->drawPixmap(itemregion, currentmap, pixmapbounds);
 #ifdef QT_DEBUG
-			p->setPen(Qt::red);
+			p->setPen(QPen(QBrush(Qt::red),0.0f));
 			p->setBrush(Qt::NoBrush);
 			p->drawRect(itemregion);
+#else
+			p->setPen(QColor(0, 0, 255));
+			p->setBrush(Qt::NoBrush);
+			p->drawRoundedRect(mybounds,2.0f,2.0f);
 #endif
 		}
 	}
-#ifndef QT_DEBUG
-	p->setPen(QColor(0, 0, 255));
-	p->setBrush(QColor(0, 0, 255, 64));
-	p->drawRoundedRect(mybounds, 4.0f, 4.0f);
-#endif
 }
 
 void ClipTimelineItem::generateWaveform()
