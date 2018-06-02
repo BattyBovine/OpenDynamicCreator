@@ -68,8 +68,9 @@ bool ClipContainer::loadWav(QUrl file)
 
 	char *pcmbuffer = new char[wav.totalSampleCount*wav.bytesPerSample*wav.channels];
 	quint64 bytecount = drwav_read_raw(&wav, wav.totalSampleCount*wav.bytesPerSample, pcmbuffer);
-	this->bufferPCMData.buffer().clear();
-	this->bufferPCMData.buffer().append(pcmbuffer, bytecount);
+	this->baPCMData.clear();
+	this->baPCMData.append(pcmbuffer, bytecount);
+	this->bufferPCMData.setBuffer(&this->baPCMData);
 	delete pcmbuffer;
 	drwav_uninit(&wav);
 
@@ -92,7 +93,7 @@ bool ClipContainer::loadVorbis(QUrl file)
 	this->iBitrateWindow = vorb.vi->bitrate_window;
 	this->iBytesPerSample = 2;
 
-	this->bufferPCMData.buffer().clear();
+	this->baPCMData.clear();
 	char pcmbuffer[4096];
 	int section;
 	bool eof = false;
@@ -103,8 +104,9 @@ bool ClipContainer::loadVorbis(QUrl file)
 		else if(retval<0)
 			qDebug() << QString("Error decoding Ogg Vorbis data; attempting to ignore...");
 		else
-			this->bufferPCMData.buffer().append(pcmbuffer, retval);
+			this->baPCMData.append(pcmbuffer, retval);
 	}
+	this->bufferPCMData.setBuffer(&this->baPCMData);
 	ov_clear(&vorb);
 
 	this->fLengthSeconds = this->bufferPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);

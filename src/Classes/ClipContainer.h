@@ -65,10 +65,11 @@ public:
 	int bitrateWindow() { return this->iBitrateWindow; }
 	int bytesPerSample() { return this->iBytesPerSample; }
 	bool isGroupClip() { return this->bIsGroupClip; }
-	QBuffer *buffer() { return &this->bufferPCMData; }
 	const char *rawData() { return this->bufferPCMData.data().data(); }
 	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
 	QAudioOutput *audioPlayer() { return this->aoAudioPlayer; }
+	QBuffer *buffer() { return &this->bufferPCMData; }
+	QByteArray *pcmData() { return &this->baPCMData; }
 
 	void setVolume(qreal);
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
@@ -136,6 +137,7 @@ private:
 	Beat beatLength;
 
 	QUrl urlFilePath;
+	QByteArray baPCMData;
 	QBuffer bufferPCMData;
 	bool bIsPlaying = false;
 	MusicEventWorker *mewEventWorker = NULL;
