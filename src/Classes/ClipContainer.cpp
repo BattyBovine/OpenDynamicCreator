@@ -114,7 +114,7 @@ bool ClipContainer::loadVorbis(QUrl file)
 	return true;
 }
 
-ClipContainer::Error ClipContainer::configurePlayer()
+QAudioOutput *ClipContainer::createPlayer()
 {
 	QAudioFormat format;
 	format.setSampleRate(this->sampleRate());
@@ -127,16 +127,10 @@ ClipContainer::Error ClipContainer::configurePlayer()
 	QSettings settings;
 	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 	int devicesetting = settings.value(KEY_OUTPUT_DEVICE).toInt();
-	if(!devices[devicesetting].isFormatSupported(format))
-		return Error::CLIP_FORMAT_UNRECOGNIZED;
+	if(devices[devicesetting].isFormatSupported(format))
+		return new QAudioOutput(devices[devicesetting], format);
 
-	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
-	this->aoAudioPlayer = new QAudioOutput(devices[devicesetting], format);
-	this->aoAudioPlayer->setVolume(this->volume());
-	connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
-	connect(this, SIGNAL(volumeChanged(qreal)), this, SLOT(setPlayerVolume(qreal)));
-	this->bufferPCMData.open(QIODevice::ReadOnly);
-	return Error::CLIP_OK;
+	return NULL;
 }
 
 
@@ -240,23 +234,6 @@ void ClipContainer::setPlayerVolume(qreal v)
 {
 	if(this->aoAudioPlayer)
 		this->aoAudioPlayer->setVolume(v);
-}
-
-void ClipContainer::playerState(QAudio::State s)
-{
-	switch(s) {
-	case QAudio::ActiveState:
-		this->bIsPlaying = true;
-		break;
-	case QAudio::StoppedState:
-		this->bIsPlaying = false;
-		if(this->aoAudioPlayer->error()!=QAudio::NoError)
-			qDebug() << this->aoAudioPlayer->error();
-		break;
-	case QAudio::IdleState:
-		emit(finished());
-		break;
-	}
 }
 
 void ClipContainer::startEventThread()

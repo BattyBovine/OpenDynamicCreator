@@ -9,6 +9,7 @@
 
 #include "PreferencesDialog.h"
 #include "ClipContainer.h"
+#include "Classes/ClipPlayer.h"
 #include "Widgets/MusicTreeView.h"
 
 

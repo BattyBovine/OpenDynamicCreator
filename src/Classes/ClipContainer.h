@@ -67,7 +67,7 @@ public:
 	bool isGroupClip() { return this->bIsGroupClip; }
 	const char *rawData() { return this->bufferPCMData.data().data(); }
 	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
-	QAudioOutput *audioPlayer() { return this->aoAudioPlayer; }
+	QAudioOutput *createPlayer();
 	QBuffer *buffer() { return &this->bufferPCMData; }
 	QByteArray *pcmData() { return &this->baPCMData; }
 
@@ -104,7 +104,6 @@ public:
 
 private slots:
 	void handleEvent(MusicEvent *me) { emit(eventFired(me)); this->setNextEvent(); }
-	void playerState(QAudio::State);
 	void setPlayerVolume(qreal);
 	void setNextEvent();
 	void stopEventThread();
@@ -117,7 +116,6 @@ signals:
 
 private:
 	void setParent(ClipContainer *cc) { this->ccParent=cc; }
-	Error configurePlayer();
 	void setTempo(qreal t) { this->fTempo=t; }
 	void setBeatsPerMeasure(quint8 b) { this->iBeatsPerMeasure=b; }
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
