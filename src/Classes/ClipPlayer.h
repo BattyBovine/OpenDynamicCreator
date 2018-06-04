@@ -2,33 +2,38 @@
 #define CLIPPLAYER_H
 
 #include <QObject>
+#include <QUuid>
 #include <QAudioOutput>
 #include <QBuffer>
+#include <QHash>
 
 #include "Classes/MusicEventWorker.h"
 
 
 typedef QHash<QUuid,QAudioOutput*> PlayerHash;
 typedef QHash<QUuid,QBuffer*> BufferHash;
+typedef QHash<QUuid,QByteArray*> ByteArrayHash;
 typedef QHash<QUuid,MusicEventWorker*> EventWorkerHash;
 class ClipPlayer : public QObject
 {
 	Q_OBJECT
 public:
 	~ClipPlayer();
-	bool getAudioData(QUuid);
+	bool addAudioData(ClipContainer*);
 public slots:
 	void play() {
-		BufferList::Iterator bufferiter = this->lDataBuffers.begin();
-		foreach(QAudioOutput *player, this->lAudioPlayers) {
+		BufferHash::Iterator bufferiter = this->hashDataBuffers.begin();
+		foreach(QAudioOutput *player, this->hashAudioPlayers) {
 			player->start(*bufferiter);
 			bufferiter++;
 		}
 	}
-	void pause() { foreach(QAudioOutput *player, this->lAudioPlayers) player->suspend(); }
-	void stop() { foreach(QAudioOutput *player, this->lAudioPlayers) player->stop(); }
+	void pause() { foreach(QAudioOutput *player, this->hashAudioPlayers) player->suspend(); }
+	void stop() { foreach(QAudioOutput *player, this->hashAudioPlayers) player->stop(); }
 private slots:
 	void playerState(QAudio::State);
+signals:
+	void finished();
 private:
 	PlayerHash hashAudioPlayers;
 	BufferHash hashDataBuffers;

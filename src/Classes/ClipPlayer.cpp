@@ -1,36 +1,41 @@
 #include "ClipPlayer.h"
+#include "ClipContainer.h"
 
 
 ClipPlayer::~ClipPlayer()
 {
-	foreach(QAudioOutput *player, this->lAudioPlayers)
+	foreach(MusicEventWorker *mew, this->hashEventThreads)
+		mew->stop();
+	foreach(QAudioOutput *player, this->hashAudioPlayers)
 		player->deleteLater();
+	foreach(QBuffer *buffer, this->hashDataBuffers)
+		buffer->deleteLater();
 }
 
-bool ClipPlayer::getAudioData(ClipContainer *clip)
+bool ClipPlayer::addAudioData(ClipContainer *clip)
 {
+	QUuid &uuid = clip->uuid();
 	QAudioOutput *player = clip->createPlayer();
 	if(!player)
 		return false;
-	this->lAudioPlayers.append(player);
+	this->hashAudioPlayers[uuid] = player;
 	connect(player, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
 	QByteArray *ba = clip->pcmData();
-	this->lDataBuffers.append(new QBuffer(ba));
-	this->lEventThreads.append(new MusicEventWorker(ba));
-	this->lAudioPlayers.last()->setVolume(clip->volume());
+	this->hashDataBuffers[uuid] = new QBuffer(ba);
+	this->hashEventThreads[uuid] = new MusicEventWorker(this->hashDataBuffers[uuid]);
 	return true;
 }
 
 void ClipPlayer::playerState(QAudio::State s)
 {
-	QAudioOutput *sender = (QAudioOutput*)QObject::sender();
+//	QAudioOutput *sender = (QAudioOutput*)QObject::sender();
 	switch(s) {
 //	case QAudio::ActiveState:
 //		this->bIsPlaying = true;
 //		break;
 	case QAudio::StoppedState:
-		if(sender->error()!=QAudio::NoError)
-			qDebug() << sender->error();
+//		if(sender->error()!=QAudio::NoError)
+//			qDebug() << sender->error();
 		break;
 	case QAudio::IdleState:
 		emit(finished());

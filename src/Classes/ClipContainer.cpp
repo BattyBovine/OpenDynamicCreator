@@ -31,7 +31,8 @@ void ClipContainer::copy(const ClipContainer &c)
 {
 	this->uuidUnique = c.uuidUnique;
 	this->urlFilePath = c.urlFilePath;
-	this->bufferPCMData.setData(c.bufferPCMData.buffer());
+	this->baPCMData = c.baPCMData;
+	this->bufferPCMData.setBuffer(&this->baPCMData);
 	this->iSampleRate = c.iSampleRate;
 	this->iChannelCount = c.iChannelCount;
 	this->iLowerBitrate = c.iLowerBitrate;
@@ -44,7 +45,6 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->fVolume = c.fVolume;
 	this->smelEvents = c.smelEvents;
 	this->ccParent = c.ccParent;
-	this->configurePlayer();
 }
 
 ClipContainer::Error ClipContainer::loadAudioFile(QUrl file)
@@ -52,7 +52,7 @@ ClipContainer::Error ClipContainer::loadAudioFile(QUrl file)
 	if(!this->loadWav(file) && !this->loadVorbis(file))
 		return CLIP_FORMAT_UNRECOGNIZED;
 	this->bufferPCMData.open(QIODevice::ReadOnly);
-	return this->configurePlayer();
+	return CLIP_OK;
 }
 bool ClipContainer::loadWav(QUrl file)
 {
@@ -127,8 +127,11 @@ QAudioOutput *ClipContainer::createPlayer()
 	QSettings settings;
 	QList<QAudioDeviceInfo> devices = QAudioDeviceInfo::availableDevices(QAudio::AudioOutput);
 	int devicesetting = settings.value(KEY_OUTPUT_DEVICE).toInt();
-	if(devices[devicesetting].isFormatSupported(format))
-		return new QAudioOutput(devices[devicesetting], format);
+	if(devices[devicesetting].isFormatSupported(format)) {
+		QAudioOutput *out = new QAudioOutput(devices[devicesetting], format);
+		out->setVolume(this->volume());
+		return out;
+	}
 
 	return NULL;
 }

@@ -55,7 +55,7 @@ public:
 		this->setBeatLength(Beat::fromSeconds(this->length(), this->fTempo, this->iBeatUnit));
 	}
 
-	QUuid uuid() { return this->uuidUnique; }
+	QUuid &uuid() { return this->uuidUnique; }
 	QString uuidString() { return this->uuidUnique.toString(); }
 	int sampleRate() { return this->iSampleRate; }
 	quint8 channelCount() { return this->iChannelCount; }

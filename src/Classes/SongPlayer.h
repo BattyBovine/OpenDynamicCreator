@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QUuid>
 #include <QSettings>
+#include <QQueue>
 
 #include "PreferencesDialog.h"
 #include "ClipContainer.h"
@@ -39,10 +40,14 @@ signals:
 
 private:
 	Error searchItemChildren(BaseMusicItem*);
-	void addNewClip(BaseMusicItem*);
+	ClipPlayer* createClipPlayer(QUuid&);
 
-	QMap<QUuid, ClipContainerPtr> mapClips;
-	QUuid uuidActiveClip;
+	QHash<QUuid,ClipContainer*> hashClips;
+	QMultiHash<QUuid,QUuid> hashGroupMap;
+
+	ClipPlayer *cpActiveSegment = NULL;
+	ClipPlayer *cpTransitionSegment = NULL;
+	QQueue<ClipPlayer*> queueSegments;
 };
 
 #endif // SONGPLAYER_H
