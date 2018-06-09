@@ -1,6 +1,8 @@
 #ifndef SONGPLAYER_H
 #define SONGPLAYER_H
 
+#include <QDebug>
+
 #include <memory>
 
 #include <QObject>
@@ -22,10 +24,11 @@ public:
 		SP_OK,
 		SP_NO_CLIPS,
 		SP_INVALID_DEVICE,
-		SP_INVALID_ACTIVE_CLIP
+		SP_INVALID_ACTIVE_SEGMENT
 	};
 
-	explicit SongPlayer(QObject *parent=Q_NULLPTR) : QObject(parent) {}
+	explicit SongPlayer(QObject *parent=Q_NULLPTR) : QObject(parent){}
+	~SongPlayer();
 
 	Error buildSong(BaseMusicItem*);
 

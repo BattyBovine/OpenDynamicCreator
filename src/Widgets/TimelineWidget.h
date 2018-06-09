@@ -46,6 +46,7 @@ public slots:
 
 	void setReadOnly(bool r) { this->bReadOnly=r; }
 	void setBeatUnitSnapFromCombo(int s) { this->iBeatUnitSnap=powf(2,s); }
+	void movePlayMarkerToClipPos(qreal);
 
 signals:
 	void zoomChanged(float);
@@ -60,7 +61,6 @@ protected:
 private slots:
 	void addEventMarker(StaticMusicEventPtr);
 	void moveEventMarkers(Beat&);
-	void movePlayMarkerToClipPos();
 
 private:
 	void redrawStageElements();
@@ -91,8 +91,6 @@ private:
 	quint8 iBeatUnitSnap = 4;
 	bool bClickMode = false;
 	bool bMoveMode = false;
-
-	QTimer timerPlayMarker;
 };
 
 #endif // TIMELINEWIDGET_H

@@ -35,6 +35,11 @@ public:
 	Beat operator*(const Beat &b)	{ return Beat(iTick*b.iTick); }
 	Beat operator/(const Beat &b)	{ return Beat(iTick/b.iTick); }
 
+	Beat &operator+=(const Beat &b)	{ iTick+=b.iTick; return *this; }
+	Beat &operator-=(const Beat &b)	{ iTick-=b.iTick; return *this; }
+	Beat &operator*=(const Beat &b)	{ iTick*=b.iTick; return *this; }
+	Beat &operator/=(const Beat &b)	{ iTick/=b.iTick; return *this; }
+
 	bool operator==(const Beat &b) const	{ return (iTick==b.iTick); }
 	bool operator!=(const Beat &b) const	{ return !(*this==b); }
 	bool operator<(const Beat &b) const		{ return (iTick<b.iTick); }

@@ -226,7 +226,6 @@ QStandardItem *OpenDynamicCreator::checkSelectedEventTreeItem()
 void OpenDynamicCreator::swapEditorWidget(QItemSelection newitem)
 {
 	if(this->widgetActiveCentral) {
-//		ui->layoutCentralWidget->removeWidget(this->widgetActiveCentral);
 		this->widgetActiveCentral->deleteLater();
 		this->widgetActiveCentral = NULL;
 	}

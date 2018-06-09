@@ -1,8 +1,6 @@
 #ifndef CLIPCONTAINER_H
 #define CLIPCONTAINER_H
 
-#include <QDebug>
-
 #include <memory>
 #include <vorbis/vorbisfile.h>
 
@@ -36,11 +34,8 @@ public:
 
 	ClipContainer(QUrl file=QUrl(), ClipContainer *parent=NULL);
 	ClipContainer(const ClipContainer&);
-	~ClipContainer();
 	ClipContainer &operator=(const ClipContainer&);
 	void copy(const ClipContainer&);
-
-	bool isPlaying() { return this->bIsPlaying; }
 
 	Error loadAudioFile(QUrl);
 	bool loadWav(QUrl);
@@ -65,16 +60,14 @@ public:
 	int bitrateWindow() { return this->iBitrateWindow; }
 	int bytesPerSample() { return this->iBytesPerSample; }
 	bool isGroupClip() { return this->bIsGroupClip; }
-	const char *rawData() { return this->bufferPCMData.data().data(); }
-	const quint64 rawDataLength() { return this->bufferPCMData.size(); }
+	const char *rawData() { return this->baPCMData; }
+	const quint64 rawDataLength() { return this->baPCMData.size(); }
 	QAudioOutput *createPlayer();
-	QBuffer *buffer() { return &this->bufferPCMData; }
 	QByteArray *pcmData() { return &this->baPCMData; }
 
 	void setVolume(qreal);
-	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo, this->iBeatUnit)); }
-	void setPositionSeconds(float);
-	void setPositionToAbsoluteZero();
+	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo,this->iBeatUnit)); }
+	void setPositionSeconds(qreal s) { this->fPositionSeconds=s; emit(secondsPositionChanged(s)); }
 
 	void setTimelineOffset(Beat b) { this->beatTimelineOffset=b; }
 	qreal length() { return this->fLengthSeconds; }
@@ -86,30 +79,21 @@ public:
 	quint8 beatUnit() { return this->iBeatUnit; }
 	Beat timelineOffset() { return this->beatTimelineOffset; }
 	qreal volume() { return this->fVolume; }
-	float secondsElapsed();
+	float secondsElapsed() { return this->fPositionSeconds; }
 
 	void addEvent(MusicEventPtr e, Beat pos) {
 		StaticMusicEventPtr sme = std::make_shared<StaticMusicEvent>(StaticMusicEvent(e,pos));
 		this->smelEvents.append(sme);
-		std::sort(this->smelEvents.begin(), this->smelEvents.end());
+		std::sort(this->smelEvents.begin(), this->smelEvents.end(), [](StaticMusicEventPtr a, StaticMusicEventPtr b){return *a<*b;});
 		emit(eventAdded(sme));
 	}
 	StaticMusicEventList &events() { return this->smelEvents; }
 
 	void addSubClip(ClipContainerPtr clip) { clip->setParent(this); this->lChildClips.append(clip); this->bIsGroupClip=true; }
 
-	bool play();
-	void pause();
-	void stop();
-
-private slots:
-	void handleEvent(MusicEvent *me) { emit(eventFired(me)); this->setNextEvent(); }
-	void setPlayerVolume(qreal);
-	void setNextEvent();
-	void stopEventThread();
-
 signals:
 	void finished();
+	void secondsPositionChanged(qreal);
 	void volumeChanged(qreal);
 	void eventAdded(StaticMusicEventPtr);
 	void eventFired(MusicEvent*);
@@ -121,8 +105,6 @@ private:
 	void setBeatUnit(quint8 u) { this->iBeatUnit=u; }
 	void setBeatLength(Beat b) { this->beatLength=b; }
 
-	void startEventThread();
-
 	QUuid uuidUnique;
 	int iSampleRate = 0;
 	quint8 iChannelCount = 0;
@@ -132,16 +114,13 @@ private:
 	int iBitrateWindow = 0;
 	quint8 iBytesPerSample = 0;
 	qreal fLengthSeconds = 0.0f;
+	qreal fPositionSeconds = 0.0f;
 	Beat beatLength;
 
 	QUrl urlFilePath;
 	QByteArray baPCMData;
-	QBuffer bufferPCMData;
-	bool bIsPlaying = false;
-	MusicEventWorker *mewEventWorker = NULL;
 
 	QString sName;
-	QAudioOutput *aoAudioPlayer = NULL;
 	qreal fTempo = 0.0f;
 	quint8 iBeatsPerMeasure = 0;
 	quint8 iBeatUnit = 0;

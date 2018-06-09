@@ -20,19 +20,12 @@ ClipContainer &ClipContainer::operator=(const ClipContainer &c)
 	this->copy(c);
 	return *this;
 }
-ClipContainer::~ClipContainer()
-{
-	this->bufferPCMData.close();
-	this->stop();
-	if(this->mewEventWorker) this->mewEventWorker->deleteLater();
-	if(this->aoAudioPlayer) this->aoAudioPlayer->deleteLater();
-}
+
 void ClipContainer::copy(const ClipContainer &c)
 {
 	this->uuidUnique = c.uuidUnique;
 	this->urlFilePath = c.urlFilePath;
 	this->baPCMData = c.baPCMData;
-	this->bufferPCMData.setBuffer(&this->baPCMData);
 	this->iSampleRate = c.iSampleRate;
 	this->iChannelCount = c.iChannelCount;
 	this->iLowerBitrate = c.iLowerBitrate;
@@ -51,7 +44,6 @@ ClipContainer::Error ClipContainer::loadAudioFile(QUrl file)
 {
 	if(!this->loadWav(file) && !this->loadVorbis(file))
 		return CLIP_FORMAT_UNRECOGNIZED;
-	this->bufferPCMData.open(QIODevice::ReadOnly);
 	return CLIP_OK;
 }
 bool ClipContainer::loadWav(QUrl file)
@@ -70,11 +62,10 @@ bool ClipContainer::loadWav(QUrl file)
 	quint64 bytecount = drwav_read_raw(&wav, wav.totalSampleCount*wav.bytesPerSample, pcmbuffer);
 	this->baPCMData.clear();
 	this->baPCMData.append(pcmbuffer, bytecount);
-	this->bufferPCMData.setBuffer(&this->baPCMData);
 	delete pcmbuffer;
 	drwav_uninit(&wav);
 
-	this->fLengthSeconds = this->bufferPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
+	this->fLengthSeconds = this->baPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
 
 	return true;
 }
@@ -106,10 +97,9 @@ bool ClipContainer::loadVorbis(QUrl file)
 		else
 			this->baPCMData.append(pcmbuffer, retval);
 	}
-	this->bufferPCMData.setBuffer(&this->baPCMData);
 	ov_clear(&vorb);
 
-	this->fLengthSeconds = this->bufferPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
+	this->fLengthSeconds = this->baPCMData.size() / float(this->iSampleRate * this->iBytesPerSample * this->iChannelCount);
 
 	return true;
 }
@@ -147,124 +137,4 @@ void ClipContainer::setVolume(qreal v)
 	if(this->ccParent)
 		adjustedvolume *= this->ccParent->volume();
 	emit(volumeChanged(adjustedvolume));
-}
-
-void ClipContainer::setPositionSeconds(float seconds)
-{
-	seconds -= this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit);
-	if(seconds<0.0f)
-		seconds = 0.0f;
-	if(this->bIsGroupClip)
-		foreach(ClipContainerPtr cc, this->lChildClips)
-			cc->setPositionSeconds(seconds);
-	else
-		this->bufferPCMData.seek(floorf(seconds*this->iSampleRate)*(this->iBytesPerSample*this->iChannelCount));
-}
-
-float ClipContainer::secondsElapsed()
-{
-	if(this->bIsGroupClip) {
-		float elapsed = FLT_MAX;
-		foreach(ClipContainerPtr cc, this->lChildClips) {
-			if(cc->secondsElapsed()<elapsed)
-				elapsed = cc->secondsElapsed();
-		}
-		return elapsed;
-	} else {
-		return ((this->bufferPCMData.pos() / float(this->iSampleRate*this->iChannelCount*this->iBytesPerSample)) +
-				this->beatTimelineOffset.toSeconds(this->fTempo, this->iBeatUnit));
-	}
-}
-
-void ClipContainer::setPositionToAbsoluteZero()
-{
-	if(this->bIsGroupClip)
-		foreach(ClipContainerPtr cc, this->lChildClips)
-			cc->setPositionToAbsoluteZero();
-	else
-		this->bufferPCMData.seek(0);
-}
-
-
-
-bool ClipContainer::play()
-{
-	if(this->bIsGroupClip) {
-		foreach(ClipContainerPtr cc, this->lChildClips) {
-			cc->setPositionSeconds(this->secondsElapsed());
-			cc->play();
-		}
-	} else {
-		if(!this->aoAudioPlayer)
-			return false;
-		if(!this->bIsPlaying)
-			this->setPositionToAbsoluteZero();
-		this->aoAudioPlayer->setVolume(this->volume());
-		connect(this->aoAudioPlayer, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
-		this->startEventThread();
-		this->setNextEvent();
-		this->aoAudioPlayer->start(&this->bufferPCMData);
-	}
-	this->bIsPlaying = true;
-	return true;
-}
-void ClipContainer::pause()
-{
-	if(this->bIsGroupClip) {
-		foreach(ClipContainerPtr cc, this->lChildClips)
-			cc->pause();
-	} else {
-		if(this->aoAudioPlayer)
-			this->aoAudioPlayer->suspend();
-	}
-}
-void ClipContainer::stop()
-{
-	if(this->bIsGroupClip) {
-		foreach(ClipContainerPtr cc, this->lChildClips)
-			cc->stop();
-	} else {
-		if(this->aoAudioPlayer)
-			this->aoAudioPlayer->stop();
-	}
-	this->stopEventThread();
-	this->bIsPlaying = false;
-}
-
-
-
-void ClipContainer::setPlayerVolume(qreal v)
-{
-	if(this->aoAudioPlayer)
-		this->aoAudioPlayer->setVolume(v);
-}
-
-void ClipContainer::startEventThread()
-{
-	if(!this->mewEventWorker) {
-		this->mewEventWorker = new MusicEventWorker(&this->bufferPCMData, this);
-		connect(this->mewEventWorker, SIGNAL(musicEvent(MusicEvent*)), this, SLOT(handleEvent(MusicEvent*)));
-		connect(this->mewEventWorker, SIGNAL(finished()), this, SLOT(stopEventThread()));
-		this->mewEventWorker->start(QThread::LowestPriority);
-	}
-}
-void ClipContainer::setNextEvent()
-{
-	for(StaticMusicEventList::Iterator i = this->smelEvents.begin(); i!=this->smelEvents.end(); i++) {
-		StaticMusicEvent *sme = (*i).get();
-		quint64 pos = roundf(sme->beat().toSeconds(this->fTempo, this->iBeatUnit) * this->iSampleRate) *
-					  (this->iBytesPerSample * this->iChannelCount);
-		if(pos >= (quint64)this->bufferPCMData.pos()) {
-			this->mewEventWorker->setNextEvent(sme->musicEvent().get(), pos);
-			break;
-		}
-	}
-}
-void ClipContainer::stopEventThread()
-{
-	if(this->mewEventWorker) {
-		if(this->mewEventWorker->isRunning())
-			this->mewEventWorker->stop();
-		this->mewEventWorker = NULL;
-	}
 }

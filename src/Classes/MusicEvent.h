@@ -16,7 +16,7 @@
 class MusicEvent
 {
 public:
-	MusicEvent() { this->uuid=QUuid::createUuid(); }
+	MusicEvent() { this->uuidUnique=QUuid::createUuid(); }
 	~MusicEvent();
 
 	void setName(QString &n) { this->sName=n; }
@@ -24,11 +24,13 @@ public:
 	void addCommand(EventCommand *e);
 
 	QString name() const { return this->sName; }
+	QUuid uuid() const { return this->uuidUnique; }
+	QString uuidString() const { return this->uuidUnique.toString(); }
 	bool active() const { return this->bActive; }
 	const QList<EventCommand*> &commands() { return this->lCommands; }
 
 private:
-	QUuid uuid;
+	QUuid uuidUnique;
 	QString sName;
 	bool bActive = true;
 	QList<EventCommand*> lCommands;

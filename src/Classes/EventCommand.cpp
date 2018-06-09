@@ -3,10 +3,6 @@
 #include "ClipContainer.h"
 
 
-JumpToMarkerCommand::JumpToMarkerCommand(StaticMusicEventPtr sme)
-{
-	this->smeToPosition = sme;
-}
 void JumpToMarkerCommand::applyEvent(ClipContainer *cc)
 {
 	cc->setPositionBeats(this->smeToPosition->beat() + cc->timelineOffset());

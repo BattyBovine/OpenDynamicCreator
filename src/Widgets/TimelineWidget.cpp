@@ -27,8 +27,7 @@ TimelineWidget::TimelineWidget(ClipContainerPtr clip, bool readonly, QWidget *pa
 	this->setViewportBounds();
 	this->setZoom(-1000.0f);
 
-	connect(&this->timerPlayMarker, SIGNAL(timeout()), this, SLOT(movePlayMarkerToClipPos()));
-	this->timerPlayMarker.start(1);
+	connect(this->ccClip.get(), SIGNAL(secondsPositionChanged(qreal)), this, SLOT(movePlayMarkerToClipPos(qreal)));
 }
 
 TimelineWidget::~TimelineWidget()
@@ -93,14 +92,14 @@ void TimelineWidget::mouseReleaseEvent(QMouseEvent *e)
 	switch(e->button()) {
 	case Qt::LeftButton:
 		if(!this->bMoveMode && !this->bReadOnly)
-			this->pmiPlayMarker->setTimelinePos(this->beatMouseClickPos, this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit());
+			this->ccClip->setPositionSeconds(this->beatMouseClickPos.toSeconds(this->ccClip->tempo(), this->ccClip->beatUnit()));
 		this->setViewportBounds();
 		break;
 	case Qt::RightButton:
 		if(!this->bReadOnly) {
 			MusicEventPtr event = std::make_shared<MusicEvent>(MusicEvent());
 			if(this->ccClip->events().size()>0)
-				event->addCommand(new JumpToMarkerCommand(this->ccClip->events().first()));
+				event->addCommand(new JumpToMarkerCommand(this->ccClip->events().first(), this->ccClip->uuid()));
 			this->ccClip->addEvent(event, this->beatMouseClickPos-this->tiEventMarkerParent->timelineBeat());
 		}
 		break;
@@ -267,11 +266,10 @@ void TimelineWidget::setViewportBounds()
 
 
 
-void TimelineWidget::movePlayMarkerToClipPos()
+void TimelineWidget::movePlayMarkerToClipPos(qreal secs)
 {
-	if(!this->ccClip->isPlaying())
-		return;
-	Beat pos = Beat::fromSeconds(this->ccClip->secondsElapsed(), this->ccClip->tempo(), this->ccClip->beatUnit());
+	Beat pos = Beat::fromSeconds(secs, this->ccClip->tempo(), this->ccClip->beatUnit());
+	pos += this->ccClip->timelineOffset();
 	this->pmiPlayMarker->setTimelinePos(pos.toTimelinePosition(this->fMeasureSpacing, this->ccClip->beatsPerMeasure(), this->ccClip->beatUnit()));
 	this->centerOn(this->pmiPlayMarker->x(),0.0f);
 }
