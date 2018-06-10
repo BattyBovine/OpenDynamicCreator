@@ -12,15 +12,18 @@ SongPlayer::~SongPlayer()
 }
 
 
-SongPlayer::Error SongPlayer::buildSong(BaseMusicItem *selected)
+SongPlayer::Error SongPlayer::buildSong(BaseMusicItem *track)
 {
-	BaseMusicItem *track = selected;
-	while(track->type()!=MIT_TRACK)
-		track = (BaseMusicItem*)track->parent();
-	Error errorcode = this->searchItemChildren(track);
-	if(!this->cpActiveSegment)
-		errorcode = Error::SP_INVALID_ACTIVE_SEGMENT;
-	return errorcode;
+	if(track->type()!=MIT_TRACK)
+		return Error::SP_INVALID_TRACK;
+	int children = track->rowCount();
+	Error error = Error::SP_OK;
+	for(int i=0; i<children; i++) {
+		error = this->searchItemChildren((BaseMusicItem*)track->child(i));
+		if(error!=Error::SP_OK)
+			break;
+	}
+	return error;
 }
 SongPlayer::Error SongPlayer::searchItemChildren(BaseMusicItem *item)
 {
@@ -31,15 +34,11 @@ SongPlayer::Error SongPlayer::searchItemChildren(BaseMusicItem *item)
 	} else {
 		for(int i=0; i<item->rowCount(); i++) {
 			BaseMusicItem *bmi = static_cast<BaseMusicItem*>(item->child(i));
-			if(bmi->type()==MIT_CLIPGROUP) {
-				ClipContainerPtr childcc = bmi->clipContainer();
-				this->hashGroupMap.insert(cc->uuid(), childcc->uuid());
-			}
+			ClipContainerPtr childcc = bmi->clipContainer();
+			this->hashGroupMap.insert(cc->uuid(), childcc->uuid());
 			this->searchItemChildren(bmi);
 		}
 	}
-	if(item->type()!=MIT_TRACK && !this->cpActiveSegment)
-		this->cpActiveSegment = this->createClipPlayer(cc->uuid());
 	return Error::SP_OK;
 }
 ClipPlayer *SongPlayer::createClipPlayer(QUuid &clipgroup)
@@ -55,13 +54,18 @@ ClipPlayer *SongPlayer::createClipPlayer(QUuid &clipgroup)
 
 
 
-SongPlayer::Error SongPlayer::playSong()
+SongPlayer::Error SongPlayer::playSong(QUuid &startclip)
 {
 	Error error = Error::SP_OK;
 	if(this->hashClips.isEmpty() || this->hashGroupMap.isEmpty())
 		return Error::SP_NO_CLIPS;
-	if(!this->cpActiveSegment)
-		return Error::SP_INVALID_ACTIVE_SEGMENT;
+	if(startclip==QUuid()) {
+		if(!this->cpActiveSegment)
+			return Error::SP_INVALID_ACTIVE_SEGMENT;
+	} else {
+		if(this->cpActiveSegment) this->cpActiveSegment->deleteLater();
+			this->cpActiveSegment = this->createClipPlayer(startclip);
+	}
 	this->cpActiveSegment->play(this);
 	return error;
 }

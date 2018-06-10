@@ -23,6 +23,7 @@ public:
 	enum Error {
 		SP_OK,
 		SP_NO_CLIPS,
+		SP_INVALID_TRACK,
 		SP_INVALID_DEVICE,
 		SP_INVALID_ACTIVE_SEGMENT
 	};
@@ -33,7 +34,7 @@ public:
 	Error buildSong(BaseMusicItem*);
 
 public slots:
-	Error playSong();
+	Error playSong(QUuid &startclip=QUuid());
 	void pauseSong();
 	void stopSong();
 	void applyEvent(MusicEvent*);

@@ -23,7 +23,6 @@ public:
 	{
 		this->ccParent = cc;
 		this->bufferClip = buf;
-
 		this->iOffsetPos = roundf(secs2samples(cc->timelineOffset().toSeconds(cc->tempo(),cc->beatUnit()),
 											   cc->sampleRate(),
 											   cc->bytesPerSample(),
@@ -49,12 +48,12 @@ public slots:
 			const qint64 bufferoffsetpos = (bufferpos+this->iOffsetPos);
 			const int beatcount = floorf(bufferoffsetpos / float(this->iBeatLength));
 			if(beatcount>=0 && this->iBeatValue!=beatcount) {
-				qDebug() << QString::number(beatcount);
 				this->iBeatValue = beatcount;
 				emit(beat(beatcount));
 			}
 			const int measurecount = floorf(bufferoffsetpos / float(this->iMeasureLength));
 			if(measurecount>=0 && this->iMeasureValue!=measurecount) {
+				qDebug() << QString::number(measurecount);
 				this->iMeasureValue = measurecount;
 				emit(measure(measurecount));
 			}

@@ -81,7 +81,17 @@ void ClipPlayer::stop()
 void ClipPlayer::startEventThread()
 {
 	if(!this->mewEvents) {
-		this->mewEvents = new MusicEventWorker(this->hashClips[this->uuidMainClip], this->hashDataBuffers[this->uuidMainClip]);
+		Beat smallestoffset(INT_MAX);
+		QList<QUuid> &buffers = this->hashDataBuffers.keys();
+		QUuid clipwithsmallestoffset;
+		foreach(QUuid clipid, buffers) {
+			Beat clipoffset = this->hashClips[clipid]->timelineOffset();
+			if(clipoffset < smallestoffset) {
+				smallestoffset = clipoffset;
+				clipwithsmallestoffset = clipid;
+			}
+		}
+		this->mewEvents = new MusicEventWorker(this->hashClips[this->uuidMainClip], this->hashDataBuffers[clipwithsmallestoffset]);
 		connect(this->mewEvents, SIGNAL(musicEvent(MusicEvent*)), this, SLOT(setNextEvent()));
 		connect(this->mewEvents, SIGNAL(finished()), this, SLOT(stopEventThread()));
 		this->mewEvents->start(QThread::LowestPriority);

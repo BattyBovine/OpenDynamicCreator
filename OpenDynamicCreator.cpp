@@ -336,17 +336,27 @@ QModelIndex OpenDynamicCreator::findTrack(QModelIndex index)
 void OpenDynamicCreator::playSong(bool play)
 {
 	if(play) {
+		QUuid selectedclipid = QUuid();
 		if(!this->spPlayer) {
 			this->spPlayer = new SongPlayer(this);
-			QModelIndex trackindex = this->selMusic->currentIndex();
-			if(!trackindex.isValid())
+			QModelIndex selectedindex = this->selMusic->currentIndex();
+			if(!selectedindex.isValid())
 				return;
-			TrackItem *track = static_cast<TrackItem*>(this->modelMusic->itemFromIndex(trackindex));
-			if(this->spPlayer->buildSong(track) != SongPlayer::Error::SP_OK)
+			BaseMusicItem *item = static_cast<BaseMusicItem*>(this->modelMusic->itemFromIndex(selectedindex));
+			if(item->type()==MIT_TRACK) {
+				BaseMusicItem *firstchild = static_cast<BaseMusicItem*>(item->child(0));
+				if(!firstchild)	return;
+				selectedclipid = firstchild->clipContainer()->uuid();
+			} else {
+				selectedclipid = item->clipContainer()->uuid();
+			}
+			while(item->type()!=MIT_TRACK)
+				item = (BaseMusicItem*)item->parent();
+			if(this->spPlayer->buildSong(item) != SongPlayer::Error::SP_OK)
 				this->stopSong();
 		}
 		connect(this->spPlayer, SIGNAL(finished()), this, SLOT(stopSong()));
-		if(this->spPlayer->playSong() != SongPlayer::Error::SP_OK)
+		if(this->spPlayer->playSong(selectedclipid) != SongPlayer::Error::SP_OK)
 			this->stopSong();
 	} else {
 		if(this->spPlayer)
