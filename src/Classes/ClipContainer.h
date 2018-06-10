@@ -78,7 +78,7 @@ public:
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	quint8 beatUnit() { return this->iBeatUnit; }
 	Beat timelineOffset() { return this->beatTimelineOffset; }
-	qreal volume() { return this->fVolume * (this->ccParent ? this->ccParent->volume() : 1.0f); }
+	qreal volume() { return (this->fVolume * (this->ccParent ? this->ccParent->volume() : 1.0f)); }
 	float secondsElapsed() { return this->fPositionSeconds; }
 
 	void addEvent(MusicEventPtr e, Beat pos) {

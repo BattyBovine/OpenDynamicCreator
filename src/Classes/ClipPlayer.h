@@ -30,6 +30,7 @@ public slots:
 	void play(const SongPlayer*);
 	void pause() { foreach(QAudioOutput *player, this->hashAudioPlayers) player->suspend(); }
 	void stop();
+	void setVolume(QUuid&, qreal);
 
 private slots:
 	void setNextEvent();

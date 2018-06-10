@@ -76,6 +76,11 @@ void ClipPlayer::stop()
 	this->timerPlayerMarkerPosition.stop();
 }
 
+void ClipPlayer::setVolume(QUuid &clip, qreal v)
+{
+	this->hashAudioPlayers[clip]->setVolume(v);
+}
+
 
 
 void ClipPlayer::startEventThread()
