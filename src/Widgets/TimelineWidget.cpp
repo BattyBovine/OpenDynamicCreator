@@ -178,10 +178,12 @@ void TimelineWidget::createBeatMarkers(int unit, float pos, float spacing, float
 void TimelineWidget::drawMeasureMarkers()
 {
 	QList<QGraphicsItem*> activelines = this->gsTimeline->items();
+	if(!this->mapMeasureLines.contains(1)) return;
 	if(!activelines.contains(this->mapMeasureLines[1].first())) {
 		foreach(InvertedLineItem *measureline, this->mapMeasureLines[1])
 			this->gsTimeline->addItem(measureline);
 	}
+	if(!this->mapMeasureLines.contains(4)) return;
 	if(!activelines.contains(this->mapMeasureLines[4].first())) {
 		foreach(InvertedLineItem *beatline, this->mapMeasureLines[4])
 			this->gsTimeline->addItem(beatline);
@@ -191,6 +193,7 @@ void TimelineWidget::drawMeasureMarkers()
 	int unit = 8;
 	while(true) {
 		if(unit>=128) break;
+		if(!this->mapMeasureLines.contains(unit)) return;
 		spacing /= 2.0f;
 		if((spacing*this->fScale)<=TW_SUB_BEAT_MIN_SPACING) {
 			if(activelines.contains(this->mapMeasureLines[unit].first())) {
@@ -230,23 +233,24 @@ void TimelineWidget::redrawStageElements()
 		this->ctiClip->setTimelineScale(this->fScale);
 }
 
-void TimelineWidget::setClip(ClipContainerPtr c)
+void TimelineWidget::setClip(ClipContainerPtr cc)
 {
-	this->ccClip=c;
-	this->ctiClip = new ClipTimelineItem(c, this->fMeasureSpacing, this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA));
+	this->ccClip=cc;
+
+	this->ctiClip = new ClipTimelineItem(cc, this->fMeasureSpacing, this->fTopSpacing+(TW_MEASURE_MARKER_LENGTH*TW_BEAT_MARKER_DELTA));
 	this->ctiClip->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	if(!this->bReadOnly)
 		this->ctiClip->setFlag(QGraphicsItem::ItemIsSelectable);
 	this->gsTimeline->addItem(this->ctiClip);
 
 	this->tiEventMarkerParent = new TimelineItem(this->fTopSpacing);
-	this->tiEventMarkerParent->setTimelinePos(this->ctiClip->timelineBeat(), this->fMeasureSpacing, c->beatsPerMeasure(), c->beatUnit());
+	this->tiEventMarkerParent->setTimelinePos(this->ctiClip->timelineBeat(), this->fMeasureSpacing, cc->beatsPerMeasure(), cc->beatUnit());
 	connect(this->ctiClip, SIGNAL(moved(Beat&)), this, SLOT(moveEventMarkers(Beat&)));
 	if(!this->bReadOnly) {
-		StaticMusicEventList &events = c->events();
+		StaticMusicEventList &events = cc->events();
 		foreach(StaticMusicEventPtr e, events)
 			this->addEventMarker(e);
-		connect(c.get(), SIGNAL(eventAdded(StaticMusicEventPtr)), this, SLOT(addEventMarker(StaticMusicEventPtr)));
+		connect(cc.get(), SIGNAL(eventAdded(StaticMusicEventPtr)), this, SLOT(addEventMarker(StaticMusicEventPtr)));
 	}
 	this->gsTimeline->addItem(this->tiEventMarkerParent);
 }

@@ -8,6 +8,7 @@ ClipPlayer::ClipPlayer(ClipContainer *clip, QObject *parent) : QObject(parent)
 {
 	this->uuidMainClip = clip->uuid();
 	this->hashClips[this->uuidMainClip] = clip;
+	connect(clip, SIGNAL(mixedVolumeChanged(qint16)), this, SLOT(updateVolume()));
 	connect(&this->timerPlayerMarkerPosition, SIGNAL(timeout()), this, SLOT(setClipPositions()));
 }
 
@@ -30,6 +31,7 @@ bool ClipPlayer::addClipData(ClipContainer *cc)
 		return false;
 	this->hashAudioPlayers[uuid] = player;
 	connect(player, SIGNAL(stateChanged(QAudio::State)), this, SLOT(playerState(QAudio::State)));
+	connect(cc, SIGNAL(mixedVolumeChanged(qint16)), this, SLOT(updateVolume()));
 	QByteArray *ba = cc->pcmData();
 	QBuffer *buffer = new QBuffer(ba);
 	buffer->open(QIODevice::ReadOnly);
@@ -76,9 +78,19 @@ void ClipPlayer::stop()
 	this->timerPlayerMarkerPosition.stop();
 }
 
-void ClipPlayer::setVolume(QUuid &clip, qreal v)
+void ClipPlayer::updateVolume()
 {
-	this->hashAudioPlayers[clip]->setVolume(v);
+	ClipContainer *cc = static_cast<ClipContainer*>(QObject::sender());
+	QUuid uuid = cc->uuid();
+	if(this->hashAudioPlayers.contains(uuid)) {
+		this->hashAudioPlayers[uuid]->setVolume(this->hashClips[uuid]->mixedVolumePercent());
+	} else {
+		if(this->uuidMainClip!=uuid)
+			return;
+		QList<QUuid> players = this->hashAudioPlayers.keys();
+		foreach(QUuid player, players)
+			this->hashAudioPlayers[player]->setVolume(this->hashClips[player]->mixedVolumePercent());
+	}
 }
 
 

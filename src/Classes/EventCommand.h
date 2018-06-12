@@ -19,17 +19,17 @@ class EventCommand
 	friend class MusicEvent;
 public:
 	EventCommand(QUuid clip, Beat transitionlength=Beat(), MusicEvent *parent=NULL) {
-		this->uuidClip = clip;
+		this->uuidAffectedClip = clip;
 		this->beatTransitionLength=transitionlength;
 		this->setParent(parent);
 	}
-	virtual void applyEvent(ClipContainer*){}
+	virtual QUuid applyEvent(ClipContainer*) { return QUuid(); }
 
-	QUuid clip() { return this->uuidClip; }
+	QUuid clip() { return this->uuidAffectedClip; }
 
 protected:
 	void setParent(MusicEvent *p) { this->meParent=p; }
-	QUuid uuidClip;
+	QUuid uuidAffectedClip;
 	MusicEvent *meParent=NULL;
 	Beat beatTransitionLength;
 };
@@ -39,8 +39,7 @@ class JumpToMarkerCommand : public EventCommand
 public:
 	JumpToMarkerCommand(QUuid clip, Beat transitionlength=Beat()) : EventCommand(clip,transitionlength){}
 	JumpToMarkerCommand(StaticMusicEventPtr sme, QUuid clip, Beat transitionlength=Beat()) : EventCommand(clip,transitionlength) { this->smeToPosition=sme; }
-	void applyEvent(ClipContainer*) override;
-
+	QUuid applyEvent(ClipContainer*) override;
 private:
 	StaticMusicEventPtr smeToPosition;
 };
@@ -52,8 +51,7 @@ public:
 	ChangeVolumeCommand(qreal v, QUuid clip, Beat transitionlength=Beat()) : EventCommand(clip,transitionlength) { this->setVolume(v); }
 	ChangeVolumeCommand(int d, QUuid clip, Beat transitionlength=Beat()) : EventCommand(clip,transitionlength) { this->setVolume(QAudio::convertVolume(d, QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale)); }
 	void setVolume(qreal v) { this->fVolume=v; }
-	void applyEvent(ClipContainer*) override;
-
+	QUuid applyEvent(ClipContainer*) override;
 private:
 	qreal fVolume = 0.0f;
 };

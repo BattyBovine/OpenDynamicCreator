@@ -16,6 +16,8 @@ void WaveformThread::run()
 	const quint64 datalength = this->ccClip->rawDataLength();
 	const quint8 bytespersample = this->ccClip->bytesPerSample();
 	const quint8 channels = this->ccClip->channelCount();
+	if(datalength==0 || bytespersample==0 || channels==0)
+		return;
 
 	const int zeropoint = roundf(this->fHeight/2.0f);
 	const int samplesize = (bytespersample*channels);

@@ -17,23 +17,19 @@ public:
 	explicit MixerWidget(ClipContainerPtr, bool groupmode=false, QWidget *parent=0);
 	~MixerWidget();
 
-	int volumedB();
-	float volumePercent();
+	int volume();
 	int pan();
 
 public slots:
 	void attachClipContainer(ClipContainerPtr);
 	void setGroupMode(bool);
-	void setVolumedB(int);
-	void setVolumePercent(float);
+	void setVolume(int);
 	void setPan(int);
 
 private slots:
 	void snapComboChanged(int i) { emit(snapChanged(i)); }
-	void volumedBChanged(int);
+	void volumeChanged(int);
 	void panChanged(int);
-
-	void setVolumeSlider(qreal);
 
 signals:
 	void snapChanged(int);

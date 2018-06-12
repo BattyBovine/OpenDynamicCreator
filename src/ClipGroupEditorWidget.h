@@ -19,7 +19,8 @@ public:
 	explicit ClipGroupEditorWidget(QWidget *parent = 0);
 	~ClipGroupEditorWidget();
 
-	void addClipGroupEditor(ClipContainerPtr);
+	void setClipGroupEditor(ClipContainerPtr);
+	void addClipEditor(ClipContainerPtr);
 
 private:
 	Ui::ClipGroupEditorWidget *ui;

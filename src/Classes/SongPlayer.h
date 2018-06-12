@@ -39,9 +39,6 @@ public slots:
 	void stopSong();
 	void applyEvent(MusicEvent*);
 
-private slots:
-	void setVolume(qreal);
-
 signals:
 	void finished();
 

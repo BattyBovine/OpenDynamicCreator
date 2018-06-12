@@ -35,7 +35,7 @@ void ClipContainer::copy(const ClipContainer &c)
 	this->iBytesPerSample = c.iBytesPerSample;
 	this->fLengthSeconds = c.fLengthSeconds;
 	this->beatLength = c.beatLength;
-	this->fVolume = c.fVolume;
+	this->iVolume = c.iVolume;
 	this->smelEvents = c.smelEvents;
 	this->ccParent = c.ccParent;
 }
@@ -119,22 +119,9 @@ QAudioOutput *ClipContainer::createPlayer()
 	int devicesetting = settings.value(KEY_OUTPUT_DEVICE).toInt();
 	if(devices[devicesetting].isFormatSupported(format)) {
 		QAudioOutput *out = new QAudioOutput(devices[devicesetting], format);
-		out->setVolume(this->volume());
+		out->setVolume(this->mixedVolumePercent());
 		return out;
 	}
 
 	return NULL;
-}
-
-
-
-void ClipContainer::setVolume(qreal v)
-{
-	if(v==this->fVolume)
-		return;
-	float adjustedvolume;
-	this->fVolume = adjustedvolume = v;
-	if(this->ccParent)
-		adjustedvolume *= this->ccParent->volume();
-	emit(volumeChanged(adjustedvolume));
 }

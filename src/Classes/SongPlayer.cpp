@@ -29,7 +29,6 @@ SongPlayer::Error SongPlayer::searchItemChildren(BaseMusicItem *item)
 {
 	ClipContainer *cc = item->clipContainer().get();
 	this->hashClips[cc->uuid()] = cc;
-	connect(cc, SIGNAL(volumeChanged(qreal)), this, SLOT(setVolume(qreal)));
 	if(item->type()==MIT_CLIP) {
 		this->hashGroupMap.insert(cc->uuid(), cc->uuid());
 	} else {
@@ -92,16 +91,4 @@ void SongPlayer::applyEvent(MusicEvent *me)
 	foreach(EventCommand* command, commands)
 		command->applyEvent(this->hashClips[command->clip()]);
 //	}
-}
-
-
-
-void SongPlayer::setVolume(qreal v)
-{
-	if(!this->cpActiveSegment)
-		return;
-	ClipContainer *cc = static_cast<ClipContainer*>(QObject::sender());
-	QList<QUuid> clips = this->hashGroupMap.values(cc->uuid());
-	foreach(QUuid clip, clips)
-		this->cpActiveSegment->setVolume(clip, v);
 }

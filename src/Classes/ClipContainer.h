@@ -65,7 +65,7 @@ public:
 	QAudioOutput *createPlayer();
 	QByteArray *pcmData() { return &this->baPCMData; }
 
-	void setVolume(qreal);
+	void setVolume(qint16 v) { this->iVolume=v; emit(volumeChanged(this->volumedB())); emit(mixedVolumeChanged(this->mixedVolumedB())); }
 	void setPositionBeats(Beat b=Beat()) { this->setPositionSeconds(b.toSeconds(this->fTempo,this->iBeatUnit)); }
 	void setPositionSeconds(qreal s) { this->fPositionSeconds=s; emit(secondsPositionChanged(s)); }
 
@@ -78,7 +78,10 @@ public:
 	quint8 beatsPerMeasure() { return this->iBeatsPerMeasure; }
 	quint8 beatUnit() { return this->iBeatUnit; }
 	Beat timelineOffset() { return this->beatTimelineOffset; }
-	qreal volume() { return (this->fVolume * (this->ccParent ? this->ccParent->volume() : 1.0f)); }
+	qint16 volumedB() { return this->iVolume; }
+	qint16 mixedVolumedB() { return (this->iVolume + (this->ccParent ? this->ccParent->mixedVolumedB() : 0)); }
+	qreal volumePercent() { return QAudio::convertVolume(this->volumedB(), QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale); }
+	qreal mixedVolumePercent() { return QAudio::convertVolume(this->mixedVolumedB(), QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale); }
 	float secondsElapsed() { return this->fPositionSeconds; }
 
 	void addEvent(MusicEventPtr e, Beat pos) {
@@ -94,7 +97,8 @@ public:
 signals:
 	void finished();
 	void secondsPositionChanged(qreal);
-	void volumeChanged(qreal);
+	void volumeChanged(qint16);
+	void mixedVolumeChanged(qint16);
 	void eventAdded(StaticMusicEventPtr);
 	void eventFired(MusicEvent*);
 
@@ -124,7 +128,7 @@ private:
 	qreal fTempo = 0.0f;
 	quint8 iBeatsPerMeasure = 0;
 	quint8 iBeatUnit = 0;
-	qreal fVolume = 1.0f;
+	qint16 iVolume = 0;
 	Beat beatTimelineOffset;
 
 	ClipContainer *ccParent = NULL;

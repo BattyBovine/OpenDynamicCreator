@@ -3,13 +3,15 @@
 #include "ClipContainer.h"
 
 
-void JumpToMarkerCommand::applyEvent(ClipContainer *cc)
+QUuid JumpToMarkerCommand::applyEvent(ClipContainer *cc)
 {
 	cc->setPositionBeats(this->smeToPosition->beat() + cc->timelineOffset());
+	return EventCommand::applyEvent(cc);
 }
 
 
-void ChangeVolumeCommand::applyEvent(ClipContainer *cc)
+QUuid ChangeVolumeCommand::applyEvent(ClipContainer *cc)
 {
 	cc->setVolume(this->fVolume);
+	return EventCommand::applyEvent(cc);
 }

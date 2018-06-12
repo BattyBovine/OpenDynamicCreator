@@ -12,7 +12,7 @@ MixerWidget::MixerWidget(ClipContainerPtr clip, bool groupmode, QWidget *parent)
 	ui->sliderPan->setVisible(false);
 
 	connect(ui->comboNoteSnap, SIGNAL(currentIndexChanged(int)), this, SLOT(snapComboChanged(int)));
-	connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(volumedBChanged(int)));
+	connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(volumeChanged(int)));
 	connect(ui->sliderPan, SIGNAL(valueChanged(int)), this, SLOT(panChanged(int)));
 
 	this->attachClipContainer(clip);
@@ -26,10 +26,10 @@ MixerWidget::~MixerWidget()
 
 
 
-void MixerWidget::attachClipContainer(ClipContainerPtr c)
+void MixerWidget::attachClipContainer(ClipContainerPtr cc)
 {
-	this->ccClip = c;
-	this->setVolumePercent(this->ccClip->volume());
+	this->ccClip = cc;
+	this->setVolume(this->ccClip->volumedB());
 //	this->setPan(this->ccClip->pan());
 	ui->labelClipName->setText(this->ccClip->name());
 	ui->labelClipName->setToolTip(this->ccClip->name());
@@ -41,37 +41,20 @@ void MixerWidget::setGroupMode(bool g)
 	ui->labelClipName->setVisible(g);
 }
 
-void MixerWidget::volumedBChanged(int d)
+void MixerWidget::volumeChanged(int d)
 {
 	if(d<=ui->sliderVolume->minimum())
-		this->ccClip->setVolume(0.0f);
+		this->ccClip->setVolume(-200);
 	else
-		this->ccClip->setVolume(QAudio::convertVolume(d, QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale));
+		this->ccClip->setVolume(d);
 }
-void MixerWidget::setVolumedB(int d)
+void MixerWidget::setVolume(int d)
 {
 	ui->sliderVolume->setValue(d);
 }
-int MixerWidget::volumedB()
+int MixerWidget::volume()
 {
 	return ui->sliderVolume->value();
-}
-
-void MixerWidget::setVolumePercent(float v)
-{
-	ui->sliderVolume->setValue(QAudio::convertVolume(v, QAudio::LogarithmicVolumeScale, QAudio::DecibelVolumeScale));
-}
-float MixerWidget::volumePercent()
-{
-	if(ui->sliderVolume->value()<=ui->sliderVolume->minimum())
-		return 0.0f;
-	else
-		return QAudio::convertVolume(ui->sliderVolume->value(), QAudio::DecibelVolumeScale, QAudio::LogarithmicVolumeScale);
-}
-
-void MixerWidget::setVolumeSlider(qreal v)
-{
-	ui->sliderVolume->setValue(QAudio::convertVolume(v, QAudio::LogarithmicVolumeScale, QAudio::DecibelVolumeScale));
 }
 
 void MixerWidget::panChanged(int/* p*/)

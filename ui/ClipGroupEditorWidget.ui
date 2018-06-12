@@ -39,6 +39,16 @@
    </property>
    <layout class="QVBoxLayout" name="layoutClipGroupEditor">
     <item>
+     <layout class="QGridLayout" name="layoutClipGroup"/>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <layout class="QGridLayout" name="layoutClips"/>
     </item>
     <item>
